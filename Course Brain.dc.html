@@ -920,6 +920,7 @@
             <a href="Admin.dc.html" style="display:flex;align-items:center;gap:7px;background:var(--accent);border:0;color:var(--onaccent);font-family:inherit;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:11px;text-decoration:none">לוח המנהל/ת ←</a>
             </sc-if>
             <button onClick="{{ onEditProfile }}" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">עריכת פרופיל</button>
+            <button onClick="{{ onOpenTutorial }}" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">מדריך למשתמש</button>
             <button onClick="{{ onLogout }}" style="background:transparent;border:1px solid var(--bd2);color:var(--tx2);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">התנתקות</button>
           </div>
         </div>
@@ -1001,6 +1002,34 @@
       </button>
     </sc-for>
   </nav>
+  </sc-if>
+
+  <!-- ===================== INTRO TUTORIAL ===================== -->
+  <sc-if value="{{ tutorialOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
+    <div style="width:100%;max-width:440px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:26px 24px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8);animation:cbup .3s ease">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+        <div style="font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.3px">שלב {{ tutStep.num }} מתוך {{ tutStep.total }}</div>
+        <button onClick="{{ onTutSkip }}" style="background:none;border:none;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--tx3)">דלג</button>
+      </div>
+      <div style="width:52px;height:52px;border-radius:15px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;margin-bottom:16px">
+        <div style="width:22px;height:22px;border-radius:50% 50% 50% 5px;border:2.4px solid var(--accent)"></div>
+      </div>
+      <h2 style="margin:0 0 10px;font-size:22px;font-weight:800;letter-spacing:-.3px">{{ tutStep.title }}</h2>
+      <p style="margin:0 0 22px;font-size:15px;line-height:1.7;color:var(--tx2)">{{ tutStep.body }}</p>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:20px">
+        <sc-for list="{{ tutDots }}" as="d" hint-placeholder-count="8">
+          <span style="height:6px;border-radius:20px;transition:.2s;width:{{ d.active }};background:{{ d.color }}"></span>
+        </sc-for>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <sc-if value="{{ tutStep.showPrev }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onTutPrev }}" style="font-family:inherit;font-weight:600;font-size:14px;padding:12px 18px;border-radius:12px;cursor:pointer;background:transparent;border:1px solid var(--bd2);color:var(--tx2)">הקודם</button>
+        </sc-if>
+        <button onClick="{{ onTutNext }}" style="flex:1;font-family:inherit;font-weight:800;font-size:15px;padding:12px;border-radius:12px;cursor:pointer;background:var(--accent);border:none;color:var(--onaccent)">{{ tutStep.nextLabel }}</button>
+      </div>
+    </div>
+  </div>
   </sc-if>
 
 </div>
@@ -1108,7 +1137,39 @@ class Component extends DCLogic {
     editName: '',
     editAvatar: 'indigo',
     noteQuery: '',
+    tutorialOpen: false,
+    tutorialStep: 0,
   };
+
+  tutSteps() {
+    return [
+      { key:'welcome', title:'ברוכים הבאים למוח הקורס 👋', body:'המרחב האישי שלך לקורס — כל שיעור מסוכם, התובנות של רילי, כרטיסיות לחזרה וצ’אט שעונה מתוך השיעורים. נעשה סיבוב קצר?' },
+      { key:'home', title:'בית', body:'מסך הפתיחה: ממשיך מאיפה שהפסקת, רואה את ההתקדמות, הרצף והנקודות שלך, ומתחיל חזרה יומית בלחיצה.' },
+      { key:'library', title:'ספרייה', body:'כל השיעורים במקום אחד. כל שיעור כולל סיכום, פרקים, מושגי מפתח וציטוטים. בראש המסך יש גם „מפת מושגים” — כל המושגים מכל הקורס מקובצים לפי נושא.' },
+      { key:'lesson', title:'בתוך שיעור', body:'נפתח עם סיכום השיעור ו„התובנות של רילי”. אפשר לכתוב הערות אישיות, לסמן סטטוס (לחזרה / בשליטה), ולפתוח פרקים ומושגים.' },
+      { key:'insights', title:'תובנות מרילי', body:'אוסף התובנות החשובות של רילי מכל הקורס — איך לחשוב, לא רק מה לבנות. מסווגות לפי סוג, ואפשר לחפש בהן.' },
+      { key:'review', title:'חזרה ותרגול', body:'כרטיסיות בשיטת חזרה מרווחת — מה שקשה לך חוזר לעיתים קרובות יותר. דרג/י כל כרטיס והמערכת תתזמן את הבאה.' },
+      { key:'ask', title:'שאל את הקורס', body:'צ’אט חכם שעונה על סמך תוכן השיעורים, עם מקורות שאפשר ללחוץ עליהם. מצוין לשאלות חזרה לפני מבחן.' },
+      { key:'more', title:'המחברת והפרופיל', body:'„המחברת שלי” מרכזת את כל ההערות שכתבת. בפרופיל — נקודות, רצף והישגים. הכל נשמר אוטומטית ואישי לך. יאללה, מתחילים 🚀' },
+    ];
+  }
+  _tutKey() { const u = this.state.user; return 'cb_tut_v1_' + (u && u.username ? u.username : 'guest'); }
+  maybeShowTutorial() {
+    let seen = '1';
+    try { seen = localStorage.getItem(this._tutKey()); } catch (e) {}
+    if (!seen) this.setState({ tutorialOpen: true, tutorialStep: 0 });
+  }
+  openTutorial() { this.setState({ tutorialOpen: true, tutorialStep: 0 }); }
+  tutNext() {
+    const n = this.state.tutorialStep + 1;
+    if (n >= this.tutSteps().length) { this.closeTutorial(); return; }
+    this.setState({ tutorialStep: n });
+  }
+  tutPrev() { this.setState({ tutorialStep: Math.max(0, this.state.tutorialStep - 1) }); }
+  closeTutorial() {
+    try { localStorage.setItem(this._tutKey(), '1'); } catch (e) {}
+    this.setState({ tutorialOpen: false });
+  }
 
   async componentDidMount() {
     await this.bootAuth();
@@ -1366,7 +1427,7 @@ class Component extends DCLogic {
       user, userData: ud, cards, pinned, streak, booting:false,
       editName: user ? user.displayName : '',
       editAvatar: user ? (user.avatar || 'indigo') : 'indigo',
-    }, () => this.persist());
+    }, () => { this.persist(); this.maybeShowTutorial(); });
   }
 
   persist() {
@@ -1717,6 +1778,20 @@ class Component extends DCLogic {
       onCancelEdit:() => this.setState({ profileEditing: false, editName: (st.user&&st.user.displayName)||'', editAvatar: (st.user&&st.user.avatar)||'indigo' }),
       onSaveProfile:() => this.saveProfile(),
       onLogout:() => this.logout(),
+      tutorialOpen: st.tutorialOpen,
+      tutStep: (function(self){
+        const steps = self.tutSteps();
+        const i = Math.min(st.tutorialStep, steps.length-1);
+        const s = steps[i];
+        return { title:s.title, body:s.body, key:s.key, num:i+1, total:steps.length,
+          isLast:i===steps.length-1, nextLabel: i===steps.length-1?'יאללה, מתחילים 🚀':'הבא',
+          showPrev: i>0 };
+      })(this),
+      tutDots: this.tutSteps().map((s,i)=>{ const a = i===Math.min(st.tutorialStep,this.tutSteps().length-1); return { width: a?'22px':'6px', color: a?'var(--accent)':'var(--bd2)' }; }),
+      onTutNext:() => this.tutNext(),
+      onTutPrev:() => this.tutPrev(),
+      onTutSkip:() => this.closeTutorial(),
+      onOpenTutorial:() => this.openTutorial(),
       onPickIndigo: this.pickAvatar('indigo'), onPickGreen: this.pickAvatar('green'),
       onPickSky: this.pickAvatar('sky'), onPickAmber: this.pickAvatar('amber'),
       onPickRose: this.pickAvatar('rose'), onPickViolet: this.pickAvatar('violet'),
