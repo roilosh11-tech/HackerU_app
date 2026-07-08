@@ -67,7 +67,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-1.pdf', totalSlides:63,
+          file:'lesson-1.pdf', totalSlides:63,
           coreConcepts:[
             {title:'7 כללי הזהב לעבודה בטוחה', detail:[
               'בדוק הכל — AI טועה, ואתה האחראי על התוצאה הסופית.',
@@ -221,7 +221,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-2.pdf', totalSlides:54,
+          file:'lesson-2.pdf', totalSlides:54,
           coreConcepts:[
             {title:'תפקיד מיישם ה-AI — שלושה צירים', detail:[
               'אינטגרציה: חיבור כלי בינה מלאכותית למערכות המידע הקיימות של הארגון.',
@@ -352,7 +352,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-3.pdf', totalSlides:51,
+          file:'lesson-3.pdf', totalSlides:51,
           coreConcepts:[
             {title:'שבעת החטאים כעקרונות עיצוב', detail:[
               'הספר "Evil by Design" חושף שמוצרים דיגיטליים מעוצבים בכוונה סביב שבעה מנגנונים פסיכולוגיים.',
@@ -491,7 +491,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-4.pdf', totalSlides:43,
+          file:'lesson-4.pdf', totalSlides:43,
           coreConcepts:[
             {title:'שלושת השלבים מהבעיה לאפיון', detail:[
               'שלב 1 — סקר שוק: האם כבר יש פתרון קיים בשוק לבעיה שזיהינו?',
@@ -634,7 +634,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-5.pdf', totalSlides:52,
+          file:'lesson-5.pdf', totalSlides:52,
           coreConcepts:[
             {title:'תסמין מול שורש הבעיה', detail:[
               'התסמין = מה שרואים וכואב ("הצוות לחוץ ולא עומד בזמנים"); השורש = הסיבה הנסתרת שמייצרת אותו (תהליך אישור כפול).',
@@ -781,7 +781,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-6.pdf', totalSlides:58,
+          file:'lesson-6.pdf', totalSlides:58,
           coreConcepts:[
             {title:'מי הם בעלי העניין — שלושה סוגים', detail:[
               'בעל עניין = כל מי שמושפע מהפתרון או משפיע עליו.',
@@ -924,7 +924,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-7.pdf', totalSlides:50,
+          file:'lesson-7.pdf', totalSlides:50,
           coreConcepts:[
             {title:'פרומפט מול Agent מול Vibe Coding', detail:[
               'פרומפט: הוראה למשימה אחת — קלט נכנס, פלט יוצא, חד-פעמי.',
@@ -1041,7 +1041,7 @@ window.CourseData = {
           ],
         },
         deck:{
-          file:'assets/slides/lesson-8.pdf', totalSlides:85,
+          file:'lesson-8.pdf', totalSlides:85,
           coreConcepts:[
             {title:'שישה מרכיבי סיפור המשתמש המורחב', detail:[
               'CONTEXT (הקשר) — המצב הנוכחי, הנתונים, הבעיה והמגבלות.',
