@@ -210,9 +210,11 @@
         { id: 1, username: "admin", displayName: "מנהל/ת", avatar: "sun", role: "admin",
           status: "approved", points: 0, completion: 0, streak: 0, achievements: [], lastActive: Date.now()/1000 },
         { id: 2, username: "maya", displayName: "מאיה כהן", avatar: "leaf", role: "student",
-          status: "approved", points: 340, completion: 62, streak: 6, achievements: ["first","streak7"], lastActive: Date.now()/1000 },
+          status: "approved", points: 340, completion: 62, streak: 6, achievements: ["first","streak7"], lastActive: Date.now()/1000,
+          notes: { 1: "הפרדוקס של רילי על אסטרטגיה מול טקטיקה מאוד חיבר לי. לבדוק שוב לפני הפרויקט.", 3: "מודל ה-Hook — לחשוב איך ליישם במוצר שלי." } },
         { id: 3, username: "danny", displayName: "דני לוי", avatar: "wave", role: "student",
-          status: "approved", points: 180, completion: 34, streak: 2, achievements: ["first"], lastActive: Date.now()/1000-86400*3 },
+          status: "approved", points: 180, completion: 34, streak: 2, achievements: ["first"], lastActive: Date.now()/1000-86400*3,
+          notes: { 2: "שלושת המבחנים לערך — שווה לזכור למבחן." } },
         { id: 4, username: "noa", displayName: "נועה בר", avatar: "spark", role: "student",
           status: "pending", points: 0, completion: 0, streak: 0, achievements: [], createdAt: Date.now()/1000 },
       ] };

@@ -9,6 +9,7 @@
 <x-dc>
 <helmet>
 <script src="api.js"></script>
+<script src="course-data.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -118,24 +119,47 @@
         <div>תלמיד/ה</div><div>השלמת קורס</div><div>נקודות</div><div>רצף</div><div>פעילות אחרונה</div><div></div>
       </div>
       <sc-for list="{{ students }}" as="u" hint-placeholder-count="4">
-        <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 1.1fr 40px;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid #2f3742">
-          <div style="display:flex;align-items:center;gap:11px;min-width:0">
-            <div style="width:34px;height:34px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
-            <div style="min-width:0">
-              <div style="font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.displayName }}{{ u.adminTag }}</div>
-              <div style="font-size:12px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+        <div style="border-bottom:1px solid #2f3742">
+          <div onClick="{{ u.onToggle }}" style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 1.1fr 40px;gap:10px;align-items:center;padding:12px 16px;cursor:pointer">
+            <div style="display:flex;align-items:center;gap:11px;min-width:0">
+              <div style="width:34px;height:34px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
+              <div style="min-width:0">
+                <div style="display:flex;align-items:center;gap:7px">
+                  <span style="font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.displayName }}{{ u.adminTag }}</span>
+                  <sc-if value="{{ u.hasNotes }}" hint-placeholder-val="{{ false }}"><span style="flex:none;font-size:10px;font-weight:700;color:#95c8f0;background:rgba(149,200,240,.13);border:1px solid rgba(149,200,240,.28);border-radius:20px;padding:1px 7px">{{ u.noteCount }} הערות</span></sc-if>
+                </div>
+                <div style="font-size:12px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+              </div>
             </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:6px;border-radius:4px;background:#3a4451;overflow:hidden;max-width:90px"><div style="height:100%;width:{{ u.completion }}%;background:#98b1ff"></div></div>
+              <span style="font-size:12.5px;color:#ccd4e1;font-variant-numeric:tabular-nums">{{ u.completion }}%</span>
+            </div>
+            <div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">{{ u.points }}</div>
+            <div style="font-size:14px;font-variant-numeric:tabular-nums;color:#ccd4e1">{{ u.streakLabel }}</div>
+            <div style="font-size:13px;color:#a4afc0">{{ u.lastActiveLabel }}</div>
+            <button onClick="{{ u.onDelete }}" title="מחיקה" style="width:30px;height:30px;border-radius:9px;border:1px solid #3f4956;background:transparent;color:#8791a1;cursor:pointer;display:flex;align-items:center;justify-content:center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
+            </button>
           </div>
-          <div style="display:flex;align-items:center;gap:8px">
-            <div style="flex:1;height:6px;border-radius:4px;background:#3a4451;overflow:hidden;max-width:90px"><div style="height:100%;width:{{ u.completion }}%;background:#98b1ff"></div></div>
-            <span style="font-size:12.5px;color:#ccd4e1;font-variant-numeric:tabular-nums">{{ u.completion }}%</span>
+          <sc-if value="{{ u.expanded }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:2px 16px 16px;background:#1f2733">
+            <sc-if value="{{ u.hasNotes }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:#8791a1;margin-bottom:9px">המחברת של {{ u.displayName }} · {{ u.noteCount }} הערות</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ u.notesList }}" as="n" hint-placeholder-count="2">
+                <div style="background:#252d39;border:1px solid #3a4451;border-radius:11px;padding:11px 13px">
+                  <div style="font-size:11.5px;font-weight:700;color:#95c8f0;margin-bottom:4px">שיעור {{ n.num }} · {{ n.title }}</div>
+                  <div style="font-size:13.5px;line-height:1.65;color:#ccd4e1;white-space:pre-wrap">{{ n.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+            <sc-if value="{{ u.noNotes }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13px;color:#8791a1;padding:2px 0 6px">התלמיד/ה עדיין לא כתב/ה הערות.</div>
+            </sc-if>
           </div>
-          <div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">{{ u.points }}</div>
-          <div style="font-size:14px;font-variant-numeric:tabular-nums;color:#ccd4e1">{{ u.streakLabel }}</div>
-          <div style="font-size:13px;color:#a4afc0">{{ u.lastActiveLabel }}</div>
-          <button onClick="{{ u.onDelete }}" title="מחיקה" style="width:30px;height:30px;border-radius:9px;border:1px solid #3f4956;background:transparent;color:#8791a1;cursor:pointer;display:flex;align-items:center;justify-content:center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
-          </button>
+          </sc-if>
         </div>
       </sc-for>
     </div>
@@ -148,7 +172,7 @@
 </x-dc>
 <script type="text/x-dc" data-dc-script>
 class Component extends DCLogic {
-  state = { loading: true, denied: false, users: [] };
+  state = { loading: true, denied: false, users: [], expanded: {} };
 
   COLORS = {
     indigo:'#98b1ff', green:'#93e0b1', sky:'#95c8f0', amber:'#eec38a', rose:'#f0a3a3', violet:'#b6a0f0',
@@ -187,6 +211,12 @@ class Component extends DCLogic {
 
   color(key) { return this.COLORS[key] || '#98b1ff'; }
   initial(name) { return (name || '?').trim().charAt(0) || '?'; }
+  toggleExpand(id) { const e = Object.assign({}, this.state.expanded); e[id] = !e[id]; this.setState({ expanded: e }); }
+  lessonTitle(num) {
+    const ls = (window.CourseData && window.CourseData.lessons) || [];
+    const l = ls.find(x => String(x.num) === String(num));
+    return l ? l.title : '';
+  }
 
   ago(ts) {
     if (!ts) return '—';
@@ -213,16 +243,27 @@ class Component extends DCLogic {
       onReject: () => this.reject(u.id),
     }));
 
-    const students = activeRaw.map(u => ({
-      displayName: u.displayName, username: u.username,
-      color: this.color(u.avatar), initial: this.initial(u.displayName),
-      adminTag: u.role === 'admin' ? '  ·  מנהל/ת' : '',
-      completion: u.completion || 0,
-      points: u.points || 0,
-      streakLabel: (u.streak || 0) + (u.streak ? ' ימים' : ''),
-      lastActiveLabel: this.ago(u.lastActive),
-      onDelete: () => this.del(u.id, u.displayName),
-    }));
+    const students = activeRaw.map(u => {
+      const notesObj = u.notes || {};
+      const notesList = Object.keys(notesObj)
+        .filter(k => (notesObj[k] || '').trim())
+        .sort((a,b) => Number(a) - Number(b))
+        .map(k => ({ num: k, title: this.lessonTitle(k), text: notesObj[k] }));
+      return {
+        displayName: u.displayName, username: u.username,
+        color: this.color(u.avatar), initial: this.initial(u.displayName),
+        adminTag: u.role === 'admin' ? '  ·  מנהל/ת' : '',
+        completion: u.completion || 0,
+        points: u.points || 0,
+        streakLabel: (u.streak || 0) + (u.streak ? ' ימים' : ''),
+        lastActiveLabel: this.ago(u.lastActive),
+        notesList, noteCount: notesList.length,
+        hasNotes: notesList.length > 0, noNotes: notesList.length === 0,
+        expanded: !!this.state.expanded[u.id],
+        onToggle: () => this.toggleExpand(u.id),
+        onDelete: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.del(u.id, u.displayName); },
+      };
+    });
 
     const avgCompletion = activeRaw.length
       ? Math.round(activeRaw.reduce((s, u) => s + (u.completion || 0), 0) / activeRaw.length) : 0;

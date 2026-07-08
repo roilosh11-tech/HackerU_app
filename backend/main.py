@@ -98,22 +98,27 @@ def init_db():
 def seed_admin():
     if not ADMIN_PASSWORD:
         return
+    # Usernames are always stored + matched in lowercase (login lowercases input),
+    # so normalise here too — otherwise a capitalised ADMIN_USERNAME would create an
+    # admin the login screen can never reach.
+    admin_uname = ADMIN_USERNAME.strip().lower()
     conn = db()
-    row = conn.execute("SELECT id FROM users WHERE username=?", (ADMIN_USERNAME,)).fetchone()
+    row = conn.execute("SELECT id FROM users WHERE username=?", (admin_uname,)).fetchone()
     now = time.time()
     if row is None:
         conn.execute(
             """INSERT INTO users (username, display_name, password_hash, role, status,
                avatar, created_at, updated_at, last_active)
                VALUES (?,?,?,?,?,?,?,?,?)""",
-            (ADMIN_USERNAME, "מנהל/ת", hash_pw(ADMIN_PASSWORD), "admin", "approved",
+            (admin_uname, "מנהל/ת", hash_pw(ADMIN_PASSWORD), "admin", "approved",
              "sun", now, now, now),
         )
     else:
-        # keep the admin's password in sync with the env var, ensure role/status
+        # promote/repair an existing account with this username: make it an approved
+        # admin and sync its password to the env var.
         conn.execute(
             "UPDATE users SET password_hash=?, role='admin', status='approved' WHERE username=?",
-            (hash_pw(ADMIN_PASSWORD), ADMIN_USERNAME),
+            (hash_pw(ADMIN_PASSWORD), admin_uname),
         )
     conn.commit()
     conn.close()
@@ -345,6 +350,7 @@ def admin_users(request: Request):
         u = user_public(r)
         u["createdAt"] = r["created_at"]
         u["lastActive"] = r["last_active"]
+        u["notes"] = json.loads(r["data_json"] or "{}").get("notes", {})
         out.append(u)
     return {"users": out}
 
