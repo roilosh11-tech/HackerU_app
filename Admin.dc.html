@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<script src="api.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  button{color:inherit;font-family:inherit}
+  html,body{margin:0;padding:0}
+  body{background:#1b212b;font-family:'Assistant',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#98b1ff;text-decoration:none}
+  a:hover{color:#b7c6ff}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#2a323e;border-radius:8px}
+  @keyframes cbup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes cbspin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+<div dir="rtl" style="min-height:100vh;background:#1b212b;color:#f6f8fc">
+
+  <sc-if value="{{ loading }}" hint-placeholder-val="{{ true }}">
+    <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;gap:11px;color:#a4afc0">
+      <span style="width:18px;height:18px;border:2.6px solid #3a4451;border-top-color:#98b1ff;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>
+      טוען נתוני כיתה…
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ denied }}" hint-placeholder-val="{{ false }}">
+    <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px">
+      <div style="font-weight:800;font-size:20px">אין לך הרשאת מנהל/ת</div>
+      <div style="color:#a4afc0;font-size:15px">הדף הזה זמין רק לחשבון המנהל/ת.</div>
+      <a href="Course Brain.dc.html" style="background:#2e3743;border:1px solid #505c6d;color:#ccd4e1;font-weight:600;padding:10px 18px;border-radius:11px">חזרה לאפליקציה</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ready }}" hint-placeholder-val="{{ false }}">
+  <div style="max-width:980px;margin:0 auto;padding:22px 20px 60px;animation:cbup .4s ease both">
+
+    <!-- header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:22px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(145deg,#2b3550,#1a2030);border:1px solid #505c6d;display:flex;align-items:center;justify-content:center">
+          <div style="width:17px;height:17px;border-radius:50% 50% 50% 3px;border:2px solid #98b1ff"></div>
+        </div>
+        <div>
+          <div style="font-weight:800;font-size:20px;letter-spacing:-.3px">לוח המנהל/ת</div>
+          <div style="font-size:13px;color:#a4afc0">מעקב אחר התקדמות הכיתה</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:9px">
+        <a href="Course Brain.dc.html" style="background:#2e3743;border:1px solid #3f4956;color:#ccd4e1;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px">← לאפליקציה</a>
+        <button onClick="{{ onLogout }}" style="background:transparent;border:1px solid #3f4956;color:#a4afc0;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">התנתקות</button>
+      </div>
+    </div>
+
+    <!-- stat cards -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:26px">
+      <div style="background:#252d39;border:1px solid #3f4956;border-radius:15px;padding:15px 16px">
+        <div style="font-size:13px;color:#a4afc0;margin-bottom:5px">תלמידים פעילים</div>
+        <div style="font-weight:800;font-size:26px;font-variant-numeric:tabular-nums">{{ stats.active }}</div>
+      </div>
+      <div style="background:#252d39;border:1px solid #3f4956;border-radius:15px;padding:15px 16px">
+        <div style="font-size:13px;color:#a4afc0;margin-bottom:5px">ממתינים לאישור</div>
+        <div style="font-weight:800;font-size:26px;font-variant-numeric:tabular-nums;color:{{ stats.pendingColor }}">{{ stats.pending }}</div>
+      </div>
+      <div style="background:#252d39;border:1px solid #3f4956;border-radius:15px;padding:15px 16px">
+        <div style="font-size:13px;color:#a4afc0;margin-bottom:5px">השלמה ממוצעת</div>
+        <div style="font-weight:800;font-size:26px;font-variant-numeric:tabular-nums">{{ stats.avgCompletion }}%</div>
+      </div>
+      <div style="background:#252d39;border:1px solid #3f4956;border-radius:15px;padding:15px 16px">
+        <div style="font-size:13px;color:#a4afc0;margin-bottom:5px">נקודות בכיתה</div>
+        <div style="font-weight:800;font-size:26px;font-variant-numeric:tabular-nums">{{ stats.totalPoints }}</div>
+      </div>
+    </div>
+
+    <!-- PENDING approvals -->
+    <sc-if value="{{ hasPending }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-bottom:26px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#eec38a"></span>
+        <div style="font-weight:700;font-size:16px">בקשות הרשמה ממתינות</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ pending }}" as="u" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:13px;background:#252d39;border:1px solid rgba(230,195,138,.28);border-radius:14px;padding:12px 15px">
+            <div style="width:38px;height:38px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:15px">{{ u.displayName }}</div>
+              <div style="font-size:12.5px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+            </div>
+            <button onClick="{{ u.onApprove }}" style="background:rgba(147,224,177,.14);border:1px solid rgba(147,224,177,.4);color:#93e0b1;font-weight:700;font-size:13.5px;padding:8px 15px;border-radius:10px;cursor:pointer">אישור</button>
+            <button onClick="{{ u.onReject }}" style="background:transparent;border:1px solid #3f4956;color:#a4afc0;font-weight:600;font-size:13.5px;padding:8px 13px;border-radius:10px;cursor:pointer">דחייה</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
+    <!-- STUDENTS list -->
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="width:8px;height:8px;border-radius:50%;background:#98b1ff"></span>
+      <div style="font-weight:700;font-size:16px">תלמידי הכיתה</div>
+    </div>
+
+    <div style="background:#252d39;border:1px solid #3f4956;border-radius:16px;overflow:hidden">
+      <!-- head row -->
+      <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 1.1fr 40px;gap:10px;padding:11px 16px;font-size:12px;font-weight:700;color:#8791a1;border-bottom:1px solid #3a4451">
+        <div>תלמיד/ה</div><div>השלמת קורס</div><div>נקודות</div><div>רצף</div><div>פעילות אחרונה</div><div></div>
+      </div>
+      <sc-for list="{{ students }}" as="u" hint-placeholder-count="4">
+        <div style="display:grid;grid-template-columns:2fr 1.4fr 1fr 1fr 1.1fr 40px;gap:10px;align-items:center;padding:12px 16px;border-bottom:1px solid #2f3742">
+          <div style="display:flex;align-items:center;gap:11px;min-width:0">
+            <div style="width:34px;height:34px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
+            <div style="min-width:0">
+              <div style="font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.displayName }}{{ u.adminTag }}</div>
+              <div style="font-size:12px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="flex:1;height:6px;border-radius:4px;background:#3a4451;overflow:hidden;max-width:90px"><div style="height:100%;width:{{ u.completion }}%;background:#98b1ff"></div></div>
+            <span style="font-size:12.5px;color:#ccd4e1;font-variant-numeric:tabular-nums">{{ u.completion }}%</span>
+          </div>
+          <div style="font-size:14px;font-weight:600;font-variant-numeric:tabular-nums">{{ u.points }}</div>
+          <div style="font-size:14px;font-variant-numeric:tabular-nums;color:#ccd4e1">{{ u.streakLabel }}</div>
+          <div style="font-size:13px;color:#a4afc0">{{ u.lastActiveLabel }}</div>
+          <button onClick="{{ u.onDelete }}" title="מחיקה" style="width:30px;height:30px;border-radius:9px;border:1px solid #3f4956;background:transparent;color:#8791a1;cursor:pointer;display:flex;align-items:center;justify-content:center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 7h16M9 7V5h6v2M6 7l1 13h10l1-13"></path></svg>
+          </button>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="text-align:center;margin-top:18px;font-size:12.5px;color:#7f8a9b">{{ modeNote }}</div>
+
+  </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { loading: true, denied: false, users: [] };
+
+  COLORS = {
+    indigo:'#98b1ff', green:'#93e0b1', sky:'#95c8f0', amber:'#eec38a', rose:'#f0a3a3', violet:'#b6a0f0',
+    spark:'#98b1ff', leaf:'#93e0b1', wave:'#95c8f0', sun:'#eec38a', flame:'#f0a3a3', star:'#b6a0f0'
+  };
+
+  async componentDidMount() {
+    const API = window.CourseAPI;
+    if (!API) { this.setState({ loading: false, denied: true }); return; }
+    await API.boot();
+    if (API.isOnline() && !API.isAdmin()) {
+      // not an admin (or not logged in) — bounce
+      if (!API.isLoggedIn()) { API.gotoLogin(); return; }
+      this.setState({ loading: false, denied: true });
+      return;
+    }
+    await this.load();
+  }
+
+  async load() {
+    const API = window.CourseAPI;
+    try {
+      const r = await API.adminUsers();
+      this.setState({ loading: false, denied: false, users: r.users || [] });
+    } catch (e) {
+      this.setState({ loading: false, denied: true });
+    }
+  }
+
+  async approve(id) { await window.CourseAPI.adminApprove(id); this.load(); }
+  async reject(id) { await window.CourseAPI.adminReject(id); this.load(); }
+  async del(id, name) {
+    if (!confirm('למחוק את ' + name + '? פעולה זו אינה הפיכה.')) return;
+    await window.CourseAPI.adminDelete(id); this.load();
+  }
+
+  color(key) { return this.COLORS[key] || '#98b1ff'; }
+  initial(name) { return (name || '?').trim().charAt(0) || '?'; }
+
+  ago(ts) {
+    if (!ts) return '—';
+    const secs = Date.now() / 1000 - ts;
+    if (secs < 3600) return 'לפני פחות משעה';
+    if (secs < 86400) return 'היום';
+    const d = Math.floor(secs / 86400);
+    if (d === 1) return 'אתמול';
+    if (d < 7) return 'לפני ' + d + ' ימים';
+    if (d < 30) return 'לפני ' + Math.floor(d / 7) + ' שבועות';
+    return 'לפני חודש+';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const all = st.users;
+    const pendingRaw = all.filter(u => u.status === 'pending');
+    const activeRaw = all.filter(u => u.status === 'approved');
+
+    const pending = pendingRaw.map(u => ({
+      displayName: u.displayName, username: u.username,
+      color: this.color(u.avatar), initial: this.initial(u.displayName),
+      onApprove: () => this.approve(u.id),
+      onReject: () => this.reject(u.id),
+    }));
+
+    const students = activeRaw.map(u => ({
+      displayName: u.displayName, username: u.username,
+      color: this.color(u.avatar), initial: this.initial(u.displayName),
+      adminTag: u.role === 'admin' ? '  ·  מנהל/ת' : '',
+      completion: u.completion || 0,
+      points: u.points || 0,
+      streakLabel: (u.streak || 0) + (u.streak ? ' ימים' : ''),
+      lastActiveLabel: this.ago(u.lastActive),
+      onDelete: () => this.del(u.id, u.displayName),
+    }));
+
+    const avgCompletion = activeRaw.length
+      ? Math.round(activeRaw.reduce((s, u) => s + (u.completion || 0), 0) / activeRaw.length) : 0;
+    const totalPoints = activeRaw.reduce((s, u) => s + (u.points || 0), 0);
+
+    return {
+      loading: st.loading,
+      denied: st.denied,
+      ready: !st.loading && !st.denied,
+      pending, students,
+      hasPending: pending.length > 0,
+      stats: {
+        active: activeRaw.length,
+        pending: pendingRaw.length,
+        pendingColor: pendingRaw.length ? '#eec38a' : '#f6f8fc',
+        avgCompletion,
+        totalPoints,
+      },
+      onLogout: () => { window.CourseAPI.logout(); window.CourseAPI.gotoLogin(); },
+      modeNote: window.CourseAPI && window.CourseAPI.isOnline()
+        ? '' : 'מצב תצוגה מקדימה — נתוני הדגמה. לאחר פריסה לשרת יוצגו התלמידים האמיתיים.',
+    };
+  }
+}
+</script>
+</body>
+</html>
