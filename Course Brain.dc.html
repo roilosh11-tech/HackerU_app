@@ -214,7 +214,6 @@
                 </div>
                 <a href="{{ doc.file }}" target="_blank" rel="noopener" style="flex:none;font-family:inherit;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:11px;background:var(--accent);color:var(--onaccent);text-decoration:none">פתח / הורד ↗</a>
               </div>
-              <iframe src="{{ doc.file }}" title="{{ doc.title }}" style="width:100%;height:560px;border:none;border-top:1px solid var(--bd);background:#fff"></iframe>
             </div>
           </sc-for>
         </div>
@@ -1197,6 +1196,7 @@ class Component extends DCLogic {
       { key:'welcome', title:'ברוכים הבאים למוח הקורס 👋', body:'המרחב האישי שלך לקורס — כל שיעור מסוכם, התובנות של רילי, כרטיסיות לחזרה וצ’אט שעונה מתוך השיעורים. נעשה סיבוב קצר?' },
       { key:'home', title:'בית', body:'מסך הפתיחה: ממשיך מאיפה שהפסקת, רואה את ההתקדמות, הרצף והנקודות שלך, ומתחיל חזרה יומית בלחיצה.' },
       { key:'library', title:'ספרייה', body:'כל השיעורים במקום אחד. כל שיעור כולל סיכום, פרקים, מושגי מפתח וציטוטים. בראש המסך יש גם „מפת מושגים” — כל המושגים מכל הקורס מקובצים לפי נושא.' },
+      { key:'materials', title:'חומרי הקורס', body:'במסך הבית יש „חומרי הקורס” — ספר מיישם AI (תבנית העבודה שרילי מעדכנת אחרי כל שיעור) ומדריך טכניקת הפרומפטים. כדאי לחזור ולבדוק אם הספר התעדכן.' },
       { key:'lesson', title:'בתוך שיעור', body:'נפתח עם סיכום השיעור ו„התובנות של רילי”. אפשר לכתוב הערות אישיות, לסמן סטטוס (לחזרה / בשליטה), ולפתוח פרקים ומושגים.' },
       { key:'insights', title:'תובנות מרילי', body:'אוסף התובנות החשובות של רילי מכל הקורס — איך לחשוב, לא רק מה לבנות. מסווגות לפי סוג, ואפשר לחפש בהן.' },
       { key:'review', title:'חזרה ותרגול', body:'כרטיסיות בשיטת חזרה מרווחת — מה שקשה לך חוזר לעיתים קרובות יותר. דרג/י כל כרטיס והמערכת תתזמן את הבאה.' },
@@ -1204,7 +1204,7 @@ class Component extends DCLogic {
       { key:'more', title:'המחברת והפרופיל', body:'„המחברת שלי” מרכזת את כל ההערות שכתבת. בפרופיל — נקודות, רצף והישגים. הכל נשמר אוטומטית ואישי לך. יאללה, מתחילים 🚀' },
     ];
   }
-  _tutKey() { const u = this.state.user; return 'cb_tut_v1_' + (u && u.username ? u.username : 'guest'); }
+  _tutKey() { const u = this.state.user; return 'cb_tut_v2_' + (u && u.username ? u.username : 'guest'); }
   maybeShowTutorial() {
     let seen = '1';
     try { seen = localStorage.getItem(this._tutKey()); } catch (e) {}
