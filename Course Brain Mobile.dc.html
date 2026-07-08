@@ -1445,7 +1445,7 @@ class Component extends DCLogic {
       notebookEmpty: nbWith.length>0 && notebook.length===0,
       greetingName: (st.user && st.user.displayName) ? st.user.displayName : 'לומד/ת',
       onOpenProfile:() => this.openProfile(),
-      isAdmin: !!(window.CourseAPI && window.CourseAPI.isAdmin()),
+      isAdmin: !!((st.user && st.user.role === 'admin') || (window.CourseAPI && window.CourseAPI.isAdmin())),
       profileEditing: st.profileEditing,
       editName: st.editName,
       onEditName:(e) => this.setState({ editName: e.target.value }),

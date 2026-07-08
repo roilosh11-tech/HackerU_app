@@ -48,6 +48,9 @@
         <span style="width:7px;height:7px;border-radius:50%;background:var(--review)"></span>
         {{ todayDue }} לחזרה
       </button>
+      <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+      <a href="Admin.dc.html" style="display:flex;align-items:center;gap:6px;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:13px;padding:7px 12px;border-radius:10px;text-decoration:none">לוח המנהל/ת</a>
+      </sc-if>
       <button onClick="{{ onOpenProfile }}" aria-label="הפרופיל שלי" style="width:34px;height:34px;flex:none;border-radius:50%;border:0;cursor:pointer;font-weight:800;font-size:14px;color:#141a24;background:{{ profile.avatar }}">{{ profile.initial }}</button>
     </div>
   </header>
@@ -1644,7 +1647,7 @@ class Component extends DCLogic {
       notebookIc: nbActive?'var(--accent)':'var(--tx3)',
       notebookBg: nbActive?'var(--raise)':'transparent',
       notebookBd: nbActive?'var(--bd2)':'transparent',
-      isAdmin: !!(window.CourseAPI && window.CourseAPI.isAdmin()),
+      isAdmin: !!((st.user && st.user.role === 'admin') || (window.CourseAPI && window.CourseAPI.isAdmin())),
       profileEditing: st.profileEditing,
       editName: st.editName,
       onEditName:(e) => this.setState({ editName: e.target.value }),
