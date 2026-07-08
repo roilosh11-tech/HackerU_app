@@ -94,6 +94,11 @@
         <sc-if value="{{ notebookCount }}" hint-placeholder-val="{{ 0 }}"><span style="font-size:11.5px;font-weight:700;color:var(--tx3);background:var(--panel2);border-radius:20px;padding:2px 8px">{{ notebookCount }}</span></sc-if>
       </button>
 
+      <button onClick="{{ onOpenMaterials }}" style="display:flex;align-items:center;gap:12px;width:100%;text-align:start;font-family:inherit;font-size:14.5px;font-weight:{{ matWeight }};padding:11px 12px;border-radius:11px;cursor:pointer;border:1px solid {{ matBd }};background:{{ matBg }};color:{{ matColor }};transition:background .15s">
+        <span style="width:20px;display:flex;justify-content:center;color:{{ matIc }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><path d="M4 19.5V5a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v14.5"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19"></path><path d="M8 7h7M8 10.5h7"></path></svg></span>
+        <span style="flex:1">חומרי הקורס</span>
+      </button>
+
       <div style="flex:1"></div>
 
       <div style="border:1px solid var(--bd);background:var(--panel2);border-radius:14px;padding:14px">
@@ -176,6 +181,42 @@
           <div style="font-size:10.5px;color:var(--tx3);letter-spacing:.3px;margin-bottom:8px">התובנה של היום מרילי</div>
           <div style="font-size:15px;line-height:1.65;color:var(--tx);font-weight:500">„{{ todayInsight.text }}”</div>
           <div style="font-size:11.5px;color:{{ todayInsight.catColor }};margin-top:8px;font-weight:600">{{ todayInsight.category }} · שיעור {{ todayInsight.lesson }}</div>
+        </div>
+
+        <button onClick="{{ onOpenMaterials }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;margin-top:14px;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:13px">
+          <span style="width:40px;height:40px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 19.5V5a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1v14.5"></path><path d="M4 19.5A1.5 1.5 0 0 0 5.5 21H19"></path><path d="M8 7h7M8 10.5h7"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:15px;font-weight:700">חומרי הקורס</span>
+            <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">ספר מיישם AI ומדריך הפרומפטים</span>
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+      </div>
+      </sc-if>
+
+      <!-- ===================== MATERIALS ===================== -->
+      <sc-if value="{{ showMaterials }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:900px;margin:0 auto;padding:30px 26px 48px;animation:cbup .3s ease">
+        <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:5px">חומרי עזר · מסמכי הקורס</div>
+        <h1 style="margin:0 0 6px;font-size:27px;font-weight:800;letter-spacing:-.4px">חומרי הקורס</h1>
+        <p style="margin:0 0 22px;font-size:14px;color:var(--tx2);line-height:1.6;max-width:600px">המסמכים המרכזיים ללימוד. אפשר לקרוא כאן או לפתוח בכרטיסייה חדשה.</p>
+        <div style="display:flex;flex-direction:column;gap:22px">
+          <sc-for list="{{ courseDocs }}" as="doc" hint-placeholder-count="2">
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;overflow:hidden">
+              <div style="padding:18px 20px;display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap">
+                <span style="width:44px;height:44px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M14 3v5h5"></path><path d="M18 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8l5 5v11a2 2 0 0 1-2 2z"></path><path d="M8 13h8M8 17h6"></path></svg></span>
+                <div style="flex:1;min-width:180px">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px">
+                    <span style="font-size:17px;font-weight:700">{{ doc.title }}</span>
+                    <sc-if value="{{ doc.live }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;color:var(--master);background:rgba(147,224,177,.13);border:1px solid rgba(147,224,177,.3);border-radius:20px;padding:2px 9px">מתעדכן כל שיעור</span></sc-if>
+                  </div>
+                  <div style="font-size:13.5px;color:var(--tx2);line-height:1.6">{{ doc.desc }}</div>
+                </div>
+                <a href="{{ doc.file }}" target="_blank" rel="noopener" style="flex:none;font-family:inherit;font-weight:700;font-size:13.5px;padding:10px 16px;border-radius:11px;background:var(--accent);color:var(--onaccent);text-decoration:none">פתח / הורד ↗</a>
+              </div>
+              <iframe src="{{ doc.file }}" title="{{ doc.title }}" style="width:100%;height:560px;border:none;border-top:1px solid var(--bd);background:#fff"></iframe>
+            </div>
+          </sc-for>
         </div>
       </div>
       </sc-if>
@@ -1828,6 +1869,18 @@ class Component extends DCLogic {
 
       showHome: st.view === 'home' && !inLesson && !inMap,
       greetingName, continueLesson, hasContinue: !!continueLesson,
+      showMaterials: st.view === 'materials' && !inLesson && !inMap,
+      onOpenMaterials:() => this.setView('materials'),
+      matActive: st.view === 'materials',
+      matWeight: st.view === 'materials' ? 700 : 500,
+      matColor: st.view === 'materials' ? 'var(--tx)' : 'var(--tx2)',
+      matIc: st.view === 'materials' ? 'var(--accent)' : 'var(--tx3)',
+      matBg: st.view === 'materials' ? 'var(--raise)' : 'transparent',
+      matBd: st.view === 'materials' ? 'var(--bd2)' : 'transparent',
+      courseDocs: [
+        { title:'ספר מיישם AI — תבנית העבודה', file:'assets/docs/ai-implementer-book.pdf', desc:'תבנית העבודה המרכזית של הקורס. רילי מעדכנת אותה אחרי כל שיעור — כדאי לחזור ולבדוק.', live:true },
+        { title:'מדריך טכניקת פרומפטים', file:'assets/docs/prompt-guide.pdf', desc:'מדריך מרוכז לכתיבת פרומפטים אפקטיביים — טכניקות, מבנה והקשר.', live:false },
+      ],
       showLibraryGrid: st.view === 'library' && !inLesson && !inMap,
       showConceptMap: st.view === 'library' && inMap,
       lessons, legend,
