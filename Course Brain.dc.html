@@ -1683,7 +1683,7 @@ class Component extends DCLogic {
           insightCatBd: this.catMeta('דרך חשיבה').bd,
           onReview:() => this.startReview('lesson', l.num),
           onAsk:() => this.setView('ask'),
-          onSlide:() => {},
+          onSlide:() => { if (l.deck && l.deck.file) window.open(l.deck.file, '_blank'); },
           noteValue: (st.userData.notes || {})[l.num] || '',
           onNote: (e) => this.saveNote(l.num, e.target.value),
           noteStatus: ((st.userData.notes || {})[l.num] || '').trim() ? 'נשמר אוטומטית ✓' : '',
