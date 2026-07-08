@@ -56,7 +56,7 @@
   <div style="display:flex;flex:1;min-height:0">
 
     <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
-    <aside style="width:262px;flex:none;display:flex;flex-direction:column;gap:6px;padding:20px 16px;background:var(--panel);border-inline-start:1px solid var(--bd);position:sticky;top:0;height:100vh">
+    <aside style="width:262px;flex:none;display:flex;flex-direction:column;gap:6px;padding:20px 16px;background:var(--panel);border-inline-start:1px solid var(--bd);position:sticky;top:0;height:100vh;overflow-y:auto">
       <div style="display:flex;align-items:center;gap:11px;padding:6px 6px 18px">
         <div style="width:38px;height:38px;border-radius:11px;background:linear-gradient(145deg,#2b3550,#1a2030);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center">
           <div style="width:16px;height:16px;border-radius:50% 50% 50% 3px;border:2px solid var(--accent)"></div>
@@ -858,7 +858,10 @@
             <div style="font-weight:800;font-size:24px;letter-spacing:-.3px">{{ profile.name }}</div>
             <div style="font-size:13.5px;color:var(--tx3);margin-top:3px">{{ profile.roleLabel }} · {{ profile.earnedCount }}/{{ profile.achTotal }} הישגים</div>
           </div>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+            <a href="Admin.dc.html" style="display:flex;align-items:center;gap:7px;background:var(--accent);border:0;color:var(--onaccent);font-family:inherit;font-weight:700;font-size:13.5px;padding:9px 15px;border-radius:11px;text-decoration:none">לוח המנהל/ת ←</a>
+            </sc-if>
             <button onClick="{{ onEditProfile }}" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">עריכת פרופיל</button>
             <button onClick="{{ onLogout }}" style="background:transparent;border:1px solid var(--bd2);color:var(--tx2);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">התנתקות</button>
           </div>
