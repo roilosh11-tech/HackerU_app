@@ -1027,12 +1027,12 @@ class Component extends DCLogic {
     openCats: {},
     insightCat: 'all',
     insightQuery: '',
-    pinned: [103, 7],
+    pinned: [],
     chat: [],
     chatInput: '',
     thinking: false,
     thinkingSources: [],
-    cards: this.data.flashcards.map(c => Object.assign({}, c)),
+    cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })),
     reviewActive: false,
     reviewScope: null,
     reviewScopeLesson: 3,
@@ -1059,12 +1059,12 @@ class Component extends DCLogic {
     await this.bootAuth();
     // data lives in shared course-data.js (window.CourseData); if it loaded late, refill card deck
     if (!this.state.cards.length && this.data.flashcards.length) {
-      this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c)) });
+      this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })) });
     } else if (!this.data.lessons.length) {
       this._dataPoll = setInterval(() => {
         if (window.CourseData && window.CourseData.lessons.length) {
           clearInterval(this._dataPoll);
-          this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c)) });
+          this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })) });
         }
       }, 40);
     }
@@ -1272,8 +1272,8 @@ class Component extends DCLogic {
     ];
   }
 
-  effStatus(l) { return (this.state.userData.statusOverride || {})[l.num] || l.status; }
-  effProgress(l) { const o = (this.state.userData.progressOverride || {})[l.num]; return o != null ? o : l.progressPct; }
+  effStatus(l) { return (this.state.userData.statusOverride || {})[l.num] || 'new'; }
+  effProgress(l) { const o = (this.state.userData.progressOverride || {})[l.num]; return o != null ? o : 0; }
   computeCompletion() { const ls = this.data.lessons; if (!ls.length) return 0; return Math.round(ls.reduce((s,l)=>s+this.effProgress(l),0)/ls.length); }
   masteredLessons() { return this.data.lessons.filter(l=>this.effStatus(l)==='mastered').length; }
 
@@ -1604,7 +1604,7 @@ class Component extends DCLogic {
     const maxLapse = Math.max(1, ...Object.values(lapseByTag));
     const weakConcepts = Object.keys(lapseByTag).map(tag => ({ tag, lapses:lapseByTag[tag], pct: Math.round(lapseByTag[tag]/maxLapse*100) })).sort((a,b) => b.lapses - a.lapses).slice(0,4);
 
-    const staleLessons = D.lessons.filter(l => l.lastReview >= 14).map(l => ({ num:l.num, title:l.title, ago: Math.round(l.lastReview/7) + ' שבועות', onOpen:() => this.openLesson(l.num) }));
+    const staleLessons = [];
 
     // --- notebook (all my notes) ---
     const nbNotes = st.userData.notes || {};
@@ -1624,7 +1624,7 @@ class Component extends DCLogic {
       statCols: isMobile ? '1fr 1fr' : 'repeat(3,1fr)',
       scopeCols: isMobile ? '1fr' : 'repeat(3,1fr)',
       dashCols: isMobile ? '1fr' : '1fr 1fr',
-      nav, streak: st.streak || D.streak, todayDue:this.dueCards().length, todayInsight,
+      nav, streak: st.streak, todayDue:this.dueCards().length, todayInsight,
       themeVars: this.themeCSS(),
       isLight: this.isLight(),
       isDark: !this.isLight(),

@@ -928,12 +928,12 @@ class Component extends DCLogic {
     qualityDismissed: false,
     insightCat: 'all',
     insightQuery: '',
-    pinned: [103, 7],
+    pinned: [],
     chat: [],
     chatInput: '',
     thinking: false,
     thinkingSources: [],
-    cards: this.data.flashcards.map(c => Object.assign({}, c)),
+    cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })),
     reviewActive: false,
     reviewScope: null,
     reviewScopeLesson: 1,
@@ -965,8 +965,8 @@ class Component extends DCLogic {
       { id:'complete', label:'סיימת את הקורס',    desc:'100% השלמה',          color:'#98b1ff' },
     ];
   }
-  effStatus(l) { return (this.state.userData.statusOverride || {})[l.num] || l.status; }
-  effProgress(l) { const o = (this.state.userData.progressOverride || {})[l.num]; return o != null ? o : l.progressPct; }
+  effStatus(l) { return (this.state.userData.statusOverride || {})[l.num] || 'new'; }
+  effProgress(l) { const o = (this.state.userData.progressOverride || {})[l.num]; return o != null ? o : 0; }
   computeCompletion() { const ls = this.data.lessons; if (!ls.length) return 0; return Math.round(ls.reduce((s,l)=>s+this.effProgress(l),0)/ls.length); }
   masteredLessons() { return this.data.lessons.filter(l=>this.effStatus(l)==='mastered').length; }
   computeAchievements(c) {
@@ -1040,13 +1040,13 @@ class Component extends DCLogic {
   async componentDidMount() {
     await this.bootAuth();
     if (!this.state.cards.length && this.data.flashcards.length) {
-      this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c)) });
+      this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })) });
     } else if (!this.data.lessons.length) {
       this._dataPoll = setInterval(() => {
         if (window.CourseData && window.CourseData.lessons.length) {
           clearInterval(this._dataPoll);
           this._stamp();
-          this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c)) });
+          this.setState({ cards: this.data.flashcards.map(c => Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 })) });
         }
       }, 40);
     }
@@ -1069,7 +1069,20 @@ class Component extends DCLogic {
   closeMap() { this.setState({ mapOpen:false, activeConceptTerm:null }); }
   setConceptFilter(v) { this.setState({ conceptFilter:v, activeConceptTerm:null }); }
   toggleCat(key) { const o = Object.assign({}, this.state.openCats); o[key] = !o[key]; this.setState({ openCats: o }); }
-  selectConcept(t) { this.setState({ activeConceptTerm: this.state.activeConceptTerm === t ? null : t }); }
+  selectConcept(t, e) {
+    const opening = this.state.activeConceptTerm !== t;
+    const card = e && e.currentTarget ? e.currentTarget.parentNode : null;
+    this.setState({ activeConceptTerm: opening ? t : null });
+    if (opening && card) {
+      const scroller = document.querySelector('main.cbm-scroll');
+      if (scroller) {
+        requestAnimationFrame(() => {
+          const top = card.getBoundingClientRect().top - scroller.getBoundingClientRect().top;
+          scroller.scrollBy({ top: top - 14, behavior: 'smooth' });
+        });
+      }
+    }
+  }
   _normTerm(t) { return String(t).replace(/[.,'\u05f3\u05f4"()\/\u2013\u2014\-]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
   // Aggregate the key concepts from EVERY lesson into one de-duplicated glossary.
   allConcepts() {
@@ -1253,8 +1266,9 @@ class Component extends DCLogic {
     };
 
     // home
-    const contL = D.lessons.slice().sort((a,b) => a.lastReview - b.lastReview).find(l => l.progressPct < 100) || D.lessons[0];
-    const continueLesson = contL ? { num:contL.num, title:contL.title, progressPct:contL.progressPct, progressWidth: contL.progressPct + '%', onOpen:() => this.openLesson(contL.num) } : null;
+    const contL = D.lessons.find(l => this.effProgress(l) < 100) || D.lessons[0];
+    const contP = contL ? this.effProgress(contL) : 0;
+    const continueLesson = contL ? { num:contL.num, title:contL.title, progressPct:contP, progressWidth: contP + '%', onOpen:() => this.openLesson(contL.num) } : null;
     const topId = st.pinned[0] || (D.insights[0] && D.insights[0].id);
     const ti = D.insights.find(i => i.id === topId) || D.insights[0] || { text:'', category:'עקרון מנחה', lesson:1 };
     const todayInsight = { text:ti.text, category:ti.category, lesson:ti.lesson, catColor:this.catMeta(ti.category).c, onJump:() => this.jumpTo(ti.lesson) };
@@ -1390,7 +1404,7 @@ class Component extends DCLogic {
           const lz = D.lessons.find(l => l.num === ln);
           return { badge: '\u05e9' + ln, title: lz ? lz.title : ('\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ln), note: c.byLesson[ln] || '', rep: (multi && i === 0) ? '\u05e8\u05d0\u05e9\u05d5\u05df' : (multi ? '\u05d7\u05d6\u05e8\u05d4 #' + (i + 1) : ''), onOpen:() => this.openLesson(ln) };
         }),
-        onSelect:() => this.selectConcept(c.term),
+        onSelect:(e) => this.selectConcept(c.term, e),
       };
     };
     const catDef = (D.conceptCategories && D.conceptCategories.order) || [];
@@ -1470,7 +1484,7 @@ class Component extends DCLogic {
         };
       })(this),
 
-      streak: st.streak || D.streak, todayDue: this.dueCards().length, onStartToday:() => this.startReview('all', null),
+      streak: st.streak, todayDue: this.dueCards().length, onStartToday:() => this.startReview('all', null),
       continueLesson, hasContinue: !!continueLesson,
       todayInsight,
       statLessons: D.lessons.length, statConcepts: D.concepts.length, statMastered: this.masteredCards().length,
