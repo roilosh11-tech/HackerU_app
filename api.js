@@ -78,14 +78,22 @@
 
   // ---- detection ----------------------------------------------------------
   API.boot = async function () {
-    // Probe the backend once.
+    // Probe the backend once. Only treat as ONLINE when /api/health returns a
+    // real JSON {ok:true} — a static host that answers unknown paths with a 200
+    // HTML shell (common in previews) must NOT be mistaken for a live backend.
     try {
       var ctrl = new AbortController();
       var t = setTimeout(function () { ctrl.abort(); }, 2500);
-      var res = await fetch(BASE + "/api/health", { signal: ctrl.signal });
+      var res = await fetch(BASE + "/api/health", {
+        signal: ctrl.signal,
+        headers: { "Accept": "application/json" },
+      });
       clearTimeout(t);
-      if (res.ok) {
+      var payload = null;
+      try { payload = await res.json(); } catch (e) { payload = null; }
+      if (res.ok && payload && payload.ok === true) {
         API.mode = "online";
+        if (typeof payload.signupOpen === "boolean") API.signupOpen = payload.signupOpen;
       } else {
         API.mode = "offline";
       }
@@ -232,6 +240,102 @@
   API.adminDelete = function (id) {
     if (API.mode === "offline") return Promise.resolve({ ok: true });
     return req("DELETE", "/api/admin/users/" + id);
+  };
+
+  // ---- project gallery (shared class-wide feed) --------------------------
+  var GALLERY_KEY = "cb_gallery_v1";
+  function localGallery() {
+    try {
+      var raw = localStorage.getItem(GALLERY_KEY);
+      var list = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(list)) return list;
+    } catch (e) {}
+    var now = Date.now();
+    var seed = [
+      { id: "seed1", authorId: -2, authorName: "מאיה כהן", authorAvatar: "leaf",
+        title: "מתכנן ארוחות עם AI",
+        body: "בניתי Artifact שמקבל מה שיש במקרר ומחזיר תפריט שבועי + רשימת קניות. השתמשתי ב-MoSCoW כדי לחתוך פיצ׳רים — עזר בטירוף למקד.",
+        link: "", ts: now - 3600000 * 20, kudos: [-3, -4],
+        comments: [{ id: "c1", authorId: -3, authorName: "דני לוי", authorAvatar: "wave",
+          text: "מגניב! איך פתרת את הקלט של כמויות?", ts: now - 3600000 * 18 }] },
+      { id: "seed2", authorId: -3, authorName: "דני לוי", authorAvatar: "wave",
+        title: "בוט תמיכה ל-PRD",
+        body: "ניסיתי את מודל ה-Instructions מול Prompt מהשיעור האחרון — הפרדתי את ההנחיות הקבועות מהשיחה וזה שינה לגמרי את העקביות של התשובות.",
+        link: "", ts: now - 3600000 * 44, kudos: [-2], comments: [] },
+    ];
+    try { localStorage.setItem(GALLERY_KEY, JSON.stringify(seed)); } catch (e) {}
+    return seed;
+  }
+  function saveLocalGallery(list) {
+    try { localStorage.setItem(GALLERY_KEY, JSON.stringify(list)); } catch (e) {}
+    return list;
+  }
+  function localMe() {
+    var u = API.user || localUser() || ensureGuest();
+    return { id: u.id, name: u.displayName, avatar: u.avatar || "spark" };
+  }
+  function newId() { return "p" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5); }
+
+  API.galleryList = async function () {
+    if (API.mode === "offline") return { posts: localGallery() };
+    return req("GET", "/api/gallery");
+  };
+  API.galleryCreate = async function (payload) {
+    if (API.mode === "offline") {
+      var me = localMe();
+      var post = { id: newId(), authorId: me.id, authorName: me.name, authorAvatar: me.avatar,
+        title: (payload.title || "").trim(), body: (payload.body || "").trim(),
+        link: (payload.link || "").trim(), ts: Date.now(), kudos: [], comments: [] };
+      saveLocalGallery([post].concat(localGallery()));
+      return post;
+    }
+    return req("POST", "/api/gallery", payload);
+  };
+  API.galleryDelete = async function (id) {
+    if (API.mode === "offline") {
+      saveLocalGallery(localGallery().filter(function (p) { return p.id !== id; }));
+      return { ok: true };
+    }
+    return req("DELETE", "/api/gallery/" + id);
+  };
+  API.galleryKudos = async function (id) {
+    if (API.mode === "offline") {
+      var me = localMe();
+      var list = localGallery().map(function (p) {
+        if (p.id !== id) return p;
+        var k = Array.isArray(p.kudos) ? p.kudos.slice() : [];
+        var i = k.indexOf(me.id);
+        if (i >= 0) k.splice(i, 1); else k.push(me.id);
+        return Object.assign({}, p, { kudos: k });
+      });
+      saveLocalGallery(list);
+      return list.filter(function (p) { return p.id === id; })[0];
+    }
+    return req("POST", "/api/gallery/" + id + "/kudos");
+  };
+  API.galleryComment = async function (id, text) {
+    if (API.mode === "offline") {
+      var me = localMe();
+      var cm = { id: "c" + Date.now().toString(36) + Math.random().toString(36).slice(2, 4),
+        authorId: me.id, authorName: me.name, authorAvatar: me.avatar, text: text, ts: Date.now() };
+      var list = localGallery().map(function (p) {
+        return p.id === id ? Object.assign({}, p, { comments: (p.comments || []).concat([cm]) }) : p;
+      });
+      saveLocalGallery(list);
+      return list.filter(function (p) { return p.id === id; })[0];
+    }
+    return req("POST", "/api/gallery/" + id + "/comments", { text: text });
+  };
+  API.galleryCommentDelete = async function (pid, cid) {
+    if (API.mode === "offline") {
+      var list = localGallery().map(function (p) {
+        return p.id === pid ? Object.assign({}, p, {
+          comments: (p.comments || []).filter(function (c) { return c.id !== cid; }) }) : p;
+      });
+      saveLocalGallery(list);
+      return list.filter(function (p) { return p.id === pid; })[0];
+    }
+    return req("DELETE", "/api/gallery/" + pid + "/comments/" + cid);
   };
 
   // Redirect helper — call from the app if not logged in.

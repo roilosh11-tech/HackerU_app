@@ -177,6 +177,37 @@
           <button onClick="{{ onStartToday }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:12px 20px;border-radius:12px;cursor:pointer;border:none;background:var(--review);color:var(--onreview)">התחל חזרה קצרה →</button>
         </div>
 
+        <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:20px;margin-bottom:22px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:15px">
+            <div style="font-size:14px;font-weight:800">אתגרי השבוע</div>
+            <sc-if value="{{ hasChallengesEarned }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;font-weight:700;color:var(--master);background:rgba(134,214,164,.13);border-radius:20px;padding:4px 11px">+{{ challengesEarned }} נקודות השבוע</div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:15px">
+            <sc-for list="{{ challenges }}" as="ch" hint-placeholder-count="3">
+              <div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:7px">
+                  <div style="min-width:0">
+                    <span style="font-size:14px;font-weight:700">{{ ch.title }}</span>
+                    <span style="font-size:12.5px;color:var(--tx2)"> · {{ ch.desc }}</span>
+                  </div>
+                  <span dir="ltr" style="font-size:11.5px;font-weight:700;color:var(--tx3);white-space:nowrap;flex:none">+{{ ch.pts }}</span>
+                </div>                <div style="display:flex;align-items:center;gap:11px">
+                  <div style="flex:1;height:7px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ ch.pct }}%;background:{{ ch.color }};transition:width .3s"></div></div>
+                  <sc-if value="{{ ch.canClaim }}" hint-placeholder-val="{{ false }}">
+                    <button onClick="{{ ch.onClaim }}" style="font-family:inherit;font-weight:700;font-size:12px;padding:6px 13px;border-radius:9px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster);white-space:nowrap;flex:none">אספו נקודות</button>
+                  </sc-if>
+                  <sc-if value="{{ ch.claimedFlag }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:12px;font-weight:700;color:var(--master);white-space:nowrap;flex:none">✓ נאסף</span>
+                  </sc-if>
+                  <sc-if value="{{ ch.showCount }}" hint-placeholder-val="{{ true }}">
+                    <span dir="ltr" style="font-size:12px;color:var(--tx3);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none">{{ ch.cur }}/{{ ch.goal }}</span>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
         <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:16px;padding:18px">
           <div style="font-size:10.5px;color:var(--tx3);letter-spacing:.3px;margin-bottom:8px">התובנה של היום מרילי</div>
           <div style="font-size:15px;line-height:1.65;color:var(--tx);font-weight:500">„{{ todayInsight.text }}”</div>
@@ -191,6 +222,84 @@
           </span>
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
         </button>
+
+        <div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px">
+          <div>
+            <h2 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px">גלריית הפרויקטים של הכיתה</h2>
+            <div style="font-size:12.5px;color:var(--tx3);margin-top:3px">שתפו מה שבניתם, תגיבו ותנו „כל הכבוד” 👏</div>
+          </div>
+          <button onClick="{{ onToggleComposer }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:11px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);white-space:nowrap;flex:none">+ פרסמו</button>
+        </div>
+
+        <sc-if value="{{ galComposerOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:16px;padding:16px;margin-top:14px;animation:cbup .2s ease">
+          <input value="{{ galTitle }}" onInput="{{ onGalTitle }}" placeholder="כותרת הפרויקט" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:15px;font-weight:700;color:var(--tx);background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;margin-bottom:10px" />
+          <textarea value="{{ galBody }}" onInput="{{ onGalBody }}" placeholder="ספרו בקצרה מה בניתם, באיזה כלי, ומה למדתם…" rows="3" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:14px;line-height:1.55;color:var(--tx);background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:11px 13px;resize:vertical;margin-bottom:10px"></textarea>
+          <input value="{{ galLink }}" onInput="{{ onGalLink }}" placeholder="קישור (אופציונלי) — Artifact, GitHub, דמו…" style="width:100%;box-sizing:border-box;font-family:inherit;font-size:13.5px;color:var(--tx);background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:10px 13px;margin-bottom:12px;direction:ltr;text-align:start" />
+          <div style="display:flex;gap:9px;justify-content:flex-end">
+            <button onClick="{{ onToggleComposer }}" style="font-family:inherit;font-weight:600;font-size:13px;padding:9px 15px;border-radius:10px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2)">ביטול</button>
+            <button onClick="{{ onAddPost }}" disabled="{{ cantPost }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:9px 18px;border-radius:10px;cursor:pointer;border:none;background:{{ postBtnBg }};color:var(--onaccent);opacity:{{ postBtnOp }}">{{ postBtnLabel }}</button>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ galLoadingEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:var(--tx3);font-size:13.5px;padding:34px 20px;margin-top:14px">טוען פרויקטים…</div>
+        </sc-if>
+
+        <sc-if value="{{ galleryEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;color:var(--tx3);font-size:13.5px;padding:34px 20px;border:1px dashed var(--bd2);border-radius:16px;margin-top:14px">עדיין אין פרויקטים — היו הראשונים לשתף ✨</div>
+        </sc-if>
+
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+          <sc-for list="{{ galleryPosts }}" as="p" hint-placeholder-count="2">
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:17px">
+              <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">
+                <span style="width:34px;height:34px;flex:none;border-radius:50%;background:{{ p.avColor }};color:#10141a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px">{{ p.initial }}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13.5px;font-weight:700;line-height:1.2">{{ p.author }}</div>
+                  <div style="font-size:11.5px;color:var(--tx3)">{{ p.ago }}</div>
+                </div>
+                <sc-if value="{{ p.canDel }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ p.onDel }}" title="מחיקה" style="font-family:inherit;font-size:12px;color:var(--tx3);background:none;border:none;cursor:pointer;padding:4px 6px;flex:none">מחק</button>
+                </sc-if>
+              </div>
+              <div style="font-size:16px;font-weight:700;line-height:1.35;margin-bottom:6px">{{ p.title }}</div>
+              <div style="font-size:14px;line-height:1.6;color:var(--tx2);white-space:pre-wrap">{{ p.body }}</div>
+              <sc-if value="{{ p.hasLink }}" hint-placeholder-val="{{ false }}">
+                <a href="{{ p.link }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;margin-top:11px;max-width:100%;font-size:13px;font-weight:600;color:var(--accent);text-decoration:none;direction:ltr;overflow:hidden">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="flex:none"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.link }}</span>
+                </a>
+              </sc-if>
+              <div style="display:flex;align-items:center;gap:16px;margin-top:14px;padding-top:13px;border-top:1px solid var(--bd2)">
+                <button onClick="{{ p.onKudos }}" style="font-family:inherit;font-size:13px;font-weight:600;color:{{ p.kudosColor }};background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;white-space:nowrap">👏 כל הכבוד <sc-if value="{{ p.kudosCount }}" hint-placeholder-val="{{ 0 }}"><span dir="ltr" style="font-variant-numeric:tabular-nums">· {{ p.kudosCount }}</span></sc-if></button>
+                <button onClick="{{ p.onToggleComments }}" style="font-family:inherit;font-size:13px;font-weight:600;color:var(--tx3);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:6px;padding:0;white-space:nowrap">💬 תגובות <sc-if value="{{ p.commentCount }}" hint-placeholder-val="{{ 0 }}"><span dir="ltr" style="font-variant-numeric:tabular-nums">· {{ p.commentCount }}</span></sc-if></button>
+              </div>
+              <sc-if value="{{ p.commentsOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:13px;display:flex;flex-direction:column;gap:11px;animation:cbup .2s ease">
+                  <sc-for list="{{ p.comments }}" as="cm" hint-placeholder-count="1">
+                    <div style="display:flex;gap:9px;align-items:flex-start">
+                      <span style="width:26px;height:26px;flex:none;border-radius:50%;background:{{ cm.avColor }};color:#10141a;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;margin-top:1px">{{ cm.initial }}</span>
+                      <div style="flex:1;min-width:0;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:9px 12px">
+                        <div style="display:flex;align-items:baseline;gap:8px">
+                          <span style="font-size:12.5px;font-weight:700">{{ cm.name }}</span>
+                          <span style="font-size:11px;color:var(--tx3)">{{ cm.ago }}</span>
+                          <sc-if value="{{ cm.canDel }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cm.onDel }}" style="font-family:inherit;font-size:11px;color:var(--tx3);background:none;border:none;cursor:pointer;padding:0;margin-inline-start:auto">מחק</button></sc-if>
+                        </div>
+                        <div style="font-size:13.5px;line-height:1.5;color:var(--tx2);margin-top:3px;white-space:pre-wrap">{{ cm.text }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                  <div style="display:flex;gap:8px;align-items:center">
+                    <input value="{{ p.draft }}" onInput="{{ p.onDraft }}" onKeyDown="{{ p.onCommentKey }}" placeholder="כתבו תגובה…" style="flex:1;font-family:inherit;font-size:13.5px;color:var(--tx);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:9px 14px" />
+                    <button onClick="{{ p.onSendComment }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:9px 15px;border-radius:20px;cursor:pointer;border:none;background:var(--panel2);border:1px solid var(--bd2);color:var(--tx)">שלחו</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
       </div>
       </sc-if>
 
@@ -807,6 +916,42 @@
               </sc-if>
             </div>
 
+            <sc-if value="{{ reviewIsMC }}" hint-placeholder-val="{{ false }}">
+              <sc-if value="{{ mcLoading }}" hint-placeholder-val="{{ true }}">
+                <div style="margin-top:18px;display:flex;flex-direction:column;gap:9px">
+                  <div style="display:flex;align-items:center;justify-content:center;gap:9px;color:var(--tx3);font-size:13px;padding:6px 0 10px">
+                    <span style="width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--master);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>
+                    מכין אפשרויות…
+                  </div>
+                  <div style="height:52px;border-radius:13px;background:var(--panel2);border:1px solid var(--bd);opacity:.5"></div>
+                  <div style="height:52px;border-radius:13px;background:var(--panel2);border:1px solid var(--bd);opacity:.5"></div>
+                  <div style="height:52px;border-radius:13px;background:var(--panel2);border:1px solid var(--bd);opacity:.5"></div>
+                  <div style="height:52px;border-radius:13px;background:var(--panel2);border:1px solid var(--bd);opacity:.5"></div>
+                </div>
+              </sc-if>
+              <sc-if value="{{ mcReady }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:18px;display:flex;flex-direction:column;gap:9px">
+                <sc-for list="{{ mcList }}" as="op" hint-placeholder-count="4">
+                  <button onClick="{{ op.onPick }}" disabled="{{ op.locked }}" style="font-family:inherit;text-align:start;cursor:pointer;padding:14px 15px;border-radius:13px;border:1.5px solid {{ op.bd }};background:{{ op.bg }};color:{{ op.color }};opacity:{{ op.op }};display:flex;align-items:center;gap:11px;font-size:15px;line-height:1.45;transition:background .15s,border-color .15s">
+                    <span style="flex:1">{{ op.text }}</span>
+                    <span style="font-size:15px;font-weight:800;width:16px;text-align:center;flex:none">{{ op.icon }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <sc-if value="{{ mcAnswered }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:16px;animation:cbup .2s ease">
+                  <sc-if value="{{ mcCorrect }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13.5px;font-weight:700;color:var(--master);text-align:center;margin-bottom:11px">יפה! תשובה נכונה ✓</div>
+                  </sc-if>
+                  <sc-if value="{{ mcWrong }}" hint-placeholder-val="{{ false }}">
+                    <div style="font-size:13.5px;font-weight:700;color:var(--review);text-align:center;margin-bottom:11px">לא נורא — הכרטיסייה תחזור שוב</div>
+                  </sc-if>
+                  <button onClick="{{ onNextMC }}" style="width:100%;font-family:inherit;font-weight:700;font-size:15px;padding:15px;border-radius:13px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster)">המשך ›</button>
+                </div>
+              </sc-if>
+              </sc-if>
+            </sc-if>
+
             <sc-if value="{{ reviewHidden }}" hint-placeholder-val="{{ true }}">
               <button onClick="{{ onShowAnswer }}" style="width:100%;margin-top:18px;font-family:inherit;font-weight:700;font-size:15px;padding:15px;border-radius:13px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">הצג תשובה</button>
             </sc-if>
@@ -846,6 +991,13 @@
               <div style="font-size:32px;font-weight:800;color:var(--master);line-height:1">{{ masteredCount }}</div>
               <div style="font-size:12.5px;color:var(--tx2);margin-top:4px">כרטיסיות בשליטה</div>
             </div>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.4px;margin-bottom:11px">מצב תרגול</div>
+          <div style="display:inline-flex;gap:4px;padding:4px;background:var(--panel2);border:1px solid var(--bd);border-radius:12px;margin-bottom:22px">
+            <sc-for list="{{ reviewModes }}" as="rm" hint-placeholder-count="2">
+              <button onClick="{{ rm.on }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:8px 18px;border-radius:9px;cursor:pointer;border:none;background:{{ rm.bg }};color:{{ rm.color }};transition:background .15s">{{ rm.label }}</button>
+            </sc-for>
           </div>
 
           <div style="font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.4px;margin-bottom:11px">התחל חזרה</div>
@@ -1157,11 +1309,15 @@ class Component extends DCLogic {
     reviewActive: false,
     reviewScope: null,
     reviewScopeLesson: 3,
+    reviewMode: 'flash', // 'flash' | 'mc'
     queue: [],
     reviewIdx: 0,
     showAnswer: false,
     reviewDone: false,
     reviewedCount: 0,
+    mcOptions: [],
+    mcChosen: null,
+    mcLoading: false,
     // --- auth / per-user ---
     user: null,
     booting: true,
@@ -1176,6 +1332,17 @@ class Component extends DCLogic {
     noteQuery: '',
     tutorialOpen: false,
     tutorialStep: 0,
+    // --- shared space (project gallery) + weekly challenges ---
+    gallery: [],
+    galLoading: false,
+    galPosting: false,
+    galError: false,
+    galTitle: '',
+    galBody: '',
+    galLink: '',
+    galComposerOpen: false,
+    openComments: {},
+    commentDraft: {},
   };
 
   tutSteps() {
@@ -1235,6 +1402,8 @@ class Component extends DCLogic {
     };
     this._onResize();
     window.addEventListener('resize', this._onResize);
+    // shared class-wide gallery — loads from the server (offline preview falls back to localStorage)
+    this.loadGallery();
   }
   componentWillUnmount() { window.removeEventListener('resize', this._onResize); }
 
@@ -1295,10 +1464,106 @@ class Component extends DCLogic {
   startReview(scope, lessonNum) {
     const q = this.buildQueue(scope, lessonNum);
     if (!q.length) return;
-    this.setState({ view:'review', reviewActive:true, reviewScope:scope, reviewScopeLesson: lessonNum ?? this.state.reviewScopeLesson, queue:q, reviewIdx:0, showAnswer:false, reviewDone:false, reviewedCount:0 });
+    this.setState({ view:'review', reviewActive:true, reviewScope:scope, reviewScopeLesson: lessonNum ?? this.state.reviewScopeLesson, queue:q, reviewIdx:0, showAnswer:false, reviewDone:false, reviewedCount:0, mcChosen:null }, () => this.buildMC());
   }
   endReview() { this.setState({ reviewActive:false, reviewDone:false }); }
   showAnswer() { this.setState({ showAnswer: true }); }
+  setReviewMode(m) { this.setState({ reviewMode: m }); }
+
+  // build a 4-option multiple-choice set: correct answer + 3 plausible distractors.
+  // Distractors are generated by the LLM so they're on-topic, same style/length as the
+  // correct answer, and genuinely wrong — not obviously-off answers borrowed from other cards.
+  // Falls back to the same-lesson/same-tag pool when the LLM isn't available.
+  async buildMC() {
+    const st = this.state;
+    const cid = st.queue[st.reviewIdx];
+    if (!cid) { this.setState({ mcOptions: [], mcChosen: null, mcLoading: false }); return; }
+    this._mcCache = this._mcCache || {};
+    if (this._mcCache[cid]) { this.setState({ mcOptions: this._mcCache[cid], mcChosen: null, mcLoading: false }); this.prefetchMC(); return; }
+    this.setState({ mcOptions: [], mcChosen: null, mcLoading: true });
+    this.prefetchMC();
+    const opts = await this.ensureMC(cid);
+    if (opts && this.state.queue[this.state.reviewIdx] === cid) this.setState({ mcOptions: opts, mcChosen: null, mcLoading: false });
+    this.prefetchMC();
+  }
+
+  // generate (once) and cache the option set for a given card id; de-dupes in-flight requests
+  ensureMC(cid) {
+    this._mcCache = this._mcCache || {};
+    this._mcPending = this._mcPending || {};
+    if (this._mcCache[cid]) return Promise.resolve(this._mcCache[cid]);
+    if (this._mcPending[cid]) return this._mcPending[cid];
+    const card = this.state.cards.find(c => c.id === cid);
+    if (!card) return Promise.resolve(null);
+    const shuffle = (arr) => { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = arr[i]; arr[i] = arr[j]; arr[j] = t; } return arr; };
+    const p = (async () => {
+      const distractors = await this.genDistractors(card, shuffle);
+      const opts = distractors.map(t => ({ text: t, correct: false }));
+      opts.push({ text: card.a, correct: true });
+      shuffle(opts);
+      this._mcCache[cid] = opts;
+      delete this._mcPending[cid];
+      return opts;
+    })();
+    this._mcPending[cid] = p;
+    return p;
+  }
+
+  // warm the next few cards in the queue so they're ready the moment the user advances
+  prefetchMC() {
+    const st = this.state;
+    if (st.reviewMode !== 'mc') return;
+    for (let k = 1; k <= 3; k++) {
+      const nid = st.queue[st.reviewIdx + k];
+      if (nid) this.ensureMC(nid);
+    }
+  }
+
+  // pool-based fallback: same lesson → same tag → similar answer length
+  poolDistractors(card, shuffle) {
+    const cards = this.state.cards;
+    const candidates = cards.filter(c => c.id !== card.id && c.a && c.a !== card.a);
+    const len = card.a.length;
+    const tiers = [
+      shuffle(candidates.filter(c => c.lesson === card.lesson && c.tag === card.tag)),
+      shuffle(candidates.filter(c => c.lesson === card.lesson && c.tag !== card.tag)),
+      shuffle(candidates.filter(c => c.tag === card.tag && c.lesson !== card.lesson)),
+      candidates.filter(c => c.lesson !== card.lesson && c.tag !== card.tag).sort((a,b) => Math.abs(a.a.length - len) - Math.abs(b.a.length - len)),
+    ];
+    const out = []; const seen = { [card.a]: 1 };
+    for (const tier of tiers) { for (const c of tier) { if (out.length >= 3) break; if (seen[c.a]) continue; seen[c.a] = 1; out.push(c.a); } }
+    return out;
+  }
+
+  async genDistractors(card, shuffle) {
+    if (!window.claude || !window.claude.complete) return this.poolDistractors(card, shuffle);
+    const system = 'אתה מחולל מסיחים (distractors) לשאלת רב-ברירה בקורס "AI Solutions Architect" של רילי לבבי. קבל שאלה ואת התשובה הנכונה, והחזר בדיוק 3 תשובות שגויות אך משכנעות — כאלה שתלמיד שלא שלט בחומר יכול להתבלבל ולבחור בהן.\n\nכללים:\n- כל מסיח חייב להיות באותו נושא של השאלה, ולא תשובה מנושא אחר.\n- כל מסיח חייב להיות שגוי או לא מדויק — אך סביר ומנוסח בביטחון, לא מגוחך.\n- התאם את האורך, המבנה והסגנון של כל מסיח לתשובה הנכונה (אם היא משפט אחד — גם המסיחים משפט אחד; אם היא ±120 תווים — גם הם). אסור שהתשובה הנכונה תבלוט כארוכה/קצרה/מפורטת מכולן.\n- שמור מונחים טכניים באנגלית (Prompt, Instructions, RAG, LLM, PRD, API, token וכו׳) בדיוק כמו בתשובה הנכונה.\n- אל תשתמש ב"כל התשובות נכונות" או ניסוחי-על. שלושת המסיחים שונים זה מזה ושונים מהתשובה הנכונה.\n\nהחזר אך ורק JSON תקין ללא טקסט נוסף וללא code fences: {"distractors":["...","...","..."]}';
+    try {
+      const raw = await window.claude.complete({
+        model: 'claude-sonnet-4-5', max_tokens: 512, system,
+        messages: [{ role:'user', content: 'שאלה: ' + card.q + '\nתשובה נכונה: ' + card.a }],
+      });
+      let parsed = null;
+      try { parsed = JSON.parse(String(raw).replace(/^```(?:json)?/i, '').replace(/```$/, '').trim()); } catch (e) {}
+      let arr = parsed && Array.isArray(parsed.distractors) ? parsed.distractors : [];
+      arr = arr.filter(x => typeof x === 'string' && x.trim() && x.trim() !== card.a.trim());
+      // de-dupe
+      const seen = {}; arr = arr.filter(x => (seen[x] ? false : (seen[x] = 1)));
+      if (arr.length >= 3) return arr.slice(0, 3);
+      // top up from pool if the model returned too few
+      const pool = this.poolDistractors(card, shuffle);
+      for (const p of pool) { if (arr.length >= 3) break; if (arr.indexOf(p) === -1) arr.push(p); }
+      if (arr.length >= 2) return arr.slice(0, 3);
+    } catch (e) {}
+    return this.poolDistractors(card, shuffle);
+  }
+  chooseMC(i) { if (this.state.mcChosen != null) return; this.setState({ mcChosen: i }); }
+  nextMC() {
+    const st = this.state;
+    if (st.mcChosen == null) return;
+    const picked = st.mcOptions[st.mcChosen];
+    this.rateCard(picked && picked.correct ? 'good' : 'again');
+  }
 
   rateCard(rating) {
     const st = this.state;
@@ -1316,8 +1581,8 @@ class Component extends DCLogic {
     let idx = st.reviewIdx + 1;
     if (requeue) q.push(cid);
     const done = idx >= q.length;
-    const ud = Object.assign({}, st.userData); ud.reviewsTotal = (ud.reviewsTotal||0) + 1;
-    this.setState({ cards, queue:q, reviewIdx:idx, showAnswer:false, reviewedCount: st.reviewedCount + 1, reviewDone: done, userData: ud }, () => this.persist());
+    const ud = Object.assign({}, st.userData); this.ensureWeek(ud); ud.reviewsTotal = (ud.reviewsTotal||0) + 1; ud.weekReviews = (ud.weekReviews||0) + 1;
+    this.setState({ cards, queue:q, reviewIdx:idx, showAnswer:false, mcChosen:null, reviewedCount: st.reviewedCount + 1, reviewDone: done, userData: ud }, () => { this.persist(); if (!done && this.state.reviewMode === 'mc') this.buildMC(); });
   }
 
   // ---- chat ----
@@ -1483,7 +1748,7 @@ class Component extends DCLogic {
     const completion = this.computeCompletion();
     const reviews = ud.reviewsTotal || 0;
     const mastered = this.masteredLessons();
-    const points = reviews*5 + mastered*40;
+    const points = reviews*5 + mastered*40 + (ud.bonusPoints || 0);
     const achievements = this.computeAchievements({ completion, reviews, mastered, streak: st.streak, notes: ud.notes });
     this.setState({ userData: ud, completion, points, achievements });
     if (window.CourseAPI) window.CourseAPI.saveData({ data: ud, points, completion, streak: st.streak, achievements });
@@ -1512,6 +1777,112 @@ class Component extends DCLogic {
   }
   logout() { if (window.CourseAPI) { window.CourseAPI.logout(); window.CourseAPI.gotoLogin(); } }
   pickAvatar(a) { return () => this.setState({ editAvatar: a }); }
+
+  // ---------- shared space: project gallery (preview-local, class-wide feed) ----------
+  // Gallery data now lives on the server (CourseAPI.gallery*). Offline preview
+  // falls back to localStorage inside CourseAPI so the demo still works.
+  api() { return window.CourseAPI; }
+  loadGallery() {
+    const api = this.api();
+    if (!api || !api.galleryList) return;
+    this.setState({ galLoading: true });
+    api.galleryList()
+      .then(r => this.setState({ gallery: (r && r.posts) || [], galLoading: false, galError: false }))
+      .catch(() => this.setState({ galLoading: false, galError: true }));
+  }
+  // apply a single updated/created post into local state without a full refetch
+  mergePost(post) {
+    if (!post || !post.id) return;
+    const list = this.state.gallery.slice();
+    const i = list.findIndex(p => p.id === post.id);
+    if (i >= 0) list[i] = post; else list.unshift(post);
+    this.setState({ gallery: list });
+  }
+  me() { const u = this.state.user; return u ? { id:u.id, name:u.displayName, avatar:u.avatar||'spark', admin:u.role==='admin' } : { id:0, name:'אורח/ת', avatar:'spark', admin:false }; }
+  isAdminUser() { return !!(window.CourseAPI && window.CourseAPI.isAdmin && window.CourseAPI.isAdmin()) || this.me().admin; }
+  canModerate(authorId) { return this.isAdminUser() || authorId === this.me().id; }
+  safeLink(url) { const u = (url||'').trim(); if (!u) return ''; if (/^javascript:/i.test(u)) return ''; if (/^https?:\/\//i.test(u)) return u; return 'https://' + u; }
+  timeAgo(ts) {
+    const s = Math.max(1, Math.round((Date.now() - ts)/1000));
+    if (s < 60) return 'זה עתה';
+    const m = Math.round(s/60); if (m < 60) return 'לפני ' + m + ' דק׳';
+    const h = Math.round(m/60); if (h < 24) return 'לפני ' + h + ' שע׳';
+    const d = Math.round(h/24); if (d < 7) return 'לפני ' + d + ' ימים';
+    return 'לפני ' + Math.round(d/7) + ' שבועות';
+  }
+  toggleComposer() { this.setState({ galComposerOpen: !this.state.galComposerOpen }); }
+  addPost() {
+    const t = (this.state.galTitle||'').trim(), b = (this.state.galBody||'').trim();
+    if (!t || !b || this.state.galPosting) return;
+    const api = this.api(); if (!api) return;
+    this.setState({ galPosting: true });
+    api.galleryCreate({ title:t, body:b, link:(this.state.galLink||'').trim() })
+      .then(post => { this.mergePost(post); this.setState({ galTitle:'', galBody:'', galLink:'', galComposerOpen:false, galPosting:false }); })
+      .catch(() => this.setState({ galPosting:false, galError:true }));
+  }
+  deletePost(id) {
+    const p = this.state.gallery.find(x => x.id === id);
+    if (!p || !this.canModerate(p.authorId)) return;
+    const api = this.api(); if (!api) return;
+    this.setState({ gallery: this.state.gallery.filter(x => x.id !== id) }); // optimistic
+    api.galleryDelete(id).catch(() => this.loadGallery());
+  }
+  toggleKudos(id) {
+    const api = this.api(); if (!api) return;
+    const me = this.me();
+    // optimistic toggle
+    const list = this.state.gallery.map(p => {
+      if (p.id !== id) return p;
+      const k = Array.isArray(p.kudos) ? p.kudos.slice() : [];
+      const i = k.indexOf(me.id);
+      if (i >= 0) k.splice(i, 1); else k.push(me.id);
+      return Object.assign({}, p, { kudos:k });
+    });
+    this.setState({ gallery: list });
+    api.galleryKudos(id).then(post => this.mergePost(post)).catch(() => this.loadGallery());
+  }
+  toggleCommentsOpen(id) { const o = Object.assign({}, this.state.openComments); o[id] = !o[id]; this.setState({ openComments: o }); }
+  setCommentDraft(id, text) { const d = Object.assign({}, this.state.commentDraft); d[id] = text; this.setState({ commentDraft: d }); }
+  addComment(id) {
+    const text = (this.state.commentDraft[id]||'').trim(); if (!text) return;
+    const api = this.api(); if (!api) return;
+    const d = Object.assign({}, this.state.commentDraft); d[id] = ''; this.setState({ commentDraft: d });
+    api.galleryComment(id, text).then(post => this.mergePost(post)).catch(() => this.loadGallery());
+  }
+  deleteComment(pid, cid) {
+    const post = this.state.gallery.find(p => p.id === pid);
+    const c = post && (post.comments||[]).find(x => x.id === cid);
+    if (!c || !this.canModerate(c.authorId)) return;
+    const api = this.api(); if (!api) return;
+    api.galleryCommentDelete(pid, cid).then(p => this.mergePost(p)).catch(() => this.loadGallery());
+  }
+
+  // ---------- weekly challenges (auto-tracked, build on existing gamification) ----------
+  weekKey() { return Math.floor(Date.now() / (7*86400000)); }
+  ensureWeek(ud) { const wk = this.weekKey(); if (ud.weekKey !== wk) { ud.weekKey = wk; ud.weekReviews = 0; ud.claimed = {}; } return ud; }
+  myPostCount() { const me = this.me(); return this.state.gallery.filter(p => p.authorId === me.id).length; }
+  challengeDefs() {
+    const ud = this.state.userData; const wk = this.weekKey();
+    const wr = ud.weekKey === wk ? (ud.weekReviews || 0) : 0;
+    const claimed = ud.weekKey === wk ? (ud.claimed || {}) : {};
+    const defs = [
+      { id:'rev25', title:'מרתון חזרה', desc:'חזרו על 25 כרטיסיות השבוע', cur:Math.min(wr,25), goal:25, pts:50, color:'var(--review)' },
+      { id:'master3', title:'שליטה', desc:'הביאו 3 שיעורים למצב „בשליטה”', cur:Math.min(this.masteredLessons(),3), goal:3, pts:80, color:'var(--master)' },
+      { id:'share1', title:'שתפו את הכיתה', desc:'פרסמו פרויקט אחד בגלריה', cur:Math.min(this.myPostCount(),1), goal:1, pts:40, color:'var(--newc)' },
+    ];
+    return defs.map(d => {
+      const done = d.cur >= d.goal;
+      return Object.assign({}, d, { done, claimedFlag:!!claimed[d.id], pct:Math.min(100, Math.round(d.cur/d.goal*100)),
+        canClaim: done && !claimed[d.id], showCount: !(done && !claimed[d.id]) && !claimed[d.id], onClaim:() => this.claimChallenge(d.id, d.pts) });
+    });
+  }
+  claimChallenge(id, pts) {
+    const ud = Object.assign({}, this.state.userData); this.ensureWeek(ud);
+    if ((ud.claimed||{})[id]) return;
+    ud.claimed = Object.assign({}, ud.claimed, { [id]:true });
+    ud.bonusPoints = (ud.bonusPoints || 0) + pts;
+    this.setState({ userData: ud }, () => this.persist());
+  }
 
   renderVals() {
     const st = this.state;
@@ -1553,6 +1924,40 @@ class Component extends DCLogic {
     const contP = contL ? this.effProgress(contL) : 0;
     const continueLesson = contL ? { num:contL.num, title:contL.title, hook:contL.hook, progressPct:contP, progressWidth: contP + '%', onOpen:() => this.openLesson(contL.num) } : null;
     const greetingName = (st.user && st.user.displayName) ? st.user.displayName : 'לומד/ת';
+
+    // --- weekly challenges ---
+    const challenges = this.challengeDefs();
+    const challengesEarned = challenges.reduce((s,c) => s + (c.claimedFlag ? c.pts : 0), 0);
+
+    // --- project gallery (shared feed) ---
+    const meId = this.me().id;
+    const galleryPosts = (st.gallery || []).map(p => {
+      const kudos = Array.isArray(p.kudos) ? p.kudos : [];
+      const comments = (p.comments || []).map(c => ({
+        id:c.id, name:c.authorName, text:c.text, ago:this.timeAgo(c.ts),
+        avColor:this.avatarColor(c.authorAvatar), initial:(c.authorName||'?').trim().charAt(0),
+        canDel:this.canModerate(c.authorId), onDel:() => this.deleteComment(p.id, c.id),
+      }));
+      return {
+        id:p.id, title:p.title, body:p.body,
+        author:p.authorName, ago:this.timeAgo(p.ts),
+        avColor:this.avatarColor(p.authorAvatar), initial:(p.authorName||'?').trim().charAt(0),
+        link:this.safeLink(p.link), hasLink:!!this.safeLink(p.link),
+        kudosCount:kudos.length, kudosOn:kudos.indexOf(meId) >= 0,
+        kudosColor: kudos.indexOf(meId) >= 0 ? 'var(--master)' : 'var(--tx3)',
+        onKudos:() => this.toggleKudos(p.id),
+        canDel:this.canModerate(p.authorId), onDel:() => this.deletePost(p.id),
+        comments, commentCount:comments.length,
+        commentsOpen: !!st.openComments[p.id], onToggleComments:() => this.toggleCommentsOpen(p.id),
+        draft: st.commentDraft[p.id] || '',
+        onDraft:(e) => this.setCommentDraft(p.id, e.target.value),
+        onSendComment:() => this.addComment(p.id),
+        onCommentKey:(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this.addComment(p.id); } },
+      };
+    });
+    const galleryEmpty = galleryPosts.length === 0 && !st.galLoading;
+    const galLoadingEmpty = st.galLoading && galleryPosts.length === 0;
+    const canPost = !!((st.galTitle||'').trim() && (st.galBody||'').trim()) && !st.galPosting;
 
     // --- library grid ---
     const lessons = D.lessons.map(l => {
@@ -1746,6 +2151,33 @@ class Component extends DCLogic {
       {key:'easy', emoji:'✓✓', label:'בקלות', next:'בעוד שבוע+', color:rc.easy},
     ].map(r => Object.assign({}, r, { bg:r.color + '1e', bd:r.color + '55', onRate:() => this.rateCard(r.key) }));
 
+    const reviewIsMC = st.reviewMode === 'mc';
+    const mcAnswered = st.mcChosen != null;
+    const mcCorrect = mcAnswered && !!(st.mcOptions[st.mcChosen] && st.mcOptions[st.mcChosen].correct);
+    let mcList = [];
+    if (reviewCard && reviewIsMC) {
+      mcList = (st.mcOptions || []).map((o, i) => {
+        const chosen = st.mcChosen === i;
+        let bd = 'var(--bd2)', bg = 'var(--panel2)', color = 'var(--tx)', icon = '', op = '1';
+        if (mcAnswered) {
+          if (o.correct) { bd = rc.easy + '99'; bg = rc.easy + '22'; icon = '✓'; }
+          else if (chosen) { bd = rc.again + '99'; bg = rc.again + '22'; icon = '✗'; }
+          else { op = '.5'; }
+        }
+        return { text:o.text, bd, bg, color, icon, op, locked: mcAnswered, onPick:() => this.chooseMC(i) };
+      });
+    }
+    const reviewModes = [
+      { key:'flash', label:'כרטיסיות', on:() => this.setReviewMode('flash') },
+      { key:'mc', label:'רב-ברירה', on:() => this.setReviewMode('mc') },
+    ].map(m => {
+      const active = st.reviewMode === m.key;
+      return Object.assign({}, m, {
+        color: active ? 'var(--onmaster)' : 'var(--tx2)',
+        bg: active ? 'var(--master)' : 'transparent',
+      });
+    });
+
     const scopeCounts = {
       all: this.dueCards().length,
       lesson: st.cards.filter(c => c.lesson === st.reviewScopeLesson).length,
@@ -1856,6 +2288,20 @@ class Component extends DCLogic {
 
       showHome: st.view === 'home' && !inLesson && !inMap,
       greetingName, continueLesson, hasContinue: !!continueLesson,
+      challenges, challengesEarned, hasChallengesEarned: challengesEarned > 0,
+      galleryPosts, galleryEmpty, galLoadingEmpty,
+      galPosting: st.galPosting,
+      postBtnLabel: st.galPosting ? 'מפרסם…' : 'פרסמו לכיתה',
+      galComposerOpen: st.galComposerOpen,
+      onToggleComposer:() => this.toggleComposer(),
+      galTitle: st.galTitle, galBody: st.galBody, galLink: st.galLink,
+      onGalTitle:(e) => this.setState({ galTitle: e.target.value }),
+      onGalBody:(e) => this.setState({ galBody: e.target.value }),
+      onGalLink:(e) => this.setState({ galLink: e.target.value }),
+      onAddPost:() => this.addPost(), canPost,
+      cantPost: !canPost,
+      postBtnBg: canPost ? 'var(--accent)' : 'var(--raise)',
+      postBtnOp: canPost ? '1' : '.6',
       showMaterials: st.view === 'materials' && !inLesson && !inMap,
       onOpenMaterials:() => this.setView('materials'),
       matActive: st.view === 'materials',
@@ -1899,11 +2345,21 @@ class Component extends DCLogic {
       reviewDash: !st.reviewActive,
       reviewDone: st.reviewDone,
       reviewCard,
-      reviewShowAnswer: st.showAnswer && !st.reviewDone,
-      reviewHidden: !st.showAnswer && !st.reviewDone && !!reviewCard,
+      reviewShowAnswer: st.showAnswer && !st.reviewDone && !reviewIsMC,
+      reviewHidden: !st.showAnswer && !st.reviewDone && !!reviewCard && !reviewIsMC,
       onShowAnswer:() => this.showAnswer(),
       onEndReview:() => this.endReview(),
       ratings,
+      reviewIsMC,
+      mcList,
+      mcAnswered,
+      mcCorrect,
+      mcLoading: st.mcLoading,
+      mcReady: reviewIsMC && !st.mcLoading,
+      mcWrong: mcAnswered && !mcCorrect,
+      mcFlash: !reviewIsMC,
+      onNextMC:() => this.nextMC(),
+      reviewModes,
       reviewProgress: st.queue.length ? Math.round(st.reviewIdx / st.queue.length * 100) : 0,
       reviewPos: Math.min(st.reviewIdx + 1, st.queue.length), reviewTotal: st.queue.length,
       reviewScopeLabel: { all:'כל הקורס', lesson:'שיעור '+st.reviewScopeLesson, weak:'מושגים חלשים' }[st.reviewScope] || '',

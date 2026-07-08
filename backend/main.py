@@ -88,6 +88,32 @@ def init_db():
             updated_at    REAL,
             last_active   REAL
         );
+
+        -- Shared project gallery (class-wide feed). One row per post.
+        -- author_name / author_avatar are denormalised so a post keeps its
+        -- byline even if the user later changes their profile.
+        CREATE TABLE IF NOT EXISTS posts (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            author_id     INTEGER NOT NULL,
+            author_name   TEXT NOT NULL,
+            author_avatar TEXT DEFAULT '',
+            title         TEXT NOT NULL,
+            body          TEXT NOT NULL,
+            link          TEXT DEFAULT '',
+            kudos_json    TEXT DEFAULT '[]',          -- JSON array of user ids who gave 👏
+            created_at    REAL
+        );
+
+        CREATE TABLE IF NOT EXISTS post_comments (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            post_id       INTEGER NOT NULL,
+            author_id     INTEGER NOT NULL,
+            author_name   TEXT NOT NULL,
+            author_avatar TEXT DEFAULT '',
+            text          TEXT NOT NULL,
+            created_at    REAL
+        );
+        CREATE INDEX IF NOT EXISTS idx_comments_post ON post_comments(post_id);
         """
     )
     conn.commit()
@@ -236,6 +262,16 @@ class DataIn(BaseModel):
     achievements: Optional[list] = None
 
 
+class PostIn(BaseModel):
+    title: str
+    body: str
+    link: Optional[str] = ""
+
+
+class CommentIn(BaseModel):
+    text: str
+
+
 # ---------------------------------------------------------------------------
 # Auth endpoints
 # ---------------------------------------------------------------------------
@@ -334,6 +370,154 @@ def put_data(body: DataIn, request: Request):
     conn.commit()
     conn.close()
     return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
+# Project gallery (shared class-wide feed)
+# ---------------------------------------------------------------------------
+def _ms(t):
+    return int((t or 0) * 1000)
+
+
+def post_public(conn, row, viewer_id=None) -> dict:
+    kudos = json.loads(row["kudos_json"] or "[]")
+    crows = conn.execute(
+        "SELECT * FROM post_comments WHERE post_id=? ORDER BY created_at ASC", (row["id"],)
+    ).fetchall()
+    comments = [{
+        "id": str(c["id"]),
+        "authorId": c["author_id"],
+        "authorName": c["author_name"],
+        "authorAvatar": c["author_avatar"],
+        "text": c["text"],
+        "ts": _ms(c["created_at"]),
+    } for c in crows]
+    return {
+        "id": str(row["id"]),
+        "authorId": row["author_id"],
+        "authorName": row["author_name"],
+        "authorAvatar": row["author_avatar"],
+        "title": row["title"],
+        "body": row["body"],
+        "link": row["link"] or "",
+        "kudos": kudos,
+        "ts": _ms(row["created_at"]),
+        "comments": comments,
+    }
+
+
+@app.get("/api/gallery")
+def gallery_list(request: Request):
+    user = current_user(request)
+    conn = db()
+    rows = conn.execute("SELECT * FROM posts ORDER BY created_at DESC").fetchall()
+    out = [post_public(conn, r, user["id"]) for r in rows]
+    conn.close()
+    return {"posts": out}
+
+
+@app.post("/api/gallery")
+def gallery_create(body: PostIn, request: Request):
+    user = current_user(request)
+    title = (body.title or "").strip()
+    text = (body.body or "").strip()
+    if not title or not text:
+        raise HTTPException(400, "title and body required")
+    conn = db()
+    now = time.time()
+    cur = conn.execute(
+        """INSERT INTO posts (author_id, author_name, author_avatar, title, body, link,
+           kudos_json, created_at) VALUES (?,?,?,?,?,?, '[]', ?)""",
+        (user["id"], user["display_name"], user["avatar"] or "",
+         title[:200], text[:4000], (body.link or "").strip()[:600], now),
+    )
+    pid = cur.lastrowid
+    conn.commit()
+    row = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    out = post_public(conn, row, user["id"])
+    conn.close()
+    return out
+
+
+@app.delete("/api/gallery/{pid}")
+def gallery_delete(pid: int, request: Request):
+    user = current_user(request)
+    conn = db()
+    row = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    if row is None:
+        conn.close()
+        raise HTTPException(404, "not found")
+    if row["author_id"] != user["id"] and user["role"] != "admin":
+        conn.close()
+        raise HTTPException(403, "not allowed")
+    conn.execute("DELETE FROM post_comments WHERE post_id=?", (pid,))
+    conn.execute("DELETE FROM posts WHERE id=?", (pid,))
+    conn.commit()
+    conn.close()
+    return {"ok": True}
+
+
+@app.post("/api/gallery/{pid}/kudos")
+def gallery_kudos(pid: int, request: Request):
+    user = current_user(request)
+    conn = db()
+    row = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    if row is None:
+        conn.close()
+        raise HTTPException(404, "not found")
+    kudos = json.loads(row["kudos_json"] or "[]")
+    if user["id"] in kudos:
+        kudos = [k for k in kudos if k != user["id"]]
+    else:
+        kudos.append(user["id"])
+    conn.execute("UPDATE posts SET kudos_json=? WHERE id=?", (json.dumps(kudos), pid))
+    conn.commit()
+    row = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    out = post_public(conn, row, user["id"])
+    conn.close()
+    return out
+
+
+@app.post("/api/gallery/{pid}/comments")
+def gallery_comment(pid: int, body: CommentIn, request: Request):
+    user = current_user(request)
+    text = (body.text or "").strip()
+    if not text:
+        raise HTTPException(400, "empty comment")
+    conn = db()
+    row = conn.execute("SELECT id FROM posts WHERE id=?", (pid,)).fetchone()
+    if row is None:
+        conn.close()
+        raise HTTPException(404, "not found")
+    conn.execute(
+        """INSERT INTO post_comments (post_id, author_id, author_name, author_avatar, text, created_at)
+           VALUES (?,?,?,?,?,?)""",
+        (pid, user["id"], user["display_name"], user["avatar"] or "", text[:1000], time.time()),
+    )
+    conn.commit()
+    prow = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    out = post_public(conn, prow, user["id"])
+    conn.close()
+    return out
+
+
+@app.delete("/api/gallery/{pid}/comments/{cid}")
+def gallery_comment_delete(pid: int, cid: int, request: Request):
+    user = current_user(request)
+    conn = db()
+    crow = conn.execute("SELECT * FROM post_comments WHERE id=? AND post_id=?", (cid, pid)).fetchone()
+    if crow is None:
+        conn.close()
+        raise HTTPException(404, "not found")
+    if crow["author_id"] != user["id"] and user["role"] != "admin":
+        conn.close()
+        raise HTTPException(403, "not allowed")
+    conn.execute("DELETE FROM post_comments WHERE id=?", (cid,))
+    conn.commit()
+    prow = conn.execute("SELECT * FROM posts WHERE id=?", (pid,)).fetchone()
+    out = post_public(conn, prow, user["id"])
+    conn.close()
+    return out
 
 
 # ---------------------------------------------------------------------------
