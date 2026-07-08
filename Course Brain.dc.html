@@ -784,13 +784,17 @@
               <button onClick="{{ onShowAnswer }}" style="width:100%;margin-top:18px;font-family:inherit;font-weight:700;font-size:15px;padding:15px;border-radius:13px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">הצג תשובה</button>
             </sc-if>
             <sc-if value="{{ reviewShowAnswer }}" hint-placeholder-val="{{ false }}">
-              <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:18px;animation:cbup .25s ease">
-                <sc-for list="{{ ratings }}" as="rt" hint-placeholder-count="4">
-                  <button onClick="{{ rt.onRate }}" style="font-family:inherit;cursor:pointer;padding:13px 6px;border-radius:12px;border:1px solid {{ rt.bd }};background:{{ rt.bg }};color:{{ rt.color }};display:flex;flex-direction:column;gap:3px;align-items:center">
-                    <span style="font-weight:700;font-size:14px">{{ rt.label }}</span>
-                    <span style="font-size:10.5px;opacity:.7">{{ rt.next }}</span>
-                  </button>
-                </sc-for>
+              <div style="margin-top:18px;animation:cbup .25s ease">
+                <div style="font-size:13px;color:var(--tx2);text-align:center;margin-bottom:11px">עד כמה ידעת את התשובה?</div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+                  <sc-for list="{{ ratings }}" as="rt" hint-placeholder-count="4">
+                    <button onClick="{{ rt.onRate }}" style="font-family:inherit;cursor:pointer;padding:13px 6px;border-radius:12px;border:1px solid {{ rt.bd }};background:{{ rt.bg }};color:{{ rt.color }};display:flex;flex-direction:column;gap:4px;align-items:center">
+                      <span style="font-size:19px;line-height:1">{{ rt.emoji }}</span>
+                      <span style="font-weight:700;font-size:13px">{{ rt.label }}</span>
+                      <span style="font-size:10px;opacity:.7">{{ rt.next }}</span>
+                    </button>
+                  </sc-for>
+                </div>
               </div>
             </sc-if>
           </sc-if>
@@ -1708,10 +1712,10 @@ class Component extends DCLogic {
       ? {again:'#c24747', hard:'#a8781f', good:'#2b6fc0', easy:'#1f8f57'}
       : {again:'#f0a3a3', hard:'#e6b980', good:'#86bce6', easy:'#86d6a4'};
     const ratings = [
-      {key:'again', label:'קשה מאוד', next:'עכשיו', color:rc.again},
-      {key:'hard', label:'קשה', next:'בקרוב', color:rc.hard},
-      {key:'good', label:'טוב', next:'בעוד כמה ימים', color:rc.good},
-      {key:'easy', label:'קל', next:'עוד הרבה זמן', color:rc.easy},
+      {key:'again', emoji:'✗', label:'לא ידעתי', next:'חוזר עכשיו', color:rc.again},
+      {key:'hard', emoji:'…', label:'בקושי', next:'חוזר בקרוב', color:rc.hard},
+      {key:'good', emoji:'✓', label:'ידעתי', next:'בעוד כמה ימים', color:rc.good},
+      {key:'easy', emoji:'✓✓', label:'בקלות', next:'בעוד שבוע+', color:rc.easy},
     ].map(r => Object.assign({}, r, { bg:r.color + '1e', bd:r.color + '55', onRate:() => this.rateCard(r.key) }));
 
     const scopeCounts = {
