@@ -835,7 +835,9 @@
           </div>
           </sc-if>
 
+          <sc-if value="{{ hasReviewInsights }}" hint-placeholder-val="{{ false }}">
           <div style="display:grid;grid-template-columns:{{ dashCols }};gap:16px">
+            <sc-if value="{{ hasWeak }}" hint-placeholder-val="{{ false }}">
             <div style="background:var(--panel);border:1px solid var(--bd);border-radius:15px;padding:18px">
               <div style="font-size:14px;font-weight:700;margin-bottom:14px">המושגים החלשים ביותר שלי</div>
               <div style="display:flex;flex-direction:column;gap:11px">
@@ -850,6 +852,8 @@
                 </sc-for>
               </div>
             </div>
+            </sc-if>
+            <sc-if value="{{ hasStale }}" hint-placeholder-val="{{ false }}">
             <div style="background:var(--panel);border:1px solid var(--bd);border-radius:15px;padding:18px">
               <div style="font-size:14px;font-weight:700;margin-bottom:14px">לא חזרת עליהם 2+ שבועות</div>
               <div style="display:flex;flex-direction:column;gap:9px">
@@ -862,7 +866,9 @@
                 </sc-for>
               </div>
             </div>
+            </sc-if>
           </div>
+          </sc-if>
         </div>
         </sc-if>
 
@@ -1421,7 +1427,14 @@ class Component extends DCLogic {
       streak = (ud.lastDay === y) ? (streak+1) : 1;
       ud.lastDay = today; ud.streak = streak;
     }
-    const cards = (ud.cards && ud.cards.length) ? ud.cards.map(c=>Object.assign({},c)) : this.state.cards;
+    let cards;
+    if (ud.cardsV === 2 && ud.cards && ud.cards.length) {
+      cards = ud.cards.map(c=>Object.assign({},c));
+    } else {
+      // one-time migration: clear baked/legacy SRS scheduling so the quiz area starts clean
+      cards = this.state.cards.map(c=>Object.assign({},c,{ due:0, interval:0, reps:0, lapses:0 }));
+      ud.cardsV = 2;
+    }
     const pinned = Array.isArray(ud.pinned) ? ud.pinned : this.state.pinned;
     this.setState({
       user, userData: ud, cards, pinned, streak, booting:false,
@@ -1853,7 +1866,7 @@ class Component extends DCLogic {
       reviewedCount: st.reviewedCount,
       masteredCount: this.masteredCards().length,
       scopes, scopeSingle: true, lessonChips,
-      weakConcepts, staleLessons,
+      weakConcepts, staleLessons, hasWeak: weakConcepts.length>0, hasStale: staleLessons.length>0, hasReviewInsights: weakConcepts.length>0 || staleLessons.length>0,
     };
   }
 }
