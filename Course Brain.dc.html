@@ -206,6 +206,18 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
         </button>
 
+        <sc-if value="{{ showNotebookShortcut }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onOpenNotebook }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;margin-top:10px;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:13px">
+          <span style="width:40px;height:40px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"></path><path d="M8 3v18"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:15px;font-weight:700">המחברת שלי</span>
+            <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">כל ההערות שכתבת · פרטי לך</span>
+          </span>
+          <sc-if value="{{ notebookCount }}" hint-placeholder-val="{{ 0 }}"><span style="font-size:11.5px;font-weight:700;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:2px 9px">{{ notebookCount }}</span></sc-if>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+        </sc-if>
+
         <div style="margin-top:30px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px">
           <div>
             <h2 style="margin:0;font-size:19px;font-weight:800;letter-spacing:-.3px">גלריית הפרויקטים של הכיתה</h2>
@@ -623,7 +635,10 @@
         <div style="display:flex;flex-direction:column;gap:12px;margin:14px 0 30px">
           <sc-for list="{{ lesson.quotes }}" as="q" hint-placeholder-count="2">
             <div style="background:var(--panel);border-inline-start:3px solid var(--accent);border-radius:0 12px 12px 0;padding:15px 17px">
-              <div style="font-size:15px;line-height:1.6;font-weight:500;margin-bottom:8px">״{{ q.text }}״</div>
+              <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:8px">
+                <div style="flex:1;font-size:15px;line-height:1.6;font-weight:500">״{{ q.text }}״</div>
+                <button onClick="{{ q.onFav }}" aria-label="סמן ציטוט כמועדף" style="flex:none;background:none;border:none;cursor:pointer;font-size:18px;line-height:1;color:{{ q.favColor }};padding:0;margin-top:1px">{{ q.favIcon }}</button>
+              </div>
               <div style="display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--tx3);flex-wrap:wrap">
                 <span style="font-weight:700;color:var(--tx2)">{{ q.speaker }}</span>
                 <span style="font-family:ui-monospace,monospace;color:var(--newc)">{{ q.timestamp }}</span>
@@ -1416,6 +1431,7 @@ class Component extends DCLogic {
     insightCat: 'all',
     insightQuery: '',
     pinned: [],
+    favQuotes: [],
     chat: [],
     chatInput: '',
     thinking: false,
@@ -1585,6 +1601,12 @@ class Component extends DCLogic {
     if (i >= 0) p.splice(i, 1); else p.unshift(id);
     this.setState({ pinned: p }, () => this.persist());
   }
+  toggleFavQuote(id) {
+    const f = this.state.favQuotes.slice();
+    const i = f.indexOf(id);
+    if (i >= 0) f.splice(i, 1); else f.unshift(id);
+    this.setState({ favQuotes: f }, () => this.persist());
+  }
 
   dueCards() { return this.state.cards.filter(c => c.due <= 0); }
   masteredCards() { return this.state.cards.filter(c => c.interval >= 6 && c.lapses === 0); }
@@ -1599,7 +1621,7 @@ class Component extends DCLogic {
   startReview(scope, lessonNum) {
     const q = this.buildQueue(scope, lessonNum);
     if (!q.length) return;
-    this.setState({ view:'review', reviewActive:true, reviewScope:scope, reviewScopeLesson: lessonNum ?? this.state.reviewScopeLesson, queue:q, reviewIdx:0, showAnswer:false, reviewDone:false, reviewedCount:0, mcChosen:null }, () => this.buildMC());
+    this.setState({ view:'review', lessonNum:null, conceptMapOpen:false, reviewActive:true, reviewScope:scope, reviewScopeLesson: lessonNum ?? this.state.reviewScopeLesson, queue:q, reviewIdx:0, showAnswer:false, reviewDone:false, reviewedCount:0, mcChosen:null }, () => this.buildMC());
   }
   endReview() { this.setState({ reviewActive:false, reviewDone:false }); }
   showAnswer() { this.setState({ showAnswer: true }); }
@@ -1932,8 +1954,9 @@ class Component extends DCLogic {
       ud.cardsV = 2;
     }
     const pinned = Array.isArray(ud.pinned) ? ud.pinned : this.state.pinned;
+    const favQuotes = Array.isArray(ud.favQuotes) ? ud.favQuotes : this.state.favQuotes;
     this.setState({
-      user, userData: ud, cards, pinned, streak, booting:false,
+      user, userData: ud, cards, pinned, favQuotes, streak, booting:false,
       editName: user ? user.displayName : '',
       editAvatar: user ? (user.avatar || 'indigo') : 'indigo',
     }, () => { this.persist(); this.maybeShowTutorial(); });
@@ -1944,6 +1967,7 @@ class Component extends DCLogic {
     const ud = Object.assign({}, st.userData);
     ud.cards = st.cards;
     ud.pinned = st.pinned;
+    ud.favQuotes = st.favQuotes;
     const completion = this.computeCompletion();
     const reviews = ud.reviewsTotal || 0;
     const mastered = this.masteredLessons();
@@ -2238,7 +2262,7 @@ class Component extends DCLogic {
           statusColor:sm.c, statusBg:sm.bg, statusLabel:sm.label,
           chapters: l.chapters.map(ch => Object.assign({}, ch, this.srcFields(ch.source), { hasTime: ch.start != null, noTime: ch.start == null })),
           concepts: l.concepts.map(c => Object.assign({}, c, this.srcFields(c.source))),
-          quotes: l.quotes.map(q => Object.assign({}, q, this.srcFields(q.source))),
+          quotes: l.quotes.map((q, qi) => { const qid = 'q' + l.num + '_' + qi; const fav = st.favQuotes.indexOf(qid) >= 0; return Object.assign({}, q, this.srcFields(q.source), { qid, isFav: fav, favIcon: fav ? '★' : '☆', favColor: fav ? 'var(--review)' : 'var(--tx3)', onFav: () => this.toggleFavQuote(qid) }); }),
           cardCount: this.state.cards.filter(c => c.lesson === l.num).length,
           conceptCount: l.concepts.length,
           quoteCount: l.quotes.length,
@@ -2440,6 +2464,7 @@ class Component extends DCLogic {
       onOpenProfile:() => this.openProfile(),
       isNotebook: nbActive,
       onOpenNotebook:() => this.setState({ view:'notebook', lessonNum:null, conceptMapOpen:false }),
+      showNotebookShortcut: isMobile,
       onBackLibraryFromNb:() => this.setView('library'),
       noteQuery: st.noteQuery,
       onNoteQuery:(e) => this.setState({ noteQuery: e.target.value }),
