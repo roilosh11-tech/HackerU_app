@@ -1744,21 +1744,21 @@ class Component extends DCLogic {
   // Direct browser → Google Gemini call using the STUDENT'S OWN free key (never leaves their device).
   // A key is free from Google AI Studio (aistudio.google.com/apikey) with a generous free tier.
   async callGemini(key, opts) {
-    const model = opts.geminiModel || 'gemini-2.5-flash';
+    // 'gemini-flash-latest' is a stable ALIAS that Google hot-swaps to the current GA Flash
+    // model, so it won't 404 when a specific dated version is retired.
+    const model = opts.geminiModel || 'gemini-flash-latest';
     const contents = (opts.messages || []).map(m => ({
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: String(m.content || '') }],
     }));
-    // gemini-2.5-flash reasons ("thinking") before answering and, left unbounded, can spend the
-    // whole output budget on hidden thinking and return NO text. Disable thinking and give real
-    // headroom so we reliably get JSON back.
+    // Generous output budget: newer Flash models "think" before answering and can otherwise
+    // spend the whole budget on hidden reasoning and return NO text.
     const body = {
       contents,
       generationConfig: {
-        maxOutputTokens: Math.max(opts.max_tokens || 2000, 4096),
+        maxOutputTokens: Math.max(opts.max_tokens || 2000, 8192),
         temperature: 0.7,
         responseMimeType: 'application/json',
-        thinkingConfig: { thinkingBudget: 0 },
       },
     };
     if (opts.system) body.systemInstruction = { parts: [{ text: opts.system }] };
