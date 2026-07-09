@@ -851,39 +851,64 @@
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
               <div>
                 <div style="font-size:13px;font-weight:700;color:var(--master);margin-bottom:3px">✓ מפתח אישי מחובר</div>
-                <div style="font-size:12px;color:var(--tx3);line-height:1.5">הצ׳אט מחויב לחשבון ה-Anthropic שלך. המפתח שמור רק במכשיר הזה.</div>
+                <div style="font-size:12px;color:var(--tx3);line-height:1.5">הצ׳אט פועל דרך חשבון ה-{{ connectedProviderLabel }} שלך. המפתח שמור רק במכשיר הזה.</div>
               </div>
               <button onClick="{{ onClearKey }}" style="flex:none;font-family:inherit;font-weight:600;font-size:12.5px;padding:8px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2)">הסר מפתח</button>
             </div>
           </sc-if>
           <sc-if value="{{ keyMissing }}" hint-placeholder-val="{{ true }}">
-            <div style="font-size:13.5px;font-weight:700;margin-bottom:8px">הצ׳אט דורש מפתח Anthropic אישי</div>
+            <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">הפעלת הצ׳אט — בחרו ספק AI</div>
+            <div style="font-size:12px;color:var(--tx3);line-height:1.55;margin-bottom:11px">שאר האפליקציה חינמית לחלוטין. הצ׳אט מפעיל מודל AI ישירות מהדפדפן שלכם, ולכן דורש מפתח API אישי. הכי פשוט וחינמי — <b style="color:var(--tx2)">Google AI Studio (Gemini)</b>.</div>
 
-            <div style="background:rgba(238,195,138,.1);border:1px solid rgba(238,195,138,.35);border-radius:11px;padding:11px 13px;margin-bottom:13px">
-              <div style="display:flex;gap:8px;align-items:flex-start">
-                <span style="flex:none;color:var(--review);margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></span>
-                <div style="font-size:12px;line-height:1.65;color:var(--tx2)">שאר האפליקציה חינמית לחלוטין. <b style="color:var(--tx)">הצ׳אט (AI) הוא היחיד שדורש מפתח API אישי משלך</b> — כי הוא מפעיל את Claude ישירות. השימוש מחויב לחשבון ה-Anthropic שלך, והעלות באחריותך המלאה. אין חובה להשתמש בצ׳אט; אפשר ללמוד מכל שאר האפליקציה בלעדיו.</div>
-              </div>
+            <div style="display:flex;gap:6px;background:var(--panel);border:1px solid var(--bd);border-radius:11px;padding:4px;margin-bottom:14px">
+              <button onClick="{{ onPickGemini }}" style="flex:1;font-family:inherit;font-weight:700;font-size:12.5px;padding:8px 6px;border-radius:8px;cursor:pointer;border:none;background:{{ geminiTabBg }};color:{{ geminiTabColor }};display:flex;align-items:center;justify-content:center;gap:6px">Google Gemini <span style="font-size:10px;font-weight:800;background:var(--master);color:#04140c;padding:1px 6px;border-radius:20px">חינם</span></button>
+              <button onClick="{{ onPickAnthropic }}" style="flex:1;font-family:inherit;font-weight:700;font-size:12.5px;padding:8px 6px;border-radius:8px;cursor:pointer;border:none;background:{{ anthropicTabBg }};color:{{ anthropicTabColor }}">Anthropic (Claude)</button>
             </div>
 
-            <div style="font-size:12px;color:var(--tx3);line-height:1.5;margin-bottom:9px">המפתח נשמר <b style="color:var(--tx2)">רק במכשיר הזה</b> (בדפדפן שלך) ולא נשלח לשרת של הקורס. איך משיגים אותו:</div>
-            <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:13px">
-              <div style="display:flex;gap:10px;align-items:flex-start">
-                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</span>
-                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">היכנסו ל-<a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">console.anthropic.com</a> והתחברו או הירשמו (חשבון חדש בחינם).</div>
+            <sc-if value="{{ isGemini }}" hint-placeholder-val="{{ true }}">
+              <div style="background:rgba(122,196,148,.12);border:1px solid rgba(122,196,148,.4);border-radius:11px;padding:11px 13px;margin-bottom:13px">
+                <div style="display:flex;gap:8px;align-items:flex-start">
+                  <span style="flex:none;color:var(--master);margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                  <div style="font-size:12px;line-height:1.65;color:var(--tx2)"><b style="color:var(--tx)">מפתח חינמי לגמרי</b> — ל-Google AI Studio יש שכבת שימוש חינם נדיבה (ללא כרטיס אשראי). מספיק בהחלט לשאלות על הקורס. המפתח נשמר <b style="color:var(--tx2)">רק במכשיר הזה</b> ולא נשלח לשרת הקורס.</div>
+                </div>
               </div>
-              <div style="display:flex;gap:10px;align-items:flex-start">
-                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</span>
-                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<b style="color:var(--tx)">Billing</b> הוסיפו אמצעי תשלום וטענו קרדיט (אפשר סכום קטן, למשל 5$). בלי זה המפתח לא יעבוד.</div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:13px">
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</span>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">היכנסו ל-<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">aistudio.google.com/apikey</a> והתחברו עם חשבון Google רגיל.</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</span>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">לחצו <b style="color:var(--tx)">Create API key</b>, העתיקו את המפתח (מתחיל ב-<span dir="ltr" style="font-family:monospace">AIza</span>) והדביקו כאן.</div>
+                </div>
               </div>
-              <div style="display:flex;gap:10px;align-items:flex-start">
-                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">3</span>
-                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">API Keys</a> → <b style="color:var(--tx)">Create Key</b>, העתיקו את המפתח (מתחיל ב-<span dir="ltr" style="font-family:monospace">sk-ant-</span>) והדביקו כאן.</div>
+            </sc-if>
+
+            <sc-if value="{{ isAnthropic }}" hint-placeholder-val="{{ false }}">
+              <div style="background:rgba(238,195,138,.1);border:1px solid rgba(238,195,138,.35);border-radius:11px;padding:11px 13px;margin-bottom:13px">
+                <div style="display:flex;gap:8px;align-items:flex-start">
+                  <span style="flex:none;color:var(--review);margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></span>
+                  <div style="font-size:12px;line-height:1.65;color:var(--tx2)">Claude נותן תשובות מצוינות אך <b style="color:var(--tx)">בתשלום</b> — השימוש מחויב לחשבון ה-Anthropic שלך והעלות באחריותך. המפתח נשמר רק במכשיר הזה.</div>
+                </div>
               </div>
-            </div>
+              <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:13px">
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</span>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">היכנסו ל-<a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">console.anthropic.com</a> והתחברו או הירשמו.</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</span>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<b style="color:var(--tx)">Billing</b> הוסיפו אמצעי תשלום וטענו קרדיט (אפשר סכום קטן, למשל 5$). בלי זה המפתח לא יעבוד.</div>
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">3</span>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">API Keys</a> → <b style="color:var(--tx)">Create Key</b>, העתיקו את המפתח (מתחיל ב-<span dir="ltr" style="font-family:monospace">sk-ant-</span>) והדביקו כאן.</div>
+                </div>
+              </div>
+            </sc-if>
 
             <div style="display:flex;gap:8px;align-items:center">
-              <input value="{{ keyInput }}" onInput="{{ onKeyInput }}" onKeyDown="{{ onKeyKeydown }}" type="password" placeholder="sk-ant-..." dir="ltr" style="flex:1;min-width:0;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--panel);color:var(--tx);outline:none;text-align:start" />
+              <input value="{{ keyInput }}" onInput="{{ onKeyInput }}" onKeyDown="{{ onKeyKeydown }}" type="password" placeholder="{{ keyPlaceholder }}" dir="ltr" style="flex:1;min-width:0;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--panel);color:var(--tx);outline:none;text-align:start" />
               <button onClick="{{ onSaveKey }}" style="flex:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">שמור</button>
             </div>
             <sc-if value="{{ keyError }}" hint-placeholder-val="{{ false }}">
@@ -1413,6 +1438,8 @@ class Component extends DCLogic {
     theme: 'light',
     donateOpen: false,
     apiKey: '',
+    geminiKey: '',
+    provider: 'gemini', // 'gemini' (free via Google AI Studio) | 'anthropic'
     keyInput: '',
     keyError: '',
     keyPanelOpen: null, // null = follow default (open while no key), true/false = user override
@@ -1706,9 +1733,36 @@ class Component extends DCLogic {
   // Is an LLM reachable at all? Live-preview bridge, OR the student's own key, OR a server key.
   llmAvailable() {
     if (window.claude && window.claude.complete) return true;
+    if (this.state.geminiKey) return true;
     if (this.state.apiKey) return true;
     if (this.serverChat()) return true;
     return false;
+  }
+  // Direct browser → Google Gemini call using the STUDENT'S OWN free key (never leaves their device).
+  // A key is free from Google AI Studio (aistudio.google.com/apikey) with a generous free tier.
+  async callGemini(key, opts) {
+    const model = opts.geminiModel || 'gemini-2.5-flash';
+    const contents = (opts.messages || []).map(m => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: String(m.content || '') }],
+    }));
+    const body = {
+      contents,
+      generationConfig: { maxOutputTokens: opts.max_tokens || 2000, temperature: 0.7, responseMimeType: 'application/json' },
+    };
+    if (opts.system) body.system_instruction = { parts: [{ text: opts.system }] };
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      let d = ''; try { d = (await res.json()).error?.message || ''; } catch (e) {}
+      const err = new Error('gemini ' + res.status + (d ? ': ' + d : '')); err.status = res.status; throw err;
+    }
+    const data = await res.json();
+    const cand = (data.candidates || [])[0];
+    return ((cand && cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
   }
   // Direct browser → Anthropic call using the STUDENT'S OWN key (never leaves their device).
   async callAnthropic(key, opts) {
@@ -1737,6 +1791,7 @@ class Component extends DCLogic {
   // Single completion entry point. Order: live-preview bridge → student's own key → server key.
   async llmComplete(opts) {
     if (window.claude && window.claude.complete) return await window.claude.complete(opts);
+    if (this.state.geminiKey) return await this.callGemini(this.state.geminiKey, opts);
     if (this.state.apiKey) return await this.callAnthropic(this.state.apiKey, opts);
     if (window.CourseAPI && window.CourseAPI.chat) {
       const r = await window.CourseAPI.chat({ system: opts.system, messages: opts.messages, max_tokens: opts.max_tokens, model: opts.model });
@@ -1744,15 +1799,33 @@ class Component extends DCLogic {
     }
     return null;
   }
-  loadApiKey() { try { const k = localStorage.getItem('cb_anthropic_key'); if (k) this.setState({ apiKey: k }); } catch (e) {} }
+  loadApiKey() {
+    try {
+      const g = localStorage.getItem('cb_gemini_key');
+      const k = localStorage.getItem('cb_anthropic_key');
+      const patch = {};
+      if (g) { patch.geminiKey = g; patch.provider = 'gemini'; }
+      if (k) { patch.apiKey = k; if (!g) patch.provider = 'anthropic'; }
+      if (Object.keys(patch).length) this.setState(patch);
+    } catch (e) {}
+  }
   saveApiKey() {
     const k = (this.state.keyInput || '').trim();
     if (!k) return;
+    if (this.state.provider === 'gemini') {
+      if (k.indexOf('AIza') !== 0) { this.setState({ keyError: 'מפתח לא תקין — מפתח Google AI Studio אמור להתחיל ב-AIza' }); return; }
+      try { localStorage.setItem('cb_gemini_key', k); } catch (e) {}
+      this.setState({ geminiKey: k, keyInput: '', keyError: '', keyPanelOpen: false });
+      return;
+    }
     if (k.indexOf('sk-ant-') !== 0) { this.setState({ keyError: 'מפתח לא תקין — הוא אמור להתחיל ב-sk-ant-' }); return; }
     try { localStorage.setItem('cb_anthropic_key', k); } catch (e) {}
     this.setState({ apiKey: k, keyInput: '', keyError: '', keyPanelOpen: false });
   }
-  clearApiKey() { try { localStorage.removeItem('cb_anthropic_key'); } catch (e) {} this.setState({ apiKey: '', keyInput: '', keyError: '', keyPanelOpen: null }); }
+  clearApiKey() {
+    try { localStorage.removeItem('cb_gemini_key'); localStorage.removeItem('cb_anthropic_key'); } catch (e) {}
+    this.setState({ apiKey: '', geminiKey: '', keyInput: '', keyError: '', keyPanelOpen: null });
+  }
 
   async genDistractors(card, shuffle) {
     const baked = this.bakedDistractors(card);
@@ -1853,7 +1926,7 @@ class Component extends DCLogic {
     this.setState({ chat, chatInput:'', thinking:true, thinkingSources:['תמלולי השיעורים','המצגות (PDF)','התובנות של רילי','הסיכומים והכרטיסיות'] });
 
     if (!this.llmAvailable()) {
-      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'כדי להשתמש בצ׳אט הוסיפו למעלה מפתח Anthropic API אישי — הוא נשמר רק במכשיר שלכם. בינתיים אפשר לעיין בשיעורים, בסיכומים ובתובנות של רילי.', citations:[] }]) });
+      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'כדי להשתמש בצ׳אט הוסיפו למעלה מפתח API אישי — הכי פשוט מפתח חינמי של Google AI Studio (Gemini). הוא נשמר רק במכשיר שלכם. בינתיים אפשר לעיין בשיעורים, בסיכומים ובתובנות של רילי.', citations:[] }]) });
       return;
     }
 
@@ -2352,6 +2425,7 @@ class Component extends DCLogic {
     }).filter(r => r.count > 1);
 
     // --- ask view ---
+    const hasKey = !!(st.apiKey || st.geminiKey);
     const chat = st.chat.map(m => ({
       isUser: m.role === 'user', isBot: m.role === 'bot', text:m.text,
       hasCitations: !!(m.citations && m.citations.length),
@@ -2567,16 +2641,28 @@ class Component extends DCLogic {
       insightQuery: st.insightQuery, onInsightQuery:(e) => this.setState({ insightQuery: e.target.value }),
 
       isAsk: st.view === 'ask',
-      needKey: !(window.claude && window.claude.complete) && !this.serverChat() && !st.apiKey,
+      needKey: !(window.claude && window.claude.complete) && !this.serverChat() && !st.apiKey && !st.geminiKey,
       // Panel is expanded by default whenever the student has no personal key (and the
       // teacher isn't funding it), until they add a key or explicitly collapse it.
-      showKeyPanel: (st.keyPanelOpen == null) ? (!st.apiKey && !this.serverChat()) : st.keyPanelOpen,
-      keyConnected: !!st.apiKey,
-      keyMissing: !st.apiKey,
-      keyBtnLabel: st.apiKey ? 'מפתח מחובר' : 'מפתח API',
-      keyBtnColor: st.apiKey ? 'var(--master)' : 'var(--tx2)',
+      showKeyPanel: (st.keyPanelOpen == null) ? (!hasKey && !this.serverChat()) : st.keyPanelOpen,
+      keyConnected: hasKey,
+      keyMissing: !hasKey,
+      connectedProviderLabel: st.geminiKey ? 'Google Gemini' : 'Anthropic',
+      keyBtnLabel: hasKey ? 'מפתח מחובר' : 'מפתח API',
+      keyBtnColor: hasKey ? 'var(--master)' : 'var(--tx2)',
       keyInput: st.keyInput, keyError: st.keyError,
-      onToggleKeyPanel: () => { const cur = (st.keyPanelOpen == null) ? (!st.apiKey && !this.serverChat()) : st.keyPanelOpen; this.setState({ keyPanelOpen: !cur, keyError: '' }); },
+      // provider switcher (free Gemini vs. Anthropic)
+      provider: st.provider,
+      isGemini: st.provider === 'gemini',
+      isAnthropic: st.provider === 'anthropic',
+      onPickGemini: () => this.setState({ provider: 'gemini', keyError: '', keyInput: '' }),
+      onPickAnthropic: () => this.setState({ provider: 'anthropic', keyError: '', keyInput: '' }),
+      keyPlaceholder: st.provider === 'gemini' ? 'AIza...' : 'sk-ant-...',
+      geminiTabBg: st.provider === 'gemini' ? 'var(--accent)' : 'transparent',
+      geminiTabColor: st.provider === 'gemini' ? 'var(--onaccent)' : 'var(--tx2)',
+      anthropicTabBg: st.provider === 'anthropic' ? 'var(--accent)' : 'transparent',
+      anthropicTabColor: st.provider === 'anthropic' ? 'var(--onaccent)' : 'var(--tx2)',
+      onToggleKeyPanel: () => { const cur = (st.keyPanelOpen == null) ? (!hasKey && !this.serverChat()) : st.keyPanelOpen; this.setState({ keyPanelOpen: !cur, keyError: '' }); },
       onKeyInput: (e) => this.setState({ keyInput: e.target.value, keyError: '' }),
       onKeyKeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.saveApiKey(); } },
       onSaveKey: () => this.saveApiKey(),
