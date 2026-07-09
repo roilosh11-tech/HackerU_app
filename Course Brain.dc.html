@@ -1757,7 +1757,7 @@ class Component extends DCLogic {
     const body = {
       contents,
       generationConfig: {
-        maxOutputTokens: Math.max(opts.max_tokens || 2000, 4096),
+        maxOutputTokens: Math.max(opts.max_tokens || 2000, 8192),
         temperature: 0.7,
         responseMimeType: 'application/json',
         thinkingConfig: { thinkingBudget: 0 },
@@ -1993,6 +1993,41 @@ class Component extends DCLogic {
     return o.join('\n');
   }
 
+  // Strip leftover Markdown the model sometimes emits despite instructions, so plain-text
+  // rendering (white-space:pre-line) stays clean.
+  cleanText(s) {
+    return String(s || '')
+      .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
+      .replace(/(^|\s)\*(?!\s)(.+?)\*/g, '$1$2') // *italic*
+      .replace(/^#{1,6}\s*/gm, '')       // ## headings
+      .replace(/`{1,3}/g, '')            // `code`
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  }
+  // Parse the model's JSON answer robustly — tolerant of code fences AND of a response that was
+  // cut off mid-string (truncated JSON), in which case we salvage the answer text via regex.
+  parseAnswer(raw) {
+    let s = String(raw || '').trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+    try {
+      const p = JSON.parse(s);
+      if (p && p.answer) return { answer: this.cleanText(p.answer), citations: Array.isArray(p.citations) ? p.citations : [] };
+    } catch (e) {}
+    // salvage: pull the "answer" string value even if the JSON is incomplete/invalid
+    const m = s.match(/"answer"\s*:\s*"((?:\\.|[^"\\])*)/);
+    if (m) {
+      let a = m[1];
+      try { a = JSON.parse('"' + a.replace(/"/g, '\\"') + '"'); }
+      catch (e) { a = a.replace(/\\n/g, '\n').replace(/\\"/g, '"').replace(/\\t/g, ' ').replace(/\\\\/g, '\\'); }
+      // salvage citations if present and well-formed
+      let cites = [];
+      const cm = s.match(/"citations"\s*:\s*(\[[\s\S]*?\])/);
+      if (cm) { try { cites = JSON.parse(cm[1]); } catch (e) {} }
+      return { answer: this.cleanText(a), citations: cites };
+    }
+    // no JSON structure at all — treat the whole thing as prose
+    return { answer: this.cleanText(s), citations: [] };
+  }
+
   async ask(qtext) {
     const t = (qtext || '').trim();
     if (!t || this.state.thinking) return;
@@ -2009,7 +2044,7 @@ class Component extends DCLogic {
     const prevUser = prior.filter(mm => mm.role === 'user').slice(-1).map(mm => mm.text).join(' ');
     const retrievalQuery = (t + ' ' + prevUser).trim();
 
-    const system = 'אתה עוזר הלימוד של הקורס "AI Solutions Architect" של רילי לבבי (HackerU). ענה אך ורק על סמך חומרי הקורס המצורפים למטה — התמלולים, המצגות, התובנות של רילי, הסיכומים והכרטיסיות. אל תמציא מידע שאינו בחומרים; אם התשובה לא נמצאת בהם, אמור זאת בכנות והצע במה כן אפשר לעזור. ענה בעברית, בטון של מורה טוב: ברור, ממוקד וללא סרבול. שמור מונחים טכניים באנגלית (RAG, LLM, PRD, Vibe Coding, API, MoSCoW, PERT וכו׳). כשרלוונטי, שלב את "הקול" של רילי ואת העקרונות החוזרים שלה.\n\nהחזר אך ורק JSON תקין, ללא טקסט נוסף וללא code fences, במבנה: {"answer":"<תשובה בעברית, מותר מעברי שורה>","citations":[{"lesson":<מספר שיעור>,"ts":"<חותמת זמן כמו 01:20:15, או \'מהמצגת\' / \'סיכום\' / \'תובנה\' כשאין זמן מדויק>"}]}. צטט 1–4 מקורות רלוונטיים שעליהם התבססת; אם אין מקור מדויק החזר citations ריק.\n\n=== חומרי הקורס ===\n' + this.courseContext(retrievalQuery);
+    const system = 'אתה עוזר הלימוד של הקורס "AI Solutions Architect" של רילי לבבי (HackerU). ענה אך ורק על סמך חומרי הקורס המצורפים למטה — התמלולים, המצגות, התובנות של רילי, הסיכומים והכרטיסיות. אל תמציא מידע שאינו בחומרים; אם התשובה לא נמצאת בהם, אמור זאת בכנות והצע במה כן אפשר לעזור. ענה בעברית, בטון של מורה טוב: ברור, ממוקד וללא סרבול. שמור מונחים טכניים באנגלית (RAG, LLM, PRD, Vibe Coding, API, MoSCoW, PERT וכו׳). כשרלוונטי, שלב את "הקול" של רילי ואת העקרונות החוזרים שלה.\n\nחשוב לגבי השדה answer: כתוב טקסט רגיל וקריא בלבד — ללא סימוני Markdown כלל (בלי ** להדגשה, בלי ## לכותרות, בלי גרשיים הפוכים לקוד). לרשימות השתמש בשורה נפרדת לכל פריט שמתחילה במספר ונקודה (למשל "1. ") או במקף, עם מעבר שורה ממשי בין הפריטים.\n\nהחזר אך ורק JSON תקין, ללא טקסט נוסף וללא code fences, במבנה: {"answer":"<תשובה בעברית, מותר מעברי שורה>","citations":[{"lesson":<מספר שיעור>,"ts":"<חותמת זמן כמו 01:20:15, או \'מהמצגת\' / \'סיכום\' / \'תובנה\' כשאין זמן מדויק>"}]}. צטט 1–4 מקורות רלוונטיים שעליהם התבססת; אם אין מקור מדויק החזר citations ריק.\n\n=== חומרי הקורס ===\n' + this.courseContext(retrievalQuery);
 
     const history = prior.filter(m => m.role === 'user' || m.role === 'bot')
       .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
@@ -2021,14 +2056,13 @@ class Component extends DCLogic {
         system,
         messages: history.concat([{ role:'user', content: t }]),
       });
-      let parsed = null;
-      try { parsed = JSON.parse(String(raw).replace(/^```(?:json)?/i, '').replace(/```$/, '').trim()); } catch (e) {}
+      const { answer, citations } = this.parseAnswer(raw);
       let bot;
-      if (parsed && parsed.answer) {
-        const cites = Array.isArray(parsed.citations) ? parsed.citations.filter(c => c && c.lesson).map(c => ({ lesson: Number(c.lesson), ts: String(c.ts || '') })) : [];
-        bot = { role:'bot', text: String(parsed.answer), citations: cites };
+      if (answer) {
+        const cites = citations.filter(c => c && c.lesson).map(c => ({ lesson: Number(c.lesson), ts: String(c.ts || '') }));
+        bot = { role:'bot', text: answer, citations: cites };
       } else {
-        bot = { role:'bot', text: String(raw || '').trim() || 'לא הצלחתי לנסח תשובה — נסה לנסח את השאלה מעט אחרת.', citations: [] };
+        bot = { role:'bot', text: 'לא הצלחתי לנסח תשובה — נסה לנסח את השאלה מעט אחרת.', citations: [] };
       }
       this.setState({ thinking:false, chat: chat.concat([bot]) });
     } catch (err) {
