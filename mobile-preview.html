@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>מוח הקורס — Mobile</title>
+<script>
+  // Preview identity: force a regular (non-admin) student so the demo matches a normal user.
+  try {
+    var K = 'cb_local_user';
+    var u = {};
+    try { u = JSON.parse(localStorage.getItem(K)) || {}; } catch (e) {}
+    u.role = 'student';
+    u.status = 'approved';
+    if (!u.displayName) u.displayName = 'רועי';
+    if (!u.username) u.username = 'roi';
+    if (u.id == null) u.id = 101;
+    if (!u.avatar) u.avatar = 'spark';
+    localStorage.setItem(K, JSON.stringify(u));
+  } catch (e) {}
+</script>
+<style>
+  html,body{margin:0;min-height:100%;background:#0e0f13;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:44px 0}
+
+  /* light, thin iPhone frame */
+  .device{
+    position:relative;
+    width:400px;height:840px;
+    border-radius:58px;
+    background:linear-gradient(150deg,#3a3d44 0%,#141519 45%,#2a2d33 72%,#0d0e12 100%);
+    padding:5px;box-sizing:border-box;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.5),
+      0 30px 70px -18px rgba(0,0,0,.7),
+      inset 0 0 2px 1px rgba(255,255,255,.12);
+  }
+  .bezel{
+    position:relative;width:100%;height:100%;
+    background:#000;border-radius:53px;
+    padding:2px;box-sizing:border-box;
+  }
+  .screen{
+    position:relative;width:100%;height:100%;
+    border-radius:51px;overflow:hidden;background:#ffffff;
+  }
+
+  /* faux iOS status bar — glyph + strip colour follow the app theme (via postMessage) */
+  .statusbar{
+    position:absolute;top:0;left:0;right:0;height:52px;z-index:6;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 30px;box-sizing:border-box;color:#1c1c1e;background:#ffffff;
+    font-size:16px;font-weight:600;letter-spacing:.2px;
+    pointer-events:none;transition:background .25s ease,color .25s ease;
+  }
+  .statusbar.dark{color:#fff;background:#252d39}
+  .statusbar .time{margin-top:6px;font-variant-numeric:tabular-nums}
+  .statusbar .glyphs{margin-top:6px;display:flex;align-items:center;gap:7px}
+
+  /* Dynamic Island */
+  .island{
+    position:absolute;top:13px;left:50%;transform:translateX(-50%);
+    width:126px;height:36px;background:#000;border-radius:20px;z-index:7;
+  }
+
+  iframe{
+    position:absolute;top:52px;left:0;width:100%;height:calc(100% - 52px);
+    border:0;display:block;
+  }
+
+  /* side buttons */
+  .btn{position:absolute;background:linear-gradient(90deg,#1a1c20,#3c3f46);border-radius:3px;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+  .b-silent{left:-2px;top:148px;width:3px;height:28px}
+  .b-vup{left:-2px;top:204px;width:3px;height:54px}
+  .b-vdown{left:-2px;top:272px;width:3px;height:54px}
+  .b-power{right:-2px;top:224px;width:3px;height:84px}
+</style>
+</head>
+<body>
+  <div class="device">
+    <span class="btn b-silent"></span>
+    <span class="btn b-vup"></span>
+    <span class="btn b-vdown"></span>
+    <span class="btn b-power"></span>
+    <div class="bezel">
+      <div class="screen">
+        <div class="island"></div>
+        <div class="statusbar">
+          <span class="time">9:41</span>
+          <span class="glyphs">
+            <!-- signal -->
+            <svg width="19" height="13" viewBox="0 0 19 13" fill="currentColor"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="8" rx="1"/><rect x="10" y="2.5" width="3" height="10.5" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/></svg>
+            <!-- wifi -->
+            <svg width="18" height="13" viewBox="0 0 18 13" fill="none"><path d="M9 12.2l2.1-2.6a3 3 0 0 0-4.2 0L9 12.2z" fill="currentColor"/><path d="M4 6.7a7.2 7.2 0 0 1 10 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M1.5 3.9a11 11 0 0 1 15 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            <!-- battery -->
+            <svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x="0.5" y="0.5" width="22" height="12" rx="3.5" stroke="currentColor" stroke-opacity=".5"/><rect x="2" y="2" width="17" height="9" rx="2" fill="currentColor"/><rect x="24" y="4" width="2" height="5" rx="1" fill="currentColor" fill-opacity=".5"/></svg>
+          </span>
+        </div>
+        <iframe src="Course Brain.dc.html" title="מוח הקורס"></iframe>
+      </div>
+    </div>
+  </div>
+  <script>
+    // The app posts its theme; mirror it on the faux status bar.
+    window.addEventListener('message', function (e) {
+      var d = e.data;
+      if (d && d.type === 'cb-theme') {
+        var sb = document.querySelector('.statusbar');
+        if (sb) sb.classList.toggle('dark', d.theme !== 'light');
+      }
+    });
+  </script>
+</body>
+</html>

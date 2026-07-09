@@ -22,6 +22,8 @@ import sqlite3
 import hashlib
 import secrets
 import datetime as dt
+import urllib.request
+import urllib.error
 from typing import Optional
 
 import jwt
@@ -55,6 +57,12 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")  # if empty, admin isn't a
 
 # Whether brand-new registrations are allowed at all (signup_open = "requires approval").
 ALLOW_SIGNUP = os.environ.get("ALLOW_SIGNUP", "1") != "0"
+
+# Anthropic (for the "שאל את הקורס" chat). Set ANTHROPIC_API_KEY in the deploy env to
+# enable the chat in production. If empty, /api/chat returns 503 and the app shows a
+# graceful "chat unavailable" message.
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
 
 # ---------------------------------------------------------------------------
@@ -270,6 +278,13 @@ class PostIn(BaseModel):
 
 class CommentIn(BaseModel):
     text: str
+
+
+class ChatIn(BaseModel):
+    messages: list
+    system: Optional[str] = ""
+    max_tokens: Optional[int] = 2000
+    model: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -573,7 +588,67 @@ def admin_delete(uid: int, request: Request):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "signupOpen": ALLOW_SIGNUP}
+    return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY)}
+
+
+# ---------------------------------------------------------------------------
+# LLM chat proxy (שאל את הקורס)
+# ---------------------------------------------------------------------------
+# The front-end sends {system, messages, max_tokens}. We forward to Anthropic with
+# the server-side key and return {text}. Auth-gated so only approved students can use it.
+@app.post("/api/chat")
+def chat(body: ChatIn, request: Request):
+    current_user(request)  # must be logged in + approved
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(503, "chat not configured")
+
+    # Whitelist message shape: [{role: 'user'|'assistant', content: str}, ...]
+    msgs = []
+    for m in (body.messages or []):
+        if not isinstance(m, dict):
+            continue
+        role = m.get("role")
+        content = m.get("content")
+        if role in ("user", "assistant") and isinstance(content, str) and content.strip():
+            msgs.append({"role": role, "content": content})
+    if not msgs:
+        raise HTTPException(400, "no messages")
+
+    payload = {
+        "model": body.model or ANTHROPIC_MODEL,
+        "max_tokens": max(64, min(int(body.max_tokens or 2000), 4096)),
+        "messages": msgs,
+    }
+    if body.system:
+        payload["system"] = body.system
+
+    req_obj = urllib.request.Request(
+        "https://api.anthropic.com/v1/messages",
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "content-type": "application/json",
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req_obj, timeout=90) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        detail = ""
+        try:
+            detail = e.read().decode("utf-8")[:300]
+        except Exception:
+            pass
+        raise HTTPException(502, "llm error: " + str(e.code) + " " + detail)
+    except Exception as e:
+        raise HTTPException(502, "llm unreachable")
+
+    text = "".join(
+        b.get("text", "") for b in data.get("content", []) if b.get("type") == "text"
+    )
+    return {"text": text}
 
 
 # ---------------------------------------------------------------------------

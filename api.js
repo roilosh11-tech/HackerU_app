@@ -94,6 +94,7 @@
       if (res.ok && payload && payload.ok === true) {
         API.mode = "online";
         if (typeof payload.signupOpen === "boolean") API.signupOpen = payload.signupOpen;
+        API.chatServer = payload.chat === true;
       } else {
         API.mode = "offline";
       }
@@ -122,6 +123,7 @@
   API.isLoggedIn = function () { return !!API.user; };
   API.isAdmin = function () { return !!API.user && API.user.role === "admin"; };
   API.signupOpen = true;
+  API.chatServer = false;
 
   // ---- auth ---------------------------------------------------------------
   API.register = async function (payload) {
@@ -208,6 +210,14 @@
       return;
     }
     try { await req("PUT", "/api/data", payload); } catch (e) { /* keep local UI */ }
+  };
+
+  // ---- LLM chat proxy -----------------------------------------------------
+  // Online: POST to the backend, which calls Anthropic with the server-side key.
+  // Offline (preview): return null so the caller falls back to window.claude.
+  API.chat = async function (payload) {
+    if (API.mode !== "online") return null;
+    return req("POST", "/api/chat", payload);
   };
 
   // ---- admin --------------------------------------------------------------

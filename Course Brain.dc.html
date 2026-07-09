@@ -10,7 +10,9 @@
 <helmet>
 <script src="api.js"></script>
 <script src="course-data.js"></script>
+<script src="mc-distractors.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#ffffff">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -19,9 +21,8 @@
   button{color:inherit;font-family:inherit}
   html,body{margin:0;padding:0}
   body{background:#1b212b;font-family:'Assistant',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
-  ::-webkit-scrollbar{width:9px;height:9px}
-  ::-webkit-scrollbar-thumb{background:#2a323e;border-radius:8px}
-  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar{width:0;height:0;background:transparent}
+  *{scrollbar-width:none;-ms-overflow-style:none}
   ::selection{background:rgba(134,188,230,.28)}
   @keyframes cbspin{to{transform:rotate(360deg)}}
   @keyframes cbpulse{0%,100%{opacity:.35}50%{opacity:1}}
@@ -40,17 +41,6 @@
       <div style="font-weight:800;font-size:16px;letter-spacing:-.2px">מוח הקורס</div>
     </div>
     <div style="display:flex;align-items:center;gap:8px">
-      <button onClick="{{ onToggleTheme }}" aria-label="החלף ערכת נושא" style="width:34px;height:34px;flex:none;border-radius:10px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center">
-        <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="3" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="21"></line><line x1="3" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="21" y2="12"></line><line x1="5.6" y1="5.6" x2="7" y2="7"></line><line x1="17" y1="17" x2="18.4" y2="18.4"></line><line x1="5.6" y1="18.4" x2="7" y2="17"></line><line x1="17" y1="7" x2="18.4" y2="5.6"></line></svg></sc-if>
-        <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M20 14.5A7.5 7.5 0 1 1 11 5a6 6 0 0 0 9 9.5z"></path></svg></sc-if>
-      </button>
-      <button onClick="{{ onStartToday }}" style="display:flex;align-items:center;gap:7px;background:rgba(230,185,128,.12);border:1px solid rgba(230,185,128,.32);color:var(--review);font-family:inherit;font-weight:700;font-size:13px;padding:7px 11px;border-radius:10px;cursor:pointer">
-        <span style="width:7px;height:7px;border-radius:50%;background:var(--review)"></span>
-        {{ todayDue }} לחזרה
-      </button>
-      <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
-      <a href="Admin.dc.html" style="display:flex;align-items:center;gap:6px;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:13px;padding:7px 12px;border-radius:10px;text-decoration:none">לוח המנהל/ת</a>
-      </sc-if>
       <button onClick="{{ onOpenProfile }}" aria-label="הפרופיל שלי" style="width:34px;height:34px;flex:none;border-radius:50%;border:0;cursor:pointer;font-weight:800;font-size:14px;color:#141a24;background:{{ profile.avatar }}">{{ profile.initial }}</button>
     </div>
   </header>
@@ -68,10 +58,6 @@
           <div style="font-weight:800;font-size:18px;letter-spacing:-.3px;line-height:1">מוח הקורס</div>
           <div style="font-size:11.5px;color:var(--tx3);margin-top:3px">AI Solutions Architect · HackerU</div>
         </div>
-        <button onClick="{{ onToggleTheme }}" aria-label="החלף ערכת נושא" style="width:32px;height:32px;flex:none;border-radius:9px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center">
-          <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="3" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="21"></line><line x1="3" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="21" y2="12"></line><line x1="5.6" y1="5.6" x2="7" y2="7"></line><line x1="17" y1="17" x2="18.4" y2="18.4"></line><line x1="5.6" y1="18.4" x2="7" y2="17"></line><line x1="17" y1="7" x2="18.4" y2="5.6"></line></svg></sc-if>
-          <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M20 14.5A7.5 7.5 0 1 1 11 5a6 6 0 0 0 9 9.5z"></path></svg></sc-if>
-        </button>
       </div>
 
       <sc-for list="{{ nav }}" as="item" hint-placeholder-count="4">
@@ -124,9 +110,6 @@
           <div style="font-size:11px;color:var(--tx3)">{{ profile.roleLabel }} · {{ profile.points }} נק׳</div>
         </div>
       </button>
-      <sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
-        <a href="Admin.dc.html" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:6px;padding:9px;border-radius:11px;border:1px solid var(--bd2);background:transparent;font-size:13px;font-weight:600;color:var(--tx2)">לוח המנהל/ת ←</a>
-      </sc-if>
     </aside>
     </sc-if>
 
@@ -815,10 +798,64 @@
       <!-- ===================== ASK ===================== -->
       <sc-if value="{{ isAsk }}" hint-placeholder-val="{{ false }}">
       <div style="max-width:1080px;margin:0 auto;padding:26px 22px 0;height:100%;display:flex;flex-direction:column">
-        <div style="flex:none;margin-bottom:8px">
-          <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:5px">תשובות מסונתזות מכל 32 השיעורים</div>
-          <h1 style="margin:0;font-size:24px;font-weight:800;letter-spacing:-.3px">שאל את הקורס</h1>
+        <div style="flex:none;margin-bottom:8px;display:flex;align-items:flex-end;justify-content:space-between;gap:12px">
+          <div style="min-width:0">
+            <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:5px">תשובות מסונתזות מכל 32 השיעורים</div>
+            <h1 style="margin:0;font-size:24px;font-weight:800;letter-spacing:-.3px">שאל את הקורס</h1>
+          </div>
+          <button onClick="{{ onToggleKeyPanel }}" style="flex:none;font-family:inherit;font-size:12.5px;font-weight:600;color:{{ keyBtnColor }};background:var(--panel2);border:1px solid var(--bd2);border-radius:10px;padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="8" cy="15" r="4"></circle><path d="M10.85 12.15 19 4"></path><path d="M18 5l2 2"></path><path d="M15 8l2 2"></path></svg>
+            {{ keyBtnLabel }}
+          </button>
         </div>
+
+        <sc-if value="{{ showKeyPanel }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:none;margin-bottom:10px;background:var(--panel2);border:1px solid var(--bd2);border-radius:14px;padding:14px 16px;animation:cbup .2s ease">
+          <sc-if value="{{ keyConnected }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--master);margin-bottom:3px">✓ מפתח אישי מחובר</div>
+                <div style="font-size:12px;color:var(--tx3);line-height:1.5">הצ׳אט מחויב לחשבון ה-Anthropic שלך. המפתח שמור רק במכשיר הזה.</div>
+              </div>
+              <button onClick="{{ onClearKey }}" style="flex:none;font-family:inherit;font-weight:600;font-size:12.5px;padding:8px 14px;border-radius:10px;cursor:pointer;border:1px solid var(--bd2);background:transparent;color:var(--tx2)">הסר מפתח</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ keyMissing }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:13.5px;font-weight:700;margin-bottom:8px">הצ׳אט דורש מפתח Anthropic אישי</div>
+
+            <div style="background:rgba(238,195,138,.1);border:1px solid rgba(238,195,138,.35);border-radius:11px;padding:11px 13px;margin-bottom:13px">
+              <div style="display:flex;gap:8px;align-items:flex-start">
+                <span style="flex:none;color:var(--review);margin-top:1px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 9v4"></path><path d="M12 17h.01"></path><path d="M10.3 3.9 2 18a2 2 0 0 0 1.7 3h16.6a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></span>
+                <div style="font-size:12px;line-height:1.65;color:var(--tx2)">שאר האפליקציה חינמית לחלוטין. <b style="color:var(--tx)">הצ׳אט (AI) הוא היחיד שדורש מפתח API אישי משלך</b> — כי הוא מפעיל את Claude ישירות. השימוש מחויב לחשבון ה-Anthropic שלך, והעלות באחריותך המלאה. אין חובה להשתמש בצ׳אט; אפשר ללמוד מכל שאר האפליקציה בלעדיו.</div>
+              </div>
+            </div>
+
+            <div style="font-size:12px;color:var(--tx3);line-height:1.5;margin-bottom:9px">המפתח נשמר <b style="color:var(--tx2)">רק במכשיר הזה</b> (בדפדפן שלך) ולא נשלח לשרת של הקורס. איך משיגים אותו:</div>
+            <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:13px">
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">1</span>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">היכנסו ל-<a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">console.anthropic.com</a> והתחברו או הירשמו (חשבון חדש בחינם).</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">2</span>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<b style="color:var(--tx)">Billing</b> הוסיפו אמצעי תשלום וטענו קרדיט (אפשר סכום קטן, למשל 5$). בלי זה המפתח לא יעבוד.</div>
+              </div>
+              <div style="display:flex;gap:10px;align-items:flex-start">
+                <span style="flex:none;width:19px;height:19px;border-radius:50%;background:var(--accent);color:var(--onaccent);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px">3</span>
+                <div style="font-size:12.5px;line-height:1.55;color:var(--tx2)">ב-<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener noreferrer" style="color:var(--accent);font-weight:600;text-decoration:none">API Keys</a> → <b style="color:var(--tx)">Create Key</b>, העתיקו את המפתח (מתחיל ב-<span dir="ltr" style="font-family:monospace">sk-ant-</span>) והדביקו כאן.</div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center">
+              <input value="{{ keyInput }}" onInput="{{ onKeyInput }}" onKeyDown="{{ onKeyKeydown }}" type="password" placeholder="sk-ant-..." dir="ltr" style="flex:1;min-width:0;font-family:inherit;font-size:13px;padding:9px 12px;border:1px solid var(--bd);border-radius:10px;background:var(--panel);color:var(--tx);outline:none;text-align:start" />
+              <button onClick="{{ onSaveKey }}" style="flex:none;font-family:inherit;font-weight:700;font-size:13px;padding:9px 16px;border-radius:10px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">שמור</button>
+            </div>
+            <sc-if value="{{ keyError }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:11.5px;color:var(--review);margin-top:8px">{{ keyError }}</div>
+            </sc-if>
+          </sc-if>
+        </div>
+        </sc-if>
 
         <div style="flex:1;overflow-y:auto;padding:14px 2px;display:flex;flex-direction:column;gap:18px">
           <sc-if value="{{ chatEmpty }}" hint-placeholder-val="{{ true }}">
@@ -1110,6 +1147,10 @@
             </sc-if>
             <button onClick="{{ onEditProfile }}" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">עריכת פרופיל</button>
             <button onClick="{{ onOpenTutorial }}" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">מדריך למשתמש</button>
+            <button onClick="{{ onToggleTheme }}" aria-label="החלף ערכת נושא" style="background:var(--panel2);border:1px solid var(--bd2);color:var(--tx);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer;display:flex;align-items:center;gap:7px">
+              <sc-if value="{{ isDark }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="4"></circle><line x1="12" y1="3" x2="12" y2="5"></line><line x1="12" y1="19" x2="12" y2="21"></line><line x1="3" y1="12" x2="5" y2="12"></line><line x1="19" y1="12" x2="21" y2="12"></line><line x1="5.6" y1="5.6" x2="7" y2="7"></line><line x1="17" y1="17" x2="18.4" y2="18.4"></line><line x1="5.6" y1="18.4" x2="7" y2="17"></line><line x1="17" y1="7" x2="18.4" y2="5.6"></line></svg>מצב בהיר</sc-if>
+              <sc-if value="{{ isLight }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M20 14.5A7.5 7.5 0 1 1 11 5a6 6 0 0 0 9 9.5z"></path></svg>מצב כהה</sc-if>
+            </button>
             <button onClick="{{ onLogout }}" style="background:transparent;border:1px solid var(--bd2);color:var(--tx2);font-family:inherit;font-weight:600;font-size:13.5px;padding:9px 15px;border-radius:11px;cursor:pointer">התנתקות</button>
           </div>
         </div>
@@ -1155,8 +1196,15 @@
           </div>
         </div>
 
-        <div style="font-weight:700;font-size:16px;margin-bottom:14px">הישגים</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:11px">
+        <button onClick="{{ onToggleAch }}" style="width:100%;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;background:transparent;border:0;padding:0;margin-bottom:14px;color:var(--tx)">
+          <div style="display:flex;align-items:center;gap:9px">
+            <span style="font-weight:700;font-size:16px">הישגים</span>
+            <span style="font-size:12px;font-weight:600;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:2px 9px">{{ profile.earnedCount }}/{{ profile.achTotal }}</span>
+          </div>
+          <span style="color:var(--tx3);transform:rotate({{ achChevron }});transition:transform .2s"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m6 9 6 6 6-6"></path></svg></span>
+        </button>
+        <sc-if value="{{ achOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:11px;animation:cbup .2s ease">
           <sc-for list="{{ profile.achievements }}" as="a" hint-placeholder-count="8">
             <div style="display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:13px 15px;opacity:{{ a.op }}">
               <div style="width:38px;height:38px;flex:none;border-radius:50% 50% 50% 5px;border:2.2px solid {{ a.color }};background:{{ a.tokenBg }}"></div>
@@ -1167,6 +1215,16 @@
             </div>
           </sc-for>
         </div>
+        </sc-if>
+
+        <button onClick="{{ onOpenDonate }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;margin-top:22px;background:transparent;border:1px solid var(--bd2);border-radius:14px;padding:14px 16px">
+          <span style="width:32px;height:32px;flex:none;border-radius:9px;background:var(--panel2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;color:var(--review)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:14px;font-weight:700;color:var(--tx)">תמיכה בפרויקט</span>
+            <span style="display:block;font-size:12px;color:var(--tx3);margin-top:1px;line-height:1.4">האפליקציה חינמית — תרומה מרצון עוזרת לשמור אותה פעילה 🙏</span>
+          </span>
+          <span style="font-size:12.5px;font-weight:700;color:var(--accent);white-space:nowrap;flex:none">תרומה ♡</span>
+        </button>
 
       </div>
       </sc-if>
@@ -1221,9 +1279,40 @@
   </div>
   </sc-if>
 
+  <!-- ===================== DONATION MODAL ===================== -->
+  <sc-if value="{{ donateOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseDonate }}" style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
+    <div onClick="{{ stopEvt }}" style="width:100%;max-width:360px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:24px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8);animation:cbup .3s ease">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div style="font-size:16px;font-weight:800;letter-spacing:-.2px">תודה על התמיכה ♡</div>
+        <button onClick="{{ onCloseDonate }}" style="background:none;border:none;cursor:pointer;font-family:inherit;font-size:20px;line-height:1;color:var(--tx3);padding:2px 4px">×</button>
+      </div>
+      <p style="margin:0 0 18px;font-size:12.5px;line-height:1.6;color:var(--tx3)">האפליקציה חינמית ומתוחזקת באהבה. תרומה מרצון עוזרת לשמור אותה פעילה 🙏</p>
+
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--panel2);border:1px solid var(--bd);border-radius:16px;padding:16px 16px 14px">
+        <div style="font-size:12.5px;font-weight:700;color:var(--tx2)">Bit · סרקו את הקוד</div>
+        <img src="assets/bit-qr.png" alt="Bit QR" width="200" height="195" style="width:200px;height:auto;border-radius:10px;display:block;background:#fff" />
+        <div style="font-size:11.5px;color:var(--tx3)">פתחו את אפליקציית Bit ← סריקה</div>
+        <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">או שלחו למספר <span dir="ltr" style="font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums">054-769-9683</span></div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin:14px 0">
+        <div style="flex:1;height:1px;background:var(--bd)"></div>
+        <span style="font-size:11px;color:var(--tx3)">או</span>
+        <div style="flex:1;height:1px;background:var(--bd)"></div>
+      </div>
+
+      <a href="{{ donateUrl }}" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;box-sizing:border-box;text-decoration:none;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;background:var(--accent);color:var(--onaccent)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+        תרומה דרך PayPal
+      </a>
+    </div>
+  </div>
+  </sc-if>
+
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script>
+<script type="text/x-dc" data-dc-script data-props="{&quot;donateUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;https://paypal.me/roilosh&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;כללי&quot;}}">
 class Component extends DCLogic {
   get data() { return (typeof window !== 'undefined' && window.CourseData) ? window.CourseData : { streak:0, lessons:[], insights:[], concepts:[], flashcards:[], suggestions:[], themeLabels:{} }; }
 
@@ -1285,7 +1374,12 @@ class Component extends DCLogic {
 
   state = {
     view: 'home',
-    theme: 'dark',
+    theme: 'light',
+    donateOpen: false,
+    apiKey: '',
+    keyInput: '',
+    keyError: '',
+    keyPanelOpen: null, // null = follow default (open while no key), true/false = user override
     openSec: { chapters:false, concepts:false, quotes:false, deck:false },
     openDeckCards: {},
     openThemes: {},
@@ -1326,6 +1420,7 @@ class Component extends DCLogic {
     completion: 0,
     achievements: [],
     streak: 0,
+    achOpen: false,
     profileEditing: false,
     editName: '',
     editAvatar: 'indigo',
@@ -1376,7 +1471,26 @@ class Component extends DCLogic {
     this.setState({ tutorialOpen: false });
   }
 
+  // Broadcast the current theme so a host (mobile-preview frame, PWA chrome) can match its
+  // status bar. Updates the app's own theme-color meta AND posts to the parent frame.
+  postTheme(theme) {
+    const t = theme || this.state.theme;
+    const bg = t === 'light' ? '#ffffff' : '#252d39';
+    try { let m = document.querySelector('meta[name="theme-color"]'); if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); } m.setAttribute('content', bg); } catch (e) {}
+    try { if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'cb-theme', theme: t }, '*'); } catch (e) {}
+  }
+  toggleTheme() {
+    const next = this.state.theme === 'light' ? 'dark' : 'light';
+    this.setState({ theme: next });
+    this.postTheme(next); // broadcast immediately (runtime may not fire componentDidUpdate)
+  }
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState && prevState.theme !== this.state.theme) this.postTheme(this.state.theme);
+  }
+
   async componentDidMount() {
+    this.postTheme();
+    this.loadApiKey();
     await this.bootAuth();
     // data lives in shared course-data.js (window.CourseData); if it loaded late, refill card deck
     if (!this.state.cards.length && this.data.flashcards.length) {
@@ -1535,11 +1649,75 @@ class Component extends DCLogic {
     return out;
   }
 
+  // pre-baked distractors keyed by card id (mc-distractors.js) — instant, no LLM call
+  bakedDistractors(card) {
+    const map = (typeof window !== 'undefined' && window.CourseMCDistractors) ? window.CourseMCDistractors : null;
+    if (!map || !card || !map[card.id]) return null;
+    const arr = map[card.id].filter(x => typeof x === 'string' && x.trim() && x.trim() !== card.a.trim());
+    const seen = {}; const uniq = arr.filter(x => (seen[x] ? false : (seen[x] = 1)));
+    return uniq.length >= 3 ? uniq.slice(0, 3) : null;
+  }
+
+  // Does the deployed backend hold a shared server-side key (teacher-funded chat)?
+  serverChat() { return !!(window.CourseAPI && window.CourseAPI.chatServer && typeof window.CourseAPI.isOnline === 'function' && window.CourseAPI.isOnline()); }
+  // Is an LLM reachable at all? Live-preview bridge, OR the student's own key, OR a server key.
+  llmAvailable() {
+    if (window.claude && window.claude.complete) return true;
+    if (this.state.apiKey) return true;
+    if (this.serverChat()) return true;
+    return false;
+  }
+  // Direct browser → Anthropic call using the STUDENT'S OWN key (never leaves their device).
+  async callAnthropic(key, opts) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: opts.model || 'claude-sonnet-4-5',
+        max_tokens: opts.max_tokens || 2000,
+        system: opts.system || undefined,
+        messages: opts.messages || [],
+      }),
+    });
+    if (!res.ok) {
+      let d = ''; try { d = (await res.json()).error?.message || ''; } catch (e) {}
+      const err = new Error('anthropic ' + res.status + (d ? ': ' + d : '')); err.status = res.status; throw err;
+    }
+    const data = await res.json();
+    return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  // Single completion entry point. Order: live-preview bridge → student's own key → server key.
+  async llmComplete(opts) {
+    if (window.claude && window.claude.complete) return await window.claude.complete(opts);
+    if (this.state.apiKey) return await this.callAnthropic(this.state.apiKey, opts);
+    if (window.CourseAPI && window.CourseAPI.chat) {
+      const r = await window.CourseAPI.chat({ system: opts.system, messages: opts.messages, max_tokens: opts.max_tokens, model: opts.model });
+      return (r && typeof r.text === 'string') ? r.text : null;
+    }
+    return null;
+  }
+  loadApiKey() { try { const k = localStorage.getItem('cb_anthropic_key'); if (k) this.setState({ apiKey: k }); } catch (e) {} }
+  saveApiKey() {
+    const k = (this.state.keyInput || '').trim();
+    if (!k) return;
+    if (k.indexOf('sk-ant-') !== 0) { this.setState({ keyError: 'מפתח לא תקין — הוא אמור להתחיל ב-sk-ant-' }); return; }
+    try { localStorage.setItem('cb_anthropic_key', k); } catch (e) {}
+    this.setState({ apiKey: k, keyInput: '', keyError: '', keyPanelOpen: false });
+  }
+  clearApiKey() { try { localStorage.removeItem('cb_anthropic_key'); } catch (e) {} this.setState({ apiKey: '', keyInput: '', keyError: '', keyPanelOpen: null }); }
+
   async genDistractors(card, shuffle) {
-    if (!window.claude || !window.claude.complete) return this.poolDistractors(card, shuffle);
+    const baked = this.bakedDistractors(card);
+    if (baked) return baked;
+    if (!this.llmAvailable()) return this.poolDistractors(card, shuffle);
     const system = 'אתה כותב/ת מבחני רב-ברירה קשים לקורס "AI Solutions Architect" של רילי לבבי. קבל/י שאלה ואת התשובה הנכונה, והחזר/י בדיוק 3 מסיחים (תשובות שגויות) שקשה מאוד להבחין בינם לבין התשובה הנכונה. המטרה: תלמיד/ה שרק *חצי* זוכר/ת את החומר צריך/ה לטעות.\n\nעקרון-על — כל מסיח הוא „כמעט נכון”: קח/י את התשובה הנכונה ושנה/י בה בדיוק פרט מהותי אחד כך שהיא הופכת לשגויה, אבל נשארת מנוסחת באותו אופן. סוגי שינוי אפשריים: החלפת מונח מפתח במונח שכן/מבלבל (למשל Instructions↔Prompt, Precision↔Recall, MVP↔POC), היפוך סיבה-ותוצאה, שינוי מספר/יחס, החלפת „תמיד” ב„רק כאשר”, ייחוס לשלב/שיטה הלא-נכונים.\n\nכללים מחייבים:\n- כל 4 האפשרויות (הנכונה + 3 המסיחים) חייבות להיראות חליפיות במבט ראשון: אותו אורך (±10%), אותו מבנה משפט, אותה רמת פירוט ואותו אוצר מילים. אסור שהנכונה תהיה הארוכה/הקצרה/המפורטת/המנוסחת-הכי-יפה.\n- אל תכתוב/י מסיחים שהם וריאציות של אותו רעיון בדיוק — כל מסיח טועה בפרט *אחר*, אך כולם באותו נושא של השאלה.\n- כל מסיח חייב להיות באמת שגוי (לא ניסוח אחר של הנכון) — אך סביר ומשכנע, בלי סימנים מסגירים, בלי הגזמות ובלי מילות-על כמו „תמיד/לעולם/כל”.\n- שמור/י מונחים טכניים באנגלית (Prompt, Instructions, RAG, LLM, PRD, API, token, MVP וכו׳) בדיוק כפי שהם מופיעים בתשובה הנכונה.\n- אל תשתמש/י ב„כל התשובות נכונות” או „אף אחת מהנ״ל”.\n\nהחזר/י אך ורק JSON תקין, ללא טקסט נוסף וללא code fences: {"distractors":["...","...","..."]}';
     try {
-      const raw = await window.claude.complete({
+      const raw = await this.llmComplete({
         model: 'claude-sonnet-4-5', max_tokens: 640, system,
         messages: [{ role:'user', content: 'שאלה: ' + card.q + '\nתשובה נכונה: ' + card.a + '\n\nכתוב/י 3 מסיחים „כמעט נכונים” שקשה להבדיל מהתשובה הנכונה, כל אחד עם אורך ומבנה כמעט זהים לה.' }],
       });
@@ -1631,8 +1809,8 @@ class Component extends DCLogic {
     const chat = prior.concat([{ role:'user', text:t }]);
     this.setState({ chat, chatInput:'', thinking:true, thinkingSources:['תמלולי השיעורים','המצגות (PDF)','התובנות של רילי','הסיכומים והכרטיסיות'] });
 
-    if (!window.claude || !window.claude.complete) {
-      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'מנוע התשובות זמין רק כשמריצים את האפליקציה בתצוגה החיה. נסה מכאן, או עיין בשיעורים ובתובנות של רילי בינתיים.', citations:[] }]) });
+    if (!this.llmAvailable()) {
+      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'כדי להשתמש בצ׳אט הוסיפו למעלה מפתח Anthropic API אישי — הוא נשמר רק במכשיר שלכם. בינתיים אפשר לעיין בשיעורים, בסיכומים ובתובנות של רילי.', citations:[] }]) });
       return;
     }
 
@@ -1642,7 +1820,7 @@ class Component extends DCLogic {
       .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
 
     try {
-      const raw = await window.claude.complete({
+      const raw = await this.llmComplete({
         model: 'claude-sonnet-4-5',
         max_tokens: 2000,
         system,
@@ -2228,7 +2406,10 @@ class Component extends DCLogic {
       themeVars: this.themeCSS(),
       isLight: this.isLight(),
       isDark: !this.isLight(),
-      onToggleTheme:() => this.setState({ theme: this.state.theme === 'light' ? 'dark' : 'light' }),
+      onToggleTheme:() => this.toggleTheme(),
+      achOpen: st.achOpen,
+      achChevron: st.achOpen ? '180deg' : '0deg',
+      onToggleAch: () => this.setState({ achOpen: !st.achOpen }),
       onStartToday:() => this.startReview('all', null),
 
       // --- profile / auth ---
@@ -2304,6 +2485,11 @@ class Component extends DCLogic {
       postBtnOp: canPost ? '1' : '.6',
       showMaterials: st.view === 'materials' && !inLesson && !inMap,
       onOpenMaterials:() => this.setView('materials'),
+      donateUrl: this.props.donateUrl || 'https://paypal.me/roilosh',
+      donateOpen: st.donateOpen,
+      onOpenDonate: () => this.setState({ donateOpen: true }),
+      onCloseDonate: () => this.setState({ donateOpen: false }),
+      stopEvt: (e) => { if (e && e.stopPropagation) e.stopPropagation(); },
       matActive: st.view === 'materials',
       matWeight: st.view === 'materials' ? 700 : 500,
       matColor: st.view === 'materials' ? 'var(--tx)' : 'var(--tx2)',
@@ -2332,6 +2518,20 @@ class Component extends DCLogic {
       insightQuery: st.insightQuery, onInsightQuery:(e) => this.setState({ insightQuery: e.target.value }),
 
       isAsk: st.view === 'ask',
+      needKey: !(window.claude && window.claude.complete) && !this.serverChat() && !st.apiKey,
+      // Panel is expanded by default whenever the student has no personal key (and the
+      // teacher isn't funding it), until they add a key or explicitly collapse it.
+      showKeyPanel: (st.keyPanelOpen == null) ? (!st.apiKey && !this.serverChat()) : st.keyPanelOpen,
+      keyConnected: !!st.apiKey,
+      keyMissing: !st.apiKey,
+      keyBtnLabel: st.apiKey ? 'מפתח מחובר' : 'מפתח API',
+      keyBtnColor: st.apiKey ? 'var(--master)' : 'var(--tx2)',
+      keyInput: st.keyInput, keyError: st.keyError,
+      onToggleKeyPanel: () => { const cur = (st.keyPanelOpen == null) ? (!st.apiKey && !this.serverChat()) : st.keyPanelOpen; this.setState({ keyPanelOpen: !cur, keyError: '' }); },
+      onKeyInput: (e) => this.setState({ keyInput: e.target.value, keyError: '' }),
+      onKeyKeydown: (e) => { if (e.key === 'Enter') { e.preventDefault(); this.saveApiKey(); } },
+      onSaveKey: () => this.saveApiKey(),
+      onClearKey: () => this.clearApiKey(),
       chat, chatEmpty: chat.length === 0 && !st.thinking,
       thinking: st.thinking, thinkingSources: st.thinkingSources,
       suggestions,
