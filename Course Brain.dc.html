@@ -1903,40 +1903,94 @@ class Component extends DCLogic {
   // ---- chat ----
   // Serialize EVERYTHING in the app into one grounding context: transcripts (chapters),
   // key concepts, quotes, summaries, the deck deep-layer (מהמצגת), Rili's insights, and flashcards.
-  courseContext() {
-    if (this._ctx) return this._ctx;
-    const D = this.data;
+  // Serialize ONE lesson into a grounding block (transcript, concepts, quotes, summary, deck).
+  _lessonBlock(l) {
     const srcLabel = (s) => ({ slide:'מהמצגת', speech:'מהדיבור', spoken:'מהדיבור', both:'מצגת+דיבור' }[s] || '');
     const o = [];
-    o.push('# חומרי הקורס — AI Solutions Architect (HackerU · מרצה: רילי לבבי)');
-    D.lessons.forEach(l => {
-      o.push('\n## שיעור ' + l.num + ': ' + l.title + '  (' + l.date + ' · ' + l.duration + ')');
-      if (l.hook) o.push('משפט מפתח: ' + l.hook);
-      if (l.qualityNote) o.push('הערת איכות מקור: ' + l.qualityNote);
-      if (l.summary) {
-        o.push('### סיכום השיעור');
-        o.push(l.summary.overview);
-        o.push('עיקרי התוכן: ' + l.summary.content.join(' | '));
-        o.push('התובנות של רילי: ' + l.summary.fromRili.join(' | '));
-      }
-      o.push('### פרקים ותמלול');
-      l.chapters.forEach(c => o.push('- [' + (c.start || 'מהמצגת') + '] ' + c.title + ' (' + srcLabel(c.source) + '): ' + c.summary));
-      o.push('### מושגי מפתח');
-      l.concepts.forEach(c => o.push('- ' + c.term + ': ' + c.eli5));
-      o.push('### ציטוטים בולטים');
-      l.quotes.forEach(q => o.push('- "' + q.text + '" — ' + q.speaker + ', ' + q.timestamp + '. למה חשוב: ' + q.why));
-      if (l.deck) {
-        o.push('### מהמצגת (' + l.deck.totalSlides + ' שקפים — הרובד העמוק)');
-        l.deck.coreConcepts.forEach(c => o.push('- ' + c.title + ': ' + c.detail.join(' ')));
-        if (l.deck.gaps && l.deck.gaps.length) o.push('מה שהסיכום לא כיסה: ' + l.deck.gaps.join(' | '));
-      }
+    o.push('\n## שיעור ' + l.num + ': ' + l.title + '  (' + l.date + ' · ' + l.duration + ')');
+    if (l.hook) o.push('משפט מפתח: ' + l.hook);
+    if (l.qualityNote) o.push('הערת איכות מקור: ' + l.qualityNote);
+    if (l.summary) {
+      o.push('### סיכום השיעור');
+      o.push(l.summary.overview);
+      o.push('עיקרי התוכן: ' + l.summary.content.join(' | '));
+      o.push('התובנות של רילי: ' + l.summary.fromRili.join(' | '));
+    }
+    o.push('### פרקים ותמלול');
+    l.chapters.forEach(c => o.push('- [' + (c.start || 'מהמצגת') + '] ' + c.title + ' (' + srcLabel(c.source) + '): ' + c.summary));
+    o.push('### מושגי מפתח');
+    l.concepts.forEach(c => o.push('- ' + c.term + ': ' + c.eli5));
+    o.push('### ציטוטים בולטים');
+    l.quotes.forEach(q => o.push('- "' + q.text + '" — ' + q.speaker + ', ' + q.timestamp + '. למה חשוב: ' + q.why));
+    if (l.deck) {
+      o.push('### מהמצגת (' + l.deck.totalSlides + ' שקפים — הרובד העמוק)');
+      l.deck.coreConcepts.forEach(c => o.push('- ' + c.title + ': ' + c.detail.join(' ')));
+      if (l.deck.gaps && l.deck.gaps.length) o.push('מה שהסיכום לא כיסה: ' + l.deck.gaps.join(' | '));
+    }
+    return o.join('\n');
+  }
+  // The searchable text of a lesson (for keyword scoring) — cached per lesson.
+  _lessonSearchText(l) {
+    this._searchCache = this._searchCache || {};
+    if (this._searchCache[l.num]) return this._searchCache[l.num];
+    const parts = [l.title, l.hook || ''];
+    if (l.summary) { parts.push(l.summary.overview); parts.push(l.summary.content.join(' ')); parts.push(l.summary.fromRili.join(' ')); }
+    l.chapters.forEach(c => { parts.push(c.title); parts.push(c.summary); });
+    l.concepts.forEach(c => { parts.push(c.term); parts.push(c.eli5); });
+    l.quotes.forEach(q => { parts.push(q.text); parts.push(q.why); });
+    if (l.deck) l.deck.coreConcepts.forEach(c => { parts.push(c.title); parts.push(c.detail.join(' ')); });
+    const t = parts.join(' ').toLowerCase();
+    this._searchCache[l.num] = t;
+    return t;
+  }
+  // A cheap always-included index so the model can route/cite even lessons not fully expanded.
+  _courseMap() {
+    if (this._map) return this._map;
+    const o = ['# מפת הקורס (כל 32 השיעורים — כותרת + משפט מפתח)'];
+    this.data.lessons.forEach(l => o.push('- שיעור ' + l.num + ': ' + l.title + (l.hook ? ' — ' + l.hook : '')));
+    this._map = o.join('\n');
+    return this._map;
+  }
+  // Build grounding context SCOPED to the lessons relevant to `query`, keeping the prompt small
+  // and fast. Falls back to a broad set when nothing matches (e.g. general/meta questions).
+  courseContext(query) {
+    const D = this.data;
+    const lessons = D.lessons || [];
+    const q = String(query || '').toLowerCase();
+    // explicit lesson references: "שיעור 3", "שיעור מס' 3", or a bare number
+    const explicit = new Set();
+    let m; const re = /שיעור\s*(?:מס['׳]?\s*)?(\d{1,2})/g;
+    while ((m = re.exec(q))) explicit.add(Number(m[1]));
+    // keyword scoring: count query terms (>=3 chars) appearing in each lesson's text
+    const terms = q.replace(/[.,?!"'׳״()\/\u2013\u2014\-]/g, ' ').split(/\s+/).filter(w => w.length >= 3);
+    const scored = lessons.map(l => {
+      const text = this._lessonSearchText(l);
+      let score = 0;
+      terms.forEach(w => { if (text.indexOf(w) >= 0) score += 1; });
+      if (explicit.has(l.num)) score += 100;
+      return { l, score };
     });
-    o.push('\n# התובנות המרכזיות של רילי (אוסף חוצה-קורס)');
-    (D.insights || []).forEach(i => o.push('- [' + i.category + ' · שיעור ' + i.lesson + ' · ' + i.timestamp + '] ' + i.text));
-    o.push('\n# כרטיסיות חזרה (שאלה ← תשובה)');
-    (D.flashcards || []).forEach(f => o.push('- ש: ' + f.q + ' ← ת: ' + f.a + '  (שיעור ' + f.lesson + ')'));
-    this._ctx = o.join('\n');
-    return this._ctx;
+    let picked = scored.filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 4).map(s => s.l);
+    // no keyword hit → include the shortest/most-recent few so short questions still ground
+    if (!picked.length) picked = lessons.slice(-3);
+    const pickedNums = new Set(picked.map(l => l.num));
+
+    const o = [this._courseMap()];
+    o.push('\n# פירוט מלא — השיעורים הרלוונטיים לשאלה');
+    picked.sort((a, b) => a.num - b.num).forEach(l => o.push(this._lessonBlock(l)));
+    // Rili's cross-course insights, scoped to the picked lessons (they're short & high-signal)
+    const relInsights = (D.insights || []).filter(i => pickedNums.has(i.lesson));
+    if (relInsights.length) {
+      o.push('\n# התובנות של רילי (מהשיעורים הרלוונטיים)');
+      relInsights.forEach(i => o.push('- [' + i.category + ' · שיעור ' + i.lesson + ' · ' + i.timestamp + '] ' + i.text));
+    }
+    // flashcards scoped to the picked lessons
+    const relCards = (D.flashcards || []).filter(f => pickedNums.has(f.lesson));
+    if (relCards.length) {
+      o.push('\n# כרטיסיות חזרה (מהשיעורים הרלוונטיים)');
+      relCards.forEach(f => o.push('- ש: ' + f.q + ' ← ת: ' + f.a + '  (שיעור ' + f.lesson + ')'));
+    }
+    return o.join('\n');
   }
 
   async ask(qtext) {
@@ -1951,7 +2005,11 @@ class Component extends DCLogic {
       return;
     }
 
-    const system = 'אתה עוזר הלימוד של הקורס "AI Solutions Architect" של רילי לבבי (HackerU). ענה אך ורק על סמך חומרי הקורס המצורפים למטה — התמלולים, המצגות, התובנות של רילי, הסיכומים והכרטיסיות. אל תמציא מידע שאינו בחומרים; אם התשובה לא נמצאת בהם, אמור זאת בכנות והצע במה כן אפשר לעזור. ענה בעברית, בטון של מורה טוב: ברור, ממוקד וללא סרבול. שמור מונחים טכניים באנגלית (RAG, LLM, PRD, Vibe Coding, API, MoSCoW, PERT וכו׳). כשרלוונטי, שלב את "הקול" של רילי ואת העקרונות החוזרים שלה.\n\nהחזר אך ורק JSON תקין, ללא טקסט נוסף וללא code fences, במבנה: {"answer":"<תשובה בעברית, מותר מעברי שורה>","citations":[{"lesson":<מספר שיעור>,"ts":"<חותמת זמן כמו 01:20:15, או \'מהמצגת\' / \'סיכום\' / \'תובנה\' כשאין זמן מדויק>"}]}. צטט 1–4 מקורות רלוונטיים שעליהם התבססת; אם אין מקור מדויק החזר citations ריק.\n\n=== חומרי הקורס ===\n' + this.courseContext();
+    // Retrieval query = current question + the previous user turn (so follow-ups stay on-topic).
+    const prevUser = prior.filter(mm => mm.role === 'user').slice(-1).map(mm => mm.text).join(' ');
+    const retrievalQuery = (t + ' ' + prevUser).trim();
+
+    const system = 'אתה עוזר הלימוד של הקורס "AI Solutions Architect" של רילי לבבי (HackerU). ענה אך ורק על סמך חומרי הקורס המצורפים למטה — התמלולים, המצגות, התובנות של רילי, הסיכומים והכרטיסיות. אל תמציא מידע שאינו בחומרים; אם התשובה לא נמצאת בהם, אמור זאת בכנות והצע במה כן אפשר לעזור. ענה בעברית, בטון של מורה טוב: ברור, ממוקד וללא סרבול. שמור מונחים טכניים באנגלית (RAG, LLM, PRD, Vibe Coding, API, MoSCoW, PERT וכו׳). כשרלוונטי, שלב את "הקול" של רילי ואת העקרונות החוזרים שלה.\n\nהחזר אך ורק JSON תקין, ללא טקסט נוסף וללא code fences, במבנה: {"answer":"<תשובה בעברית, מותר מעברי שורה>","citations":[{"lesson":<מספר שיעור>,"ts":"<חותמת זמן כמו 01:20:15, או \'מהמצגת\' / \'סיכום\' / \'תובנה\' כשאין זמן מדויק>"}]}. צטט 1–4 מקורות רלוונטיים שעליהם התבססת; אם אין מקור מדויק החזר citations ריק.\n\n=== חומרי הקורס ===\n' + this.courseContext(retrievalQuery);
 
     const history = prior.filter(m => m.role === 'user' || m.role === 'bot')
       .map(m => ({ role: m.role === 'user' ? 'user' : 'assistant', content: m.text }));
