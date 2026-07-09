@@ -947,6 +947,9 @@
                     </sc-for>
                   </div>
                 </sc-if>
+                <sc-if value="{{ m.hasErr }}" hint-placeholder-val="{{ false }}">
+                  <div dir="ltr" style="margin-top:11px;padding-top:10px;border-top:1px dashed var(--bd2);font-family:ui-monospace,monospace;font-size:11px;line-height:1.5;color:var(--review);text-align:left;word-break:break-word">{{ m.errDetail }}</div>
+                </sc-if>
               </div>
             </sc-if>
           </sc-for>
@@ -1746,11 +1749,19 @@ class Component extends DCLogic {
       role: m.role === 'assistant' ? 'model' : 'user',
       parts: [{ text: String(m.content || '') }],
     }));
+    // gemini-2.5-flash reasons ("thinking") before answering and, left unbounded, can spend the
+    // whole output budget on hidden thinking and return NO text. Disable thinking and give real
+    // headroom so we reliably get JSON back.
     const body = {
       contents,
-      generationConfig: { maxOutputTokens: opts.max_tokens || 2000, temperature: 0.7, responseMimeType: 'application/json' },
+      generationConfig: {
+        maxOutputTokens: Math.max(opts.max_tokens || 2000, 4096),
+        temperature: 0.7,
+        responseMimeType: 'application/json',
+        thinkingConfig: { thinkingBudget: 0 },
+      },
     };
-    if (opts.system) body.system_instruction = { parts: [{ text: opts.system }] };
+    if (opts.system) body.systemInstruction = { parts: [{ text: opts.system }] };
     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + encodeURIComponent(key), {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -1758,11 +1769,16 @@ class Component extends DCLogic {
     });
     if (!res.ok) {
       let d = ''; try { d = (await res.json()).error?.message || ''; } catch (e) {}
-      const err = new Error('gemini ' + res.status + (d ? ': ' + d : '')); err.status = res.status; throw err;
+      const err = new Error('Gemini ' + res.status + (d ? ': ' + d : '')); err.status = res.status; throw err;
     }
     const data = await res.json();
     const cand = (data.candidates || [])[0];
-    return ((cand && cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
+    const text = ((cand && cand.content && cand.content.parts) || []).map(p => p.text || '').join('');
+    if (!text) {
+      const fr = (cand && cand.finishReason) || (data.promptFeedback && data.promptFeedback.blockReason) || 'ריק';
+      throw new Error('Gemini החזיר תשובה ריקה (' + fr + ')');
+    }
+    return text;
   }
   // Direct browser → Anthropic call using the STUDENT'S OWN key (never leaves their device).
   async callAnthropic(key, opts) {
@@ -1953,7 +1969,8 @@ class Component extends DCLogic {
       }
       this.setState({ thinking:false, chat: chat.concat([bot]) });
     } catch (err) {
-      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'לא הצלחתי להתחבר כרגע למנוע התשובות. נסה שוב בעוד רגע — ובינתיים אפשר לעיין בשיעורים ובתובנות של רילי.', citations: [] }]) });
+      const detail = (err && err.message) ? String(err.message) : '';
+      this.setState({ thinking:false, chat: chat.concat([{ role:'bot', text:'לא הצלחתי להתחבר כרגע למנוע התשובות. נסה שוב בעוד רגע — ובינתיים אפשר לעיין בשיעורים ובתובנות של רילי.', citations: [], errDetail: detail }]) });
     }
   }
   jumpTo(lesson) { this.openLesson(lesson); }
@@ -2429,6 +2446,7 @@ class Component extends DCLogic {
     const chat = st.chat.map(m => ({
       isUser: m.role === 'user', isBot: m.role === 'bot', text:m.text,
       hasCitations: !!(m.citations && m.citations.length),
+      hasErr: !!m.errDetail, errDetail: m.errDetail || '',
       citations: (m.citations||[]).map(c => ({ lesson:c.lesson, ts:c.ts, onJump:() => this.jumpTo(c.lesson) })),
     }));
     const suggestions = D.suggestions.map(q => ({ q, onAsk:() => this.ask(q) }));
