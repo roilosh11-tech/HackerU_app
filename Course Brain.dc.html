@@ -398,6 +398,25 @@
                       <span style="font-weight:700;font-size:{{ cn.size }}px;line-height:1.15">{{ cn.term }}</span>
                       <span style="font-size:11px;color:var(--tx3)">{{ cn.meta }}</span>
                     </button>
+                    <sc-if value="{{ cn.showDetail }}" hint-placeholder-val="{{ false }}">
+                    <div style="flex-basis:100%;width:100%;background:var(--panel);border:1px solid rgba(134,188,230,.4);border-radius:13px;padding:15px;margin:2px 0 4px;animation:cbup .2s ease">
+                      <div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-bottom:12px">{{ cn.detail.eli5 }}</div>
+                      <div style="font-size:12px;color:var(--newc);background:rgba(134,188,230,.1);border:1px solid rgba(134,188,230,.25);border-radius:10px;padding:9px 11px;line-height:1.5;margin-bottom:14px">{{ cn.detail.recap }}</div>
+                      <div style="font-size:11px;color:var(--tx3);letter-spacing:.3px;margin-bottom:9px">איפה זה הופיע</div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <sc-for list="{{ cn.detail.appearances }}" as="ap" hint-placeholder-count="2">
+                          <button onClick="{{ ap.onOpen }}" style="text-align:start;font-family:inherit;cursor:pointer;display:flex;align-items:flex-start;gap:10px;background:var(--panel2);border:1px solid var(--bd);border-radius:10px;padding:10px 11px">
+                            <span style="font-size:11px;font-weight:800;color:var(--tx3);min-width:20px;padding-top:1px">{{ ap.badge }}</span>
+                            <span style="flex:1;display:flex;flex-direction:column;gap:4px">
+                              <span style="font-size:12.5px;line-height:1.35;color:var(--tx);font-weight:600">{{ ap.title }}</span>
+                              <span style="font-size:11.5px;line-height:1.5;color:var(--tx3)">{{ ap.note }}</span>
+                            </span>
+                            <span style="font-size:10.5px;color:var(--newc);font-weight:700;flex:none;padding-top:1px">{{ ap.rep }}</span>
+                          </button>
+                        </sc-for>
+                      </div>
+                    </div>
+                    </sc-if>
                   </sc-for>
                 </div>
                 </sc-if>
@@ -408,6 +427,7 @@
             </sc-if>
           </div>
 
+          <sc-if value="{{ showConceptPanel }}" hint-placeholder-val="{{ true }}">
           <div style="width:340px;flex:none;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:20px;position:sticky;top:20px">
             <sc-if value="{{ activeConcept }}" hint-placeholder-val="{{ null }}">
               <div style="display:flex;align-items:center;gap:9px;margin-bottom:10px">
@@ -434,6 +454,7 @@
               <div style="text-align:center;padding:30px 10px;color:var(--tx3);font-size:13.5px;line-height:1.6">בחר מושג כדי לראות איך ההבנה שלך נבנתה לאורך הקורס</div>
             </sc-if>
           </div>
+          </sc-if>
         </div>
       </div>
       </sc-if>
@@ -1527,7 +1548,7 @@ class Component extends DCLogic {
   openLesson(n) { this.setState({ view: 'library', lessonNum: n, conceptMapOpen: false, qualityOpen: false, qualityDismissed: false, openDeckCards: {}, openSec: { chapters:false, concepts:false, quotes:false, deck:false } }); document.querySelector('main') && document.querySelector('main').scrollTo(0,0); }
   backLibrary() { this.setState({ lessonNum: null, conceptMapOpen: false, activeConceptTerm: null }); }
   openConceptMap() { this.setState({ conceptMapOpen: true, lessonNum: null, conceptQuery: '', conceptFilter: null }); }
-  selectConcept(t) { this.setState({ activeConceptTerm: t }); }
+  selectConcept(t) { this.setState({ activeConceptTerm: this.state.activeConceptTerm === t ? null : t }); }
   setConceptFilter(v) { this.setState({ conceptFilter: v, activeConceptTerm: null }); }
   toggleCat(key) { const o = Object.assign({}, this.state.openCats); o[key] = !o[key]; this.setState({ openCats: o }); }
   _normTerm(t) { return String(t).replace(/[.,'\u05f3\u05f4"()\/\u2013\u2014\-]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); }
@@ -2163,6 +2184,17 @@ class Component extends DCLogic {
       return true;
     });
     const maxL = Math.max(1, ...allC.map(c => c.lessons.length));
+    const mkDetail = (ac) => {
+      const multi = ac.lessons.length > 1;
+      return {
+        term: ac.term, eli5: ac.eli5, first: ac.first, reps: ac.reps, color:'#86bce6',
+        recap: multi ? ('\u05d4\u05d5\u05e4\u05d9\u05e2 \u05dc\u05e8\u05d0\u05e9\u05d5\u05e0\u05d4 \u05d1\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ac.first + ' \u00b7 \u05d7\u05d5\u05d6\u05e8 \u05d1-' + ac.lessons.length + ' \u05e9\u05d9\u05e2\u05d5\u05e8\u05d9\u05dd \u05dc\u05d0\u05d5\u05e8\u05da \u05d4\u05e7\u05d5\u05e8\u05e1') : ('\u05de\u05d5\u05e4\u05d9\u05e2 \u05d1\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ac.first + ' \u05d1\u05dc\u05d1\u05d3'),
+        appearances: ac.lessons.map((ln, i) => {
+          const lz = D.lessons.find(l => l.num === ln);
+          return { badge: '\u05e9' + ln, title: lz ? lz.title : ('\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ln), note: ac.byLesson[ln] || '', rep: (multi && i === 0) ? '\u05e8\u05d0\u05e9\u05d5\u05df' : (multi ? '\u05d7\u05d6\u05e8\u05d4 #' + (i + 1) : ''), onOpen:() => this.openLesson(ln) };
+        }),
+      };
+    };
     const tagOf = (c) => {
       const active = st.activeConceptTerm === c.term;
       const multi = c.lessons.length > 1;
@@ -2172,6 +2204,7 @@ class Component extends DCLogic {
         size: 13.5 + Math.round((c.lessons.length / maxL) * 6),
         bg: active ? 'rgba(134,188,230,.14)' : 'var(--panel2)',
         bd: active ? 'rgba(134,188,230,.4)' : (multi ? 'rgba(134,188,230,.28)' : 'var(--bd)'),
+        active, showDetail: active && isMobile, detail: active ? mkDetail(c) : null,
         onSelect:() => this.selectConcept(c.term),
       };
     };
@@ -2191,17 +2224,7 @@ class Component extends DCLogic {
         : { bd: 'var(--bd)', bg: 'var(--panel)', fg: 'var(--tx2)' }));
     let activeConcept = null;
     const ac = allC.find(c => c.term === st.activeConceptTerm);
-    if (ac) {
-      const multi = ac.lessons.length > 1;
-      activeConcept = {
-        term: ac.term, eli5: ac.eli5, first: ac.first, reps: ac.reps, color:'#86bce6',
-        recap: multi ? ('\u05d4\u05d5\u05e4\u05d9\u05e2 \u05dc\u05e8\u05d0\u05e9\u05d5\u05e0\u05d4 \u05d1\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ac.first + ' \u00b7 \u05d7\u05d5\u05d6\u05e8 \u05d1-' + ac.lessons.length + ' \u05e9\u05d9\u05e2\u05d5\u05e8\u05d9\u05dd \u05dc\u05d0\u05d5\u05e8\u05da \u05d4\u05e7\u05d5\u05e8\u05e1') : ('\u05de\u05d5\u05e4\u05d9\u05e2 \u05d1\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ac.first + ' \u05d1\u05dc\u05d1\u05d3'),
-        appearances: ac.lessons.map((ln, i) => {
-          const lz = D.lessons.find(l => l.num === ln);
-          return { badge: '\u05e9' + ln, title: lz ? lz.title : ('\u05e9\u05d9\u05e2\u05d5\u05e8 ' + ln), note: ac.byLesson[ln] || '', rep: (multi && i === 0) ? '\u05e8\u05d0\u05e9\u05d5\u05df' : (multi ? '\u05d7\u05d6\u05e8\u05d4 #' + (i + 1) : ''), onOpen:() => this.openLesson(ln) };
-        }),
-      };
-    }
+    if (ac) { activeConcept = mkDetail(ac); }
 
     // --- lesson detail ---
     let lesson = null;
@@ -2506,6 +2529,7 @@ class Component extends DCLogic {
       onOpenConceptMap:() => this.openConceptMap(),
       onBackLibrary:() => this.backLibrary(),
       conceptGroups, activeConcept, noConcept: !activeConcept,
+      showConceptPanel: !isMobile,
       conceptFilterChips, conceptQuery: st.conceptQuery, conceptTotal: allC.length,
       conceptCount: cFiltered.length, conceptEmpty: cFiltered.length === 0,
       onConceptSearch:(e) => this.setState({ conceptQuery: e.target.value }),
