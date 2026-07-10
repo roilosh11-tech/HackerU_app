@@ -68,6 +68,7 @@
             <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
             <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
             <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
+            <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
           </span>
           <span style="flex:1">{{ item.label }}</span>
           <sc-if value="{{ item.badge }}" hint-placeholder-val="{{ 0 }}"><span style="font-size:11.5px;font-weight:700;color:var(--review);background:rgba(230,185,128,.13);border-radius:20px;padding:2px 8px">{{ item.badge }}</span></sc-if>
@@ -214,6 +215,18 @@
             <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">כל ההערות שכתבת · פרטי לך</span>
           </span>
           <sc-if value="{{ notebookCount }}" hint-placeholder-val="{{ 0 }}"><span style="font-size:11.5px;font-weight:700;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:2px 9px">{{ notebookCount }}</span></sc-if>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+
+        </sc-if>
+
+        <sc-if value="{{ showProcessCard }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onOpenProcess }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;margin-top:10px;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:13px">
+          <span style="width:40px;height:40px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:15px;font-weight:700">מסלול העבודה</span>
+            <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">התהליך של רילי, שלב-שלב · מאיפה מתחילים</span>
+          </span>
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
         </button>
         </sc-if>
@@ -743,6 +756,171 @@
           <button onClick="{{ lesson.onReview }}" style="flex:1;min-width:160px;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;border:1px solid rgba(230,185,128,.32);background:rgba(230,185,128,.1);color:var(--review)">חזרה על השיעור הזה ({{ lesson.cardCount }} כרטיסיות)</button>
           <button onClick="{{ lesson.onAsk }}" style="flex:1;min-width:160px;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">שאל שאלה על השיעור</button>
         </div>
+      </div>
+      </sc-if>
+
+      <!-- ===================== PROCESS GUIDE ===================== -->
+      <sc-if value="{{ showProcess }}" hint-placeholder-val="{{ false }}">
+      <div style="max-width:1000px;margin:0 auto;padding:30px 26px 56px;animation:cbup .3s ease">
+
+        <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:7px">מבוסס על הספר · מיישם AI — תבנית העבודה של רילי</div>
+        <div style="font-size:32px;font-weight:800;letter-spacing:-.6px;line-height:1.05;margin-bottom:14px">מאיפה מתחילים?</div>
+        <div style="font-size:17px;line-height:1.65;color:var(--tx2);max-width:660px">אתם עובדים על <b style="color:var(--tx)">פרויקט אחד מתגלגל</b>. כל שלב שואב את הקלט שלו ממסמכי הפרויקט, מבצע את עבודתו, ומפיק תוצר שנשמר חזרה — <b style="color:var(--tx)">והתוצר הזה הוא הקלט של השלב הבא</b>. עבדו לפי הסדר, שלב אחרי שלב.</div>
+
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-top:20px;background:rgba(230,196,127,.09);border:1px solid rgba(230,196,127,.30);border-radius:14px;padding:14px 16px">
+          <span style="flex:none;margin-top:1px;color:var(--review)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5"></path><path d="M12 16.5h.01"></path></svg></span>
+          <div style="font-size:14px;line-height:1.6;color:var(--tx2)"><b style="color:var(--tx)">כלל זהב</b> — כל פלט של AI הוא טיוטה לבדיקה. קראו, אמתו מול נתונים, ורק אז המשיכו לשלב הבא.</div>
+        </div>
+
+        <!-- THE ARC: big picture -->
+        <div style="display:flex;align-items:center;gap:10px;margin:34px 0 16px">
+          <span style="width:6px;height:22px;border-radius:3px;background:var(--accent);display:inline-block"></span>
+          <div style="font-size:20px;font-weight:800;letter-spacing:-.3px">התמונה הגדולה — הקשת מבעיה לפתרון</div>
+        </div>
+        <div style="font-size:13.5px;color:var(--tx3);line-height:1.6;margin-bottom:18px">תפקיד המיישם הוא להוביל פרויקט מבעיה אמיתית עד פתרון מוטמע. כל התהליך נע בארבע תחנות — וה-AI הוא הכלי שמשרת כל תחנה בדרך.</div>
+
+        <div style="display:grid;grid-template-columns:{{ procStationCols }};gap:11px">
+          <sc-for list="{{ procStations }}" as="s" hint-placeholder-count="4">
+            <div style="position:relative;background:{{ s.bg }};border:1px solid {{ s.bd }};border-radius:16px;padding:16px 15px 15px;opacity:{{ s.op }}">
+              <sc-if value="{{ s.here }}" hint-placeholder-val="{{ false }}">
+                <div style="position:absolute;top:-11px;inset-inline-start:14px;font-size:11px;font-weight:800;color:var(--onaccent);background:var(--accent);border-radius:20px;padding:3px 11px;letter-spacing:.2px">אנחנו כאן</div>
+              </sc-if>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:9px">
+                <div style="width:30px;height:30px;flex:none;border-radius:9px;background:{{ s.numBg }};color:{{ s.numColor }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px">{{ s.id }}</div>
+                <div style="font-size:10.5px;font-weight:700;color:{{ s.color }};background:{{ s.bg }};border:1px solid {{ s.bd }};border-radius:20px;padding:2px 9px">{{ s.badge }}</div>
+              </div>
+              <div style="font-size:16px;font-weight:800;letter-spacing:-.2px;margin-bottom:5px;color:{{ s.color }}">{{ s.name }}</div>
+              <div style="font-size:12.5px;color:var(--tx2);line-height:1.5;margin-bottom:11px">{{ s.sub }}</div>
+              <div style="display:flex;flex-direction:column;gap:5px">
+                <sc-for list="{{ s.points }}" as="p" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--tx3)">
+                    <span style="flex:none;width:4px;height:4px;border-radius:1px;background:{{ s.color }};transform:rotate(45deg)"></span>{{ p.t }}
+                  </div>
+                </sc-for>
+              </div>
+              <div style="margin-top:11px;font-size:10.5px;color:var(--tx3);border-top:1px solid var(--bd);padding-top:8px">{{ s.tag }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- PROGRESS -->
+        <div style="display:flex;align-items:center;gap:14px;margin:30px 0 8px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 18px">
+          <div style="flex:none;font-size:13.5px;font-weight:700;color:var(--tx2)">ההתקדמות שלי</div>
+          <div style="flex:1;height:8px;border-radius:5px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ procPctW }};background:var(--master);transition:width .35s"></div></div>
+          <div style="flex:none;font-size:13px;font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums">{{ procDoneCount }}/{{ procTotal }}</div>
+        </div>
+
+        <!-- WHERE TO START -->
+        <div style="display:flex;align-items:center;gap:9px;margin:26px 0 4px;font-size:13px;font-weight:700;color:var(--accent)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M12 5v14"></path><path d="m6 13 6 6 6-6"></path></svg>
+          מתחילים מכאן — שלב אחרי שלב, מלמעלה למטה
+        </div>
+
+        <!-- STEP SPINE -->
+        <sc-for list="{{ procModules }}" as="m" hint-placeholder-count="2">
+          <div style="display:flex;align-items:center;gap:10px;margin:26px 0 14px">
+            <div style="font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:7px;padding:4px 10px">{{ m.label }}</div>
+            <div style="font-size:15px;font-weight:700;color:var(--tx2)">{{ m.title }}</div>
+            <div style="flex:1;height:1px;background:var(--bd)"></div>
+          </div>
+
+          <sc-for list="{{ m.steps }}" as="s" hint-placeholder-count="3">
+            <div style="display:flex;gap:15px;position:relative;padding-bottom:16px">
+              <!-- spine -->
+              <div style="position:relative;flex:none;width:42px;display:flex;justify-content:center">
+                <div style="position:absolute;top:6px;bottom:-16px;width:2px;background:var(--bd)"></div>
+                <div style="position:relative;z-index:1;width:42px;height:42px;border-radius:12px;background:{{ s.numBg }};border:1px solid {{ s.numBd }};color:{{ s.numColor }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px">{{ s.n }}</div>
+              </div>
+
+              <!-- card -->
+              <div style="flex:1;min-width:0;background:var(--panel);border:1px solid {{ s.cardBd }};border-radius:16px;overflow:hidden;transition:border-color .2s">
+                <div onClick="{{ s.onToggle }}" style="display:flex;align-items:flex-start;gap:12px;padding:15px 17px;cursor:pointer">
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:4px">
+                      <span style="font-size:16.5px;font-weight:800;letter-spacing:-.2px">שלב {{ s.n }} · {{ s.title }}</span>
+                      <sc-if value="{{ s.hasTool }}" hint-placeholder-val="{{ false }}"><span style="font-size:10.5px;font-weight:700;color:{{ s.color }};background:{{ s.bg }};border:1px solid {{ s.bd }};border-radius:20px;padding:2px 9px">{{ s.tool }}</span></sc-if>
+                    </div>
+                    <div style="font-size:13.5px;color:var(--tx2);line-height:1.55">{{ s.does }}</div>
+                  </div>
+                  <span style="flex:none;color:var(--tx3);transform:rotate({{ s.chevron }});transition:transform .2s;margin-top:3px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m6 9 6 6 6-6"></path></svg></span>
+                </div>
+
+                <!-- input → output chain (always visible) -->
+                <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:0 17px 14px">
+                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;background:var(--panel2);border:1px solid var(--bd);border-radius:9px;padding:6px 10px">
+                    <span style="color:var(--tx3);font-weight:600">קלט</span>
+                    <span style="color:var(--tx2);font-weight:600">{{ s.input }}</span>
+                  </div>
+                  <span style="color:{{ s.color }};flex:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M19 12H5"></path><path d="m12 5-7 7 7 7"></path></svg></span>
+                  <div style="display:flex;align-items:center;gap:6px;font-size:12px;background:{{ s.bg }};border:1px solid {{ s.bd }};border-radius:9px;padding:6px 10px">
+                    <span style="color:{{ s.color }};font-weight:700">פלט</span>
+                    <span style="color:var(--tx);font-weight:600">{{ s.output }}</span>
+                  </div>
+                  <span style="font-size:11px;color:var(--tx3)">↤ נשמר במסמכי הפרויקט</span>
+                </div>
+
+                <!-- expanded body -->
+                <sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+                <div style="border-top:1px solid var(--bd);padding:15px 17px 17px;display:flex;flex-direction:column;gap:16px">
+                  <sc-for list="{{ s.groups }}" as="g" hint-placeholder-count="1">
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <sc-if value="{{ g.hasTitle }}" hint-placeholder-val="{{ false }}">
+                        <div>
+                          <div style="font-size:13.5px;font-weight:800;color:{{ s.color }}">{{ g.title }}</div>
+                          <sc-if value="{{ g.hasNote }}" hint-placeholder-val="{{ false }}"><div style="font-size:12px;color:var(--tx3);line-height:1.5;margin-top:3px">{{ g.note }}</div></sc-if>
+                        </div>
+                      </sc-if>
+                      <sc-for list="{{ g.prompts }}" as="p" hint-placeholder-count="1">
+                        <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;overflow:hidden">
+                          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border-bottom:1px solid var(--bd)">
+                            <div style="display:flex;align-items:center;gap:8px;min-width:0">
+                              <span style="flex:none;color:{{ s.color }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M4 5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2z"></path><path d="M8 3v18"></path></svg></span>
+                              <sc-if value="{{ p.hasLabel }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px;font-weight:700;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.label }}</span></sc-if>
+                            </div>
+                            <button onClick="{{ p.onCopy }}" style="flex:none;display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12px;font-weight:700;padding:6px 12px;border-radius:9px;cursor:pointer;background:transparent;border:1px solid {{ p.copyBd }};color:{{ p.copyColor }};transition:all .15s">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="9" y="9" width="12" height="12" rx="2"></rect><path d="M5 15V5a2 2 0 0 1 2-2h10"></path></svg>
+                              {{ p.copyLabel }}
+                            </button>
+                          </div>
+                          <div style="padding:13px 15px;font-size:13.5px;line-height:1.7;color:var(--tx);white-space:pre-wrap;word-break:break-word">{{ p.text }}</div>
+                          <sc-if value="{{ p.hasNote }}" hint-placeholder-val="{{ false }}">
+                            <div style="display:flex;gap:8px;padding:0 15px 13px;font-size:11.5px;color:var(--tx3);line-height:1.55">
+                              <span style="flex:none;color:{{ s.color }};font-weight:700">הערה</span><span>{{ p.note }}</span>
+                            </div>
+                          </sc-if>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-for>
+
+                  <button onClick="{{ s.onDone }}" style="align-self:flex-start;display:flex;align-items:center;gap:9px;font-family:inherit;font-size:13px;font-weight:700;padding:9px 15px;border-radius:11px;cursor:pointer;background:transparent;border:1px solid {{ s.checkBd }};color:{{ s.doneColor }}">
+                    <span style="width:18px;height:18px;flex:none;border-radius:6px;border:2px solid {{ s.checkBd }};background:{{ s.checkBg }};color:{{ s.checkColor }};display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                    {{ s.doneLabel }}
+                  </button>
+                </div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </sc-for>
+
+        <!-- COMING NEXT -->
+        <div style="margin-top:14px;background:var(--panel);border:1px dashed var(--bd2);border-radius:16px;padding:20px 22px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+            <span style="color:var(--tx3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
+            <div style="font-size:15px;font-weight:800">בהמשך — מודולים 3–6</div>
+          </div>
+          <div style="font-size:13.5px;color:var(--tx2);line-height:1.65;margin-bottom:12px">מכאן נכנסים ל<b style="color:var(--tx)">בנייה המדורגת</b> ואז ל<b style="color:var(--tx)">הטמעה ותפעול</b>. כל שלב חדש ייכנס באותו מבנה בדיוק: קלט ממסמכי הפרויקט, פרומפט מבצע, ופלט שנשמר חזרה. השלבים יתווספו בשיעורים הבאים.</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">סיפורי משתמש</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">תרחישי שימוש</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">PRD</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">אפיון ארכיטקטורה</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">אב טיפוס</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">בנייה בסביבת Agents</span>
+          </div>
+        </div>
+
       </div>
       </sc-if>
 
@@ -1307,6 +1485,7 @@
           <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
           <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
           <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
+          <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
         </span>
         <span style="font-size:10.5px;font-weight:{{ item.weight }}">{{ item.shortLabel }}</span>
         <sc-if value="{{ item.badge }}" hint-placeholder-val="{{ 0 }}"><span style="position:absolute;top:2px;inset-inline-end:calc(50% - 20px);width:16px;height:16px;font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--review);color:var(--onreview);border-radius:50%">{{ item.badge }}</span></sc-if>
@@ -1458,6 +1637,8 @@ class Component extends DCLogic {
     conceptQuery: '',
     conceptFilter: null,
     openCats: {},
+    procOpen: 's0',
+    procCopied: null,
     insightCat: 'all',
     insightQuery: '',
     pinned: [],
@@ -1624,6 +1805,109 @@ class Component extends DCLogic {
     return arr;
   }
   toggleSec(key) { const o = Object.assign({}, this.state.openSec); o[key] = !o[key]; this.setState({ openSec: o }); }
+
+  // ---------- process guide (Rili's working template — "ספר מיישם AI") ----------
+  toggleProcStep(id) { this.setState({ procOpen: this.state.procOpen === id ? null : id }); }
+  toggleProcDone(id) {
+    const ud = Object.assign({}, this.state.userData);
+    const pd = Object.assign({}, ud.processDone || {});
+    if (pd[id]) delete pd[id]; else pd[id] = true;
+    ud.processDone = pd;
+    this.setState({ userData: ud }, () => this.persist());
+  }
+  copyPrompt(key, text) {
+    const done = () => { this.setState({ procCopied: key }); clearTimeout(this._copyT); this._copyT = setTimeout(() => { if (this.state.procCopied === key) this.setState({ procCopied: null }); }, 1700); };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => this._fallbackCopy(text, done));
+      else this._fallbackCopy(text, done);
+    } catch (e) { this._fallbackCopy(text, done); }
+  }
+  _fallbackCopy(text, done) {
+    try { const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch (e) {}
+  }
+  procStationMeta(id) {
+    const dark = {
+      1:{c:'#95c8f0', bg:'rgba(149,200,240,.13)', bd:'rgba(149,200,240,.30)'},
+      2:{c:'#7fd4cf', bg:'rgba(127,212,207,.12)', bd:'rgba(127,212,207,.30)'},
+      3:{c:'#eec38a', bg:'rgba(238,195,138,.12)', bd:'rgba(238,195,138,.30)'},
+      4:{c:'#93e0b1', bg:'rgba(147,224,177,.12)', bd:'rgba(147,224,177,.30)'},
+    };
+    const light = {
+      1:{c:'#2b6fc0', bg:'rgba(43,111,192,.10)', bd:'rgba(43,111,192,.26)'},
+      2:{c:'#1f8a85', bg:'rgba(31,138,133,.10)', bd:'rgba(31,138,133,.26)'},
+      3:{c:'#a8721f', bg:'rgba(168,114,31,.10)', bd:'rgba(168,114,31,.26)'},
+      4:{c:'#1f8f57', bg:'rgba(31,143,87,.10)', bd:'rgba(31,143,87,.26)'},
+    };
+    return (this.isLight() ? light : dark)[id];
+  }
+  processStations() {
+    return [
+      { id:1, name:'הבנה', tag:'מודול 1 + תחילת 2', sub:'מבינים את הבעיה לפני שנוגעים בכלים.',        points:['הערך','צורך מול רצון','חקר השוק'] },
+      { id:2, name:'אבחון',          tag:'סוף מודול 2',        sub:'יורדים לשורש, ממפים בעלי עניין וקובעים מדדים.', points:['שורש הבעיה','בעלי עניין ומדדים','תעדוף ותהליכים'] },
+      { id:3, name:'בנייה מדורגת',   tag:'מודול 3–4',          sub:'הופכים את ההבנה לפתרון, נדבך אחר נדבך.',        points:['אפיון','פיתוח','בדיקות'], future:true },
+      { id:4, name:'הטמעה ותפעול',   tag:'מודול 5–6',          sub:'מלווים את המערכת לאורך כל חיי השירות.',          points:['אבטחה','סקייל','סגירה'], future:true },
+    ];
+  }
+  // Modules 1–2, the concrete steps. Each step draws its input from the project docs,
+  // runs its prompt, and saves an output back — which becomes the next step's input.
+  processModules() {
+    return [
+      { n:1, title:'יסודות ואבחנת הערך', steps:[
+        { id:'s0', n:'0', station:1, title:'בחירת הפרויקט', does:'מנסחים את הפרויקט שבחרתם להגדרה מסודרת שתלווה את כל הקורס.',
+          input:'הפרויקט שבחרתם', output:'הגדרת פרויקט מסודרת',
+          groups:[{ prompts:[{ text:'זה הפרויקט שבחרנו לקורס:\nתחום: [הזינו].\nהבעיה שאנחנו רוצים לפתור: [הזינו].\nמי המשתמש: [הזינו].\n\nנסח את הפרויקט כהגדרה מסודרת: שם הפרויקט, הבעיה במשפט אחד, המשתמש המרכזי, והערך הצפוי אם הבעיה תיפתר. החזר פלט מובנה להמשך עבודה.' }] }] },
+        { id:'s1', n:'1', station:1, title:'אסטרטגיה', does:'מחברים את הפרויקט להקשר ארגוני רחב יותר.',
+          input:'הגדרת הפרויקט', output:'המטרות האסטרטגיות שהפרויקט משרת',
+          groups:[{ prompts:[{ text:'בהתבסס על הגדרת הפרויקט שבמסמכי הפרויקט:\nמקם את הפרויקט בהקשר אסטרטגי — לאילו מטרות ארגוניות הוא מחובר, ואיזה ערך הוא מקדם. החזר שלוש עד חמש מטרות שהפרויקט משרת.' }] }] },
+        { id:'s2', n:'2', station:1, title:'אבחנת ערך ב-LEAN', does:'מבחינים מה מוסיף ערך ומהו הצורך האמיתי.',
+          input:'המטרות האסטרטגיות', output:'הצורך המרכזי',
+          groups:[{ prompts:[{ text:'בהתבסס על הפרויקט והמטרות שבמסמכי הפרויקט:\nלפי גישת LEAN — מה מוסיף ערך למשתמש ומה בזבוז. החזר את הצורך המרכזי שמצדיק את הפתרון.' }] }] },
+      ]},
+      { n:2, title:'שוק, ערך, משתמשים ותעדוף', steps:[
+        { id:'s3', n:'3', station:1, title:'צורך מול רצון', does:'מבחינים מה המשתמש חייב, ומה יגרום לו לרצות להשתמש.',
+          input:'הצורך המרכזי', output:'הצורך והרצון',
+          groups:[{ prompts:[{ text:'בהתבסס על הצורך שבמסמכי הפרויקט:\nהבחן בין מה שהמשתמש חייב לקבל לבין מה שיגרום לו לרצות להשתמש ולשתף פעולה. החזר את הצורך ואת הרצון שמניע אימוץ.' }] }] },
+        { id:'s4', n:'4', station:1, title:'מחקר שוק ומתחרים', tool:'NotebookLM', does:'בודקים מה קיים ואיפה הפער — מול מקורות אמיתיים.',
+          input:'הצורך והרצון', output:'תמונת השוק והפער המאומת',
+          groups:[{ prompts:[{ text:'בהתבסס על הצורך והרצון שבמסמכי הפרויקט:\nאילו פתרונות ומתחרים קיימים, מה כל אחד מציע, ואיפה הפער. לכל ממצא ציין רמת ודאות: מאומת, מסתבר, או לא ידוע. החזר את תמונת השוק ואת הפער.', note:'רק ממצא מאומת ממשיך כעובדה. ממצא לא ידוע ממשיך כשאלה לבדיקה.' }] }] },
+        { id:'s5', n:'5', station:2, title:'שורש הבעיה ו-ROAI', does:'מאתרים את הסיבה האמיתית, ואז בודקים אם שווה לפתור אותה.',
+          input:'הפער המאומת', output:'מסמך שורש הבעיה + החלטת ROAI',
+          groups:[
+            { title:'נושא א · שורש הבעיה', note:'ארבעה צעדים שמייצרים יחד את התמונה המלאה, ואז מאחדים.', prompts:[
+              { label:'צעד א · עצם הדג', text:'בהתבסס על הפער המאומת שבמסמכי הפרויקט:\nבנה תרשים עצם הדג — מפה את כל משפחות הגורמים לבעיה (אנשים, תהליך, כלים, סביבה, נתונים). החזר את כל הבעיות והגורמים האפשריים.' },
+              { label:'צעד ב · בחירת הבעיות', text:'בהתבסס על פריסת הגורמים שבמסמכי הפרויקט:\nעזור לבחור את הבעיות שכדאי לתת עליהן מענה, לפי השפעה על השורש ולפי היתכנות. החזר את הבעיות הנבחרות.' },
+              { label:'צעד ג · חמשת הלמה', text:'בהתבסס על הבעיות הנבחרות שבמסמכי הפרויקט:\nעל כל בעיה, הרץ חמשת הלמה — שאל "למה" חמש פעמים ברצף, כל תשובה מזינה את הבאה. הצג את השאלות והתשובות, וסמן את השורש של כל בעיה. החזר את השורשים.' },
+              { label:'צעד ד · אימות בשטח', text:'בהתבסס על השורשים שבמסמכי הפרויקט:\nהצע איך לאמת כל שורש בשטח — ב-Gemba לתהליך פיזי, או במבחן A/B למוצר דיגיטלי. החזר תוכנית אימות לכל שורש.', note:'השורש הוא השערה עד שאימתתם אותו בשטח.' },
+              { label:'איחוד', text:'אחד את כל מה שנוצר בנושא שורש הבעיה — פריסת הגורמים, הבעיות הנבחרות, השורשים, ותוכנית האימות — למסמך שורש אחד ומסודר. החזר מסמך שורש בעיה מאוחד.' },
+            ]},
+            { title:'נושא ב · ROAI', note:'מודד אם הערך שבפתרון השורש גדול מהעלות שלו.', prompts:[
+              { label:'חישוב ROAI', text:'בהתבסס על השורש המאומת שבמסמכי הפרויקט:\nחשב ROAI — כל העלויות, כולל עלות אי-הפעולה, מול הערך הצפוי מפתרון השורש. החזר את חישוב ה-ROAI וההמלצה אם להמשיך.', note:'עלות אי-הפעולה היא חלק מהחישוב. מה שעולה להישאר עם הבעיה הוא לרוב הסכום שמצדיק את הפתרון.' },
+            ]},
+          ] },
+        { id:'s6', n:'6', station:2, title:'בעלי עניין ומדדים', does:'ממפים מי מושפע ומה נחשב הצלחה — ואז מתרגמים למספרים.',
+          input:'השורש המאומת', output:'מסמך בעלי עניין + מסמך מדדים',
+          groups:[
+            { title:'נושא א · בעלי עניין', note:'שני כיווני ראיון: אתם מראיינים את ה-AI כדי להרחיב, וה-AI מראיין אתכם כדי להעמיק.', prompts:[
+              { label:'מיפוי בעלי עניין', text:'בהתבסס על השורש שבמסמכי הפרויקט:\nמפה את בעלי העניין — המשתמשים, המממנים והמאשרים, והמושפעים מהתוצאה. לכל אחד, מה נחשב הצלחה בעיניו ומה נחשב כישלון. מקם אותם על מטריצת השפעה מול עניין. החזר מפת בעלי עניין עם הגדרת הצלחה לכל אחד.' },
+              { label:'כיוון א · אני מראיין את ה-AI', text:'בהתבסס על הפרויקט והשורש שבמסמכי הפרויקט:\nאתה יועץ שמכיר פרויקטים מסוג זה. הצע רשימת בעלי עניין טיפוסיים שעשויים להיות מעורבים, ולכל אחד מה מעניין אותו ומה עלול להדאיג אותו. הצע גם חמש שאלות ראיון שיעזרו לי לזהות בעלי עניין נוספים שספציפיים לארגון שלי.' },
+              { label:'כיוון ב · ה-AI מראיין אותי', text:'אני מיישם פתרון בארגון שאני מכיר. אל תיתן לי רשימה. ראיין אותי שאלה אחר שאלה, אחת בכל פעם, כדי לחלץ ממני מי בעלי העניין האמיתיים בארגון, מה אכפת לכל אחד, ומי עלול להתנגד. חקור לעומק כל תשובה לפני שתעבור לשאלה הבאה, עד שעולה תמונה מלאה.' },
+              { label:'איחוד', text:'אחד את כל מה שנוצר בנושא בעלי העניין — המיפוי הראשוני, רשימת ה-AI, ומה שחולץ בראיון — למסמך בעלי עניין אחד. לכל בעל עניין רשום מה נחשב הצלחה בעיניו. החזר מסמך בעלי עניין מאוחד.' },
+            ]},
+            { title:'נושא ב · מדדים  (Objective ← Key Results ← KPI)', note:'השרשרת יורדת מהצלחת בעל העניין עד המדד השוטף.', prompts:[
+              { label:'בניית OKR', text:'בהתבסס על מפת בעלי העניין וההצלחה שבמסמכי הפרויקט:\nצור OKR אחד — Objective מעורר השראה שנגזר מהצלחת בעל העניין, ושלוש Key Results מדידות, ריאליות ושאפתניות לטווח שלושה עד שישה חודשים. החזר OKR מלא.' },
+              { label:'בניית KPI', text:'בהתבסס על ה-OKR שבמסמכי הפרויקט:\nגזור מכל Key Result שניים עד שלושה מדדי KPI מדידים בפועל, שיראו אם אנחנו בדרך אל היעד. טבלה: שם המדד, איך מודדים, תדירות, יעד, ואיזה Key Result הוא משרת. החזר טבלת KPI מחוברת ל-OKR.' },
+              { label:'איחוד', text:'אחד את ה-OKR ואת טבלת ה-KPI למסמך מדדים אחד, שמראה את השרשרת מהצלחת בעל העניין עד המדד השוטף. החזר מסמך מדדים מאוחד.' },
+            ]},
+          ] },
+        { id:'s7', n:'7', station:2, title:'תלויות ותעדוף', does:'מדרגים מה לבנות קודם, ומסדרים לפי תלויות.',
+          input:'המדדים ובעלי העניין', output:'סדר הביצוע המתועדף',
+          groups:[{ prompts:[{ text:'בהתבסס על המדדים ובעלי העניין שבמסמכי הפרויקט:\nהאפשרויות שעל הפרק: [פרטו]. דרג כל אפשרות לפי ערך מול מאמץ, וזהה תלויות — מה חייב להיבנות לפני מה. החזר סדר ביצוע מומלץ.' }] }] },
+        { id:'s8', n:'8', station:2, title:'מיפוי תהליכים', tool:'Mermaid + DrawIO', does:'מציירים את התהליך הקיים מול הרצוי — בסיס לאפיון.',
+          input:'סדר הביצוע', output:'התהליך הרצוי (תרשים Mermaid)',
+          groups:[{ prompts:[{ text:'בהתבסס על סדר הביצוע שבמסמכי הפרויקט:\nשרטט את התהליך הקיים היום ואת התהליך הרצוי, וסמן איפה הפער ואיפה הפתרון נכנס. החזר את התרשים בתחביר Mermaid, מוכן להדבקה ולייבוא ל-DrawIO לעריכה ויזואלית.' }] }] },
+      ]},
+    ];
+  }
 
   togglePin(id) {
     const p = this.state.pinned.slice();
@@ -2301,19 +2585,24 @@ class Component extends DCLogic {
     const inLesson = st.lessonNum != null;
     const inMap = st.conceptMapOpen;
 
+    // Feature flag: מסלול העבודה ("process guide") is built but not rolled out yet.
+    // Flip to true to make it live everywhere (nav tab, home card, view). Code stays intact when off.
+    const PROCESS_LIVE = false;
+
     // --- nav ---
     const navDef = [
       {key:'home', label:'בית', short:'בית'},
       {key:'library', label:'ספרייה', short:'ספרייה'},
+      {key:'process', label:'מסלול העבודה', short:'מסלול'},
       {key:'insights', label:'תובנות מרילי', short:'תובנות'},
       {key:'ask', label:'שאל את הקורס', short:'שאל'},
       {key:'review', label:'חזרה ותרגול', short:'חזרה'},
-    ];
+    ].filter(n => n.key === 'process' ? (PROCESS_LIVE && !isMobile) : true);
     const nav = navDef.map(n => {
       const active = st.view === n.key;
       return {
         label:n.label, shortLabel:n.short,
-        isHome:n.key==='home', isLib:n.key==='library', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review',
+        isHome:n.key==='home', isLib:n.key==='library', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process',
         onClick:() => this.setView(n.key),
         weight: active ? 700 : 500,
         color: active ? 'var(--tx)' : (isMobile ? 'var(--tx3)' : 'var(--tx2)'),
@@ -2628,6 +2917,70 @@ class Component extends DCLogic {
     if (nbQ) notebook = notebook.filter(n => n.note.toLowerCase().indexOf(nbQ)>=0 || n.title.toLowerCase().indexOf(nbQ)>=0);
     const nbActive = st.view === 'notebook';
 
+    // --- process guide (Rili's working template) ---
+    const procRaw = this.processModules();
+    const procDone = st.userData.processDone || {};
+    const allSteps = procRaw.reduce((a, m) => a.concat(m.steps), []);
+    const procTotal = allSteps.length;
+    const procDoneCount = allSteps.filter(s => procDone[s.id]).length;
+    const procPct = procTotal ? Math.round((procDoneCount / procTotal) * 100) : 0;
+    const stM = (id) => this.procStationMeta(id);
+    const procStations = this.processStations().map(s => {
+      const m = stM(s.id);
+      return {
+        id:s.id, name:s.name, tag:s.tag, sub:s.sub,
+        points: s.points.map(p => ({ t:p })),
+        color:m.c, bg:m.bg, bd:m.bd,
+        future:!!s.future, op: s.future ? 0.6 : 1,
+        badge: s.future ? 'בקרוב' : ('תחנה ' + s.id),
+        here: s.id === 2,
+        numBg: s.future ? 'var(--panel2)' : m.bg, numColor: s.future ? 'var(--tx3)' : m.c,
+      };
+    });
+    const procModules = procRaw.map(m => ({
+      n:m.n, title:m.title, label:'מודול ' + m.n,
+      steps: m.steps.map(s => {
+        const meta = stM(s.station);
+        const open = st.procOpen === s.id;
+        const done = !!procDone[s.id];
+        let pi = 0;
+        const groups = s.groups.map(g => ({
+          title: g.title || null, hasTitle: !!g.title,
+          note: g.note || null, hasNote: !!g.note,
+          prompts: g.prompts.map(p => {
+            const key = s.id + '_' + pi; pi++;
+            const copied = st.procCopied === key;
+            return {
+              label: p.label || 'הפרומפט', hasLabel: true,
+              text: p.text, note: p.note || null, hasNote: !!p.note,
+              copied, copyLabel: copied ? 'הועתק ✓' : 'העתק',
+              copyColor: copied ? 'var(--master)' : meta.c,
+              copyBd: copied ? 'var(--master)' : meta.bd,
+              onCopy: () => this.copyPrompt(key, p.text),
+            };
+          }),
+        }));
+        return {
+          id:s.id, n:s.n, title:s.title, does:s.does, input:s.input, output:s.output,
+          tool: s.tool || null, hasTool: !!s.tool,
+          open, closed: !open, done, station:s.station,
+          color:meta.c, bg:meta.bg, bd:meta.bd,
+          cardBd: open ? meta.bd : 'var(--bd)',
+          numBg: done ? meta.c : meta.bg, numColor: done ? '#141a24' : meta.c, numBd: meta.bd,
+          chevron: open ? '180deg' : '0deg',
+          checkBg: done ? 'var(--master)' : 'transparent',
+          checkBd: done ? 'var(--master)' : 'var(--bd2)',
+          checkColor: done ? 'var(--onmaster)' : 'transparent',
+          doneLabel: done ? 'הושלם' : 'סמן שהושלם',
+          doneColor: done ? 'var(--master)' : 'var(--tx3)',
+          onToggle: () => this.toggleProcStep(s.id),
+          onDone: () => this.toggleProcDone(s.id),
+          groups,
+          multiPrompt: s.groups.reduce((a, g) => a + g.prompts.length, 0) > 1,
+        };
+      }),
+    }));
+
     return {
       isMobile, isDesktop: !isMobile,
       mainPadBottom: isMobile ? 74 : 0,
@@ -2653,7 +3006,9 @@ class Component extends DCLogic {
       onOpenProfile:() => this.openProfile(),
       isNotebook: nbActive,
       onOpenNotebook:() => this.setState({ view:'notebook', lessonNum:null, conceptMapOpen:false }),
+      onOpenProcess:() => this.setView('process'),
       showNotebookShortcut: isMobile,
+      showProcessCard: PROCESS_LIVE && isMobile,
       onBackLibraryFromNb:() => this.setView('library'),
       noteQuery: st.noteQuery,
       onNoteQuery:(e) => this.setState({ noteQuery: e.target.value }),
@@ -2740,6 +3095,13 @@ class Component extends DCLogic {
       showLibraryGrid: st.view === 'library' && !inLesson && !inMap,
       showConceptMap: st.view === 'library' && inMap,
       lessons, legend,
+
+      showProcess: PROCESS_LIVE && st.view === 'process',
+      procStations, procModules,
+      procDoneCount, procTotal, procPct, procPctW: procPct + '%',
+      procHasProgress: procDoneCount > 0,
+      procStationCols: isMobile ? '1fr' : 'repeat(4,1fr)',
+      procStationArrow: isMobile ? '90deg' : '0deg',
       onOpenConceptMap:() => this.openConceptMap(),
       onBackLibrary:() => this.backLibrary(),
       conceptGroups, activeConcept, noConcept: !activeConcept,
