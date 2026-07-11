@@ -28,6 +28,13 @@
   @keyframes cbpulse{0%,100%{opacity:.35}50%{opacity:1}}
   @keyframes cbup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   @keyframes cbdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+  @keyframes cbshake{10%,90%{transform:translateX(-1px)}30%,70%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+  @media print{
+    body *{visibility:hidden !important}
+    .cheat-print,.cheat-print *{visibility:visible !important}
+    .cheat-print{position:absolute;inset:0;margin:0;border:0 !important;border-radius:0 !important}
+    .cheat-noprint{display:none !important}
+  }
 </style>
 </helmet>
 <div dir="rtl" style="{{ themeVars }}min-height:100vh;background:var(--bg);color:var(--tx);display:flex;flex-direction:column;transition:background .25s ease,color .25s ease">
@@ -69,6 +76,7 @@
             <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
             <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
             <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
+            <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
           </span>
           <span style="flex:1">{{ item.label }}</span>
           <sc-if value="{{ item.badge }}" hint-placeholder-val="{{ 0 }}"><span style="font-size:11.5px;font-weight:700;color:var(--review);background:rgba(230,185,128,.13);border-radius:20px;padding:2px 8px">{{ item.badge }}</span></sc-if>
@@ -756,6 +764,109 @@
           <button onClick="{{ lesson.onReview }}" style="flex:1;min-width:160px;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;border:1px solid rgba(230,185,128,.32);background:rgba(230,185,128,.1);color:var(--review)">חזרה על השיעור הזה ({{ lesson.cardCount }} כרטיסיות)</button>
           <button onClick="{{ lesson.onAsk }}" style="flex:1;min-width:160px;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">שאל שאלה על השיעור</button>
         </div>
+
+        <!-- ===== TEACHING TOOLS (admin, scoped to this lesson) ===== -->
+        <sc-if value="{{ lessonToolsAdmin }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:30px;border-top:1px solid var(--bd);padding-top:22px">
+          <div class="cheat-noprint" style="display:flex;align-items:center;gap:9px;margin-bottom:5px">
+            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></span>
+            <div style="font-size:16px;font-weight:800">כלי הוראה</div>
+            <span style="font-size:11px;font-weight:700;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:2px 9px">למורה בלבד</span>
+          </div>
+          <div class="cheat-noprint" style="font-size:13px;color:var(--tx3);margin-bottom:15px">פעילויות שנבנות אוטומטית מהשיעור הזה.</div>
+          <div class="cheat-noprint" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+            <sc-for list="{{ lessonToolTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ t.bg }};border:1.5px solid {{ t.border }};color:{{ t.color }};font-weight:700;font-size:13px;padding:8px 15px;border-radius:10px">{{ t.label }}</button></sc-for>
+          </div>
+
+          <sc-if value="{{ ltNone }}" hint-placeholder-val="{{ true }}"><div class="cheat-noprint" style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:34px 24px;text-align:center;color:var(--tx3);font-size:14px">בחר/י כלי כדי להתחיל.</div></sc-if>
+
+          <!-- MATCH -->
+          <sc-if value="{{ ltMatch }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div class="cheat-noprint" style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onClick="{{ onMatchReshuffle }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer">סבב חדש</button></div>
+            <sc-if value="{{ matchEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:30px 24px;text-align:center;color:var(--tx3);font-size:14px">אין מספיק מושגים בשיעור הזה למשחק.</div></sc-if>
+            <sc-if value="{{ matchActive }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+                <div style="flex:1;height:7px;border-radius:5px;background:var(--panel2);overflow:hidden"><div style="height:100%;width:{{ matchPct }}%;background:var(--master);transition:width .3s"></div></div>
+                <span style="font-size:13px;font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums">{{ matchDoneCount }} / {{ matchTotal }}</span>
+              </div>
+              <sc-if value="{{ matchWin }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(134,214,164,.13);border:1px solid var(--master);color:var(--master);border-radius:13px;padding:12px 16px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center">כל הכבוד! כל ההתאמות נכונות 🎉</div></sc-if>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;align-items:stretch">
+                <div style="font-size:12px;font-weight:700;color:var(--tx3)">מושגים</div>
+                <div style="font-size:12px;font-weight:700;color:var(--tx3)">הגדרות</div>
+                <sc-for list="{{ matchRows }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.t.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.t.cursor }};background:{{ r.t.bg }};border:1.5px solid {{ r.t.border }};color:{{ r.t.color }};font-weight:700;font-size:14px;padding:12px 14px;border-radius:12px;transition:.12s">{{ r.t.term }}</button><button onClick="{{ r.d.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.d.cursor }};background:{{ r.d.bg }};border:1.5px solid {{ r.d.border }};color:{{ r.d.color }};font-size:13px;line-height:1.5;padding:12px 14px;border-radius:12px;transition:.12s;animation:{{ r.d.anim }}">{{ r.d.def }}</button></sc-for>
+              </div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:12px;text-align:center">בחר/י מושג ואז את ההגדרה המתאימה לו.</div>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- ANALOGY -->
+          <sc-if value="{{ ltAnalogy }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:15px;padding:18px;margin-bottom:18px;max-width:640px">
+              <div style="display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-bottom:15px">
+                <span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--tx3);color:var(--tx3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">i</span>
+                <div style="font-size:12.5px;color:var(--tx3);line-height:1.55">הכלי משתמש במפתח ה-API האישי — אותו מפתח שמזינים ב”שאל את הקורס”. ללא מפתח לא ניתן לייצר אנלוגיות.</div>
+              </div>
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">מושג מהשיעור</div>
+              <select value="{{ anConcept }}" onChange="{{ onAnConcept }}" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;cursor:pointer;margin-bottom:14px">
+                <option value="">— בחר/י מושג —</option>
+                <sc-for list="{{ conceptOpts }}" as="c" hint-placeholder-count="4"><option value="{{ c.idx }}">{{ c.label }}</option></sc-for>
+              </select>
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">או נושא חופשי</div>
+              <input value="{{ anCustom }}" onInput="{{ onAnCustom }}" placeholder="למשל: ההבדל בין Instructions ל-Prompt" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;margin-bottom:14px">
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:8px">קהל יעד</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:17px">
+                <sc-for list="{{ audienceOpts }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ a.bg }};border:1.5px solid {{ a.border }};color:{{ a.color }};font-weight:600;font-size:13px;padding:8px 14px;border-radius:10px">{{ a.label }}</button></sc-for>
+              </div>
+              <button onClick="{{ onAnRun }}" style="cursor:{{ anBtnCursor }};font-family:inherit;background:var(--review);border:none;color:var(--onreview);font-weight:800;font-size:14.5px;padding:11px 22px;border-radius:11px;display:inline-flex;align-items:center;gap:9px">
+                <sc-if value="{{ anLoading }}" hint-placeholder-val="{{ false }}"><span style="width:15px;height:15px;border:2.4px solid rgba(0,0,0,.25);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span></sc-if>
+                {{ anBtnLabel }}
+              </button>
+              <sc-if value="{{ anNoLLM }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:var(--review);margin-top:11px;line-height:1.6">לא נמצא מפתח API. הוסיפו מפתח (חינמי מ-Google AI Studio) במסך <button onClick="{{ onGoAsk }}" style="background:none;border:none;padding:0;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--accent);cursor:pointer;text-decoration:underline">שאל את הקורס ›</button></div></sc-if>
+            </div>
+            <sc-if value="{{ anError }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(240,163,163,.1);border:1px solid #e6928f;color:#e6928f;border-radius:12px;padding:12px 15px;font-size:13.5px;margin-bottom:14px;max-width:640px">{{ anError }}</div></sc-if>
+            <sc-if value="{{ anHasResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;max-width:720px">
+              <sc-for list="{{ anResults }}" as="r" hint-placeholder-count="2">
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px 17px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+                    <div style="font-weight:800;font-size:15.5px;color:var(--review)">{{ r.title }}</div>
+                    <button onClick="{{ r.onCopy }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:12px;padding:5px 11px;border-radius:9px;cursor:pointer">{{ r.copyLabel }}</button>
+                  </div>
+                  <div style="font-size:14.5px;line-height:1.75;color:var(--tx)">{{ r.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- CHEAT -->
+          <sc-if value="{{ ltCheat }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div class="cheat-noprint" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">
+              <div style="font-size:13px;color:var(--tx3)">דף סיכום לשיעור זה · {{ cheatConceptCount }} מושגים</div>
+              <button onClick="{{ onCheatPrint }}" style="cursor:pointer;font-family:inherit;background:#9678e6;border:none;color:#fff;font-weight:800;font-size:13.5px;padding:9px 16px;border-radius:10px">הדפסה / PDF</button>
+            </div>
+            <sc-if value="{{ cheatHas }}" hint-placeholder-val="{{ true }}">
+            <div class="cheat-print" style="background:#fbfbfa;color:#111;border:1px solid var(--bd);border-radius:14px;padding:26px 28px">
+              <div style="border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:16px;font-weight:800;font-size:20px">{{ cheatTitle }}</div>
+              <sc-for list="{{ cheatBlocks }}" as="b" hint-placeholder-count="1">
+                <div style="columns:2;column-gap:30px">
+                  <sc-for list="{{ b.concepts }}" as="c" hint-placeholder-count="6"><div style="break-inside:avoid;font-size:12.5px;line-height:1.55;margin-bottom:7px"><span style="font-weight:700;color:#111">{{ c.term }}</span><span style="color:#444"> — {{ c.line }}</span></div></sc-for>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+        </div>
+        </sc-if>
       </div>
       </sc-if>
 
@@ -1486,6 +1597,7 @@
           <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
           <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
           <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
+          <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
         </span>
         <span style="font-size:10.5px;font-weight:{{ item.weight }}">{{ item.shortLabel }}</span>
         <sc-if value="{{ item.badge }}" hint-placeholder-val="{{ 0 }}"><span style="position:absolute;top:2px;inset-inline-end:calc(50% - 20px);width:16px;height:16px;font-size:9.5px;font-weight:800;display:flex;align-items:center;justify-content:center;background:var(--review);color:var(--onreview);border-radius:50%">{{ item.badge }}</span></sc-if>
@@ -1618,6 +1730,11 @@ class Component extends DCLogic {
   state = {
     view: 'home',
     theme: 'light',
+    tool: null, lessonTool: null,
+    matchLesson: '', matchConcepts: [], matched: {}, matchSelTerm: null, matchWrong: null, matchDefOrder: [],
+    tlLesson: '', tlItems: [], tlOrder: [], tlChecked: false,
+    anConcept: '', anCustom: '', anAudience: 'beginner', anLoading: false, anError: '', anResults: [], anCopied: null,
+    cheatSel: {},
     donateOpen: false,
     apiKey: '',
     geminiKey: '',
@@ -1769,10 +1886,10 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener('resize', this._onResize); }
 
-  setView(v) { this.setState({ view: v, lessonNum: null, conceptMapOpen: false }); }
+  setView(v) { this.setState({ view: v, lessonNum: null, conceptMapOpen: false, tool: null, lessonTool: null }); }
   toggleDeckCard(i) { const o = Object.assign({}, this.state.openDeckCards); o[i] = !o[i]; this.setState({ openDeckCards: o }); }
   toggleRecurring(theme) { const o = Object.assign({}, this.state.openThemes); o[theme] = !o[theme]; this.setState({ openThemes: o }); }
-  openLesson(n) { this.setState({ view: 'library', lessonNum: n, conceptMapOpen: false, qualityOpen: false, qualityDismissed: false, openDeckCards: {}, openSec: { chapters:false, concepts:false, quotes:false, deck:false } }); document.querySelector('main') && document.querySelector('main').scrollTo(0,0); }
+  openLesson(n) { this.setState({ view: 'library', lessonNum: n, conceptMapOpen: false, qualityOpen: false, qualityDismissed: false, openDeckCards: {}, openSec: { chapters:false, concepts:false, quotes:false, deck:false }, lessonTool: null, matchConcepts: [], matched: {}, matchSelTerm: null, matchWrong: null, tlItems: [], tlOrder: [], tlChecked: false, anConcept: '', anCustom: '', anResults: [], anError: '' }); document.querySelector('main') && document.querySelector('main').scrollTo(0,0); }
   backLibrary() { this.setState({ lessonNum: null, conceptMapOpen: false, activeConceptTerm: null }); }
   openConceptMap() { this.setState({ conceptMapOpen: true, lessonNum: null, conceptQuery: '', conceptFilter: null }); }
   selectConcept(t) { this.setState({ activeConceptTerm: this.state.activeConceptTerm === t ? null : t }); }
@@ -1805,6 +1922,169 @@ class Component extends DCLogic {
     return arr;
   }
   toggleSec(key) { const o = Object.assign({}, this.state.openSec); o[key] = !o[key]; this.setState({ openSec: o }); }
+
+  // ---------- teaching tools (admin-only) ----------
+  _tShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;} return a; }
+  _tSample(a,n){ return this._tShuffle(a).slice(0,n); }
+  _tTrunc(s,n){ s=String(s||''); return s.length>n?s.slice(0,n-1).trim()+'\u2026':s; }
+  _tFirst(s){ s=String(s||'').trim(); const m=s.split(/(?<=[.!?])\s| \u2014 |: /)[0]||s; return this._tTrunc(m,120); }
+  _tParse(t){ const p=String(t||'').split(':').map(Number); if(p.some(isNaN)) return null; return p.reduce((a,b)=>a*60+b,0); }
+  _tLesson(num){ return this.data.lessons.find(x=>String(x.num)===String(num)); }
+
+  openTool(t){ this.setState({ tool:t }); }
+  backTool(){ this.setState({ tool:null }); }
+
+  startMatch(num){
+    const l=this._tLesson(num);
+    if(!l){ this.setState({matchLesson:'',matchConcepts:[],matched:{},matchSelTerm:null,matchWrong:null,matchDefOrder:[]}); return; }
+    const picked=this._tSample((l.concepts||[]).filter(c=>c.term&&c.eli5),6);
+    const concepts=picked.map((c,i)=>({id:'m'+i,term:this._tTrunc(c.term,46),def:this._tTrunc(c.eli5,140)}));
+    this.setState({matchLesson:String(num),matchConcepts:concepts,matched:{},matchSelTerm:null,matchWrong:null,matchDefOrder:this._tShuffle(concepts.map(c=>c.id))});
+  }
+  selectTerm(id){ if(this.state.matched[id]) return; this.setState({matchSelTerm:id,matchWrong:null}); }
+  tryDef(id){
+    if(this.state.matched[id]) return;
+    const sel=this.state.matchSelTerm; if(!sel) return;
+    if(sel===id){ const m=Object.assign({},this.state.matched); m[id]=true; this.setState({matched:m,matchSelTerm:null,matchWrong:null}); }
+    else { this.setState({matchWrong:id}); setTimeout(()=>{ if(this.state.matchWrong===id) this.setState({matchWrong:null}); },550); }
+  }
+
+  startTimeline(num){
+    const l=this._tLesson(num);
+    if(!l){ this.setState({tlLesson:'',tlItems:[],tlOrder:[],tlChecked:false}); return; }
+    const chapters=(l.chapters||[]).map(c=>({title:c.title,secs:this._tParse(c.start)})).filter(c=>c.secs!=null);
+    const picked=this._tSample(chapters,Math.min(6,chapters.length)).map((c,i)=>({id:'t'+i,title:c.title,secs:c.secs}));
+    let order=this._tShuffle(picked.map(c=>c.id));
+    const correct=picked.slice().sort((a,b)=>a.secs-b.secs).map(c=>c.id);
+    if(picked.length>1&&order.join()===correct.join()) order=this._tShuffle(order);
+    this.setState({tlLesson:String(num),tlItems:picked,tlOrder:order,tlChecked:false});
+  }
+  tlMove(id,dir){
+    if(this.state.tlChecked) return;
+    const order=this.state.tlOrder.slice(); const i=order.indexOf(id); const j=i+dir;
+    if(j<0||j>=order.length) return;
+    const t=order[i]; order[i]=order[j]; order[j]=t; this.setState({tlOrder:order});
+  }
+  tlCheck(){ this.setState({tlChecked:true}); }
+
+  setToolAudience(a){ this.setState({anAudience:a}); }
+  async runAnalogy(){
+    if(this.state.anLoading) return;
+    let concept='',eli5='';
+    if((this.state.anCustom||'').trim()){ concept=this.state.anCustom.trim(); }
+    else if(this.state.anConcept!==''){ const l=this._tLesson(this.state.lessonNum); const c=l&&(l.concepts||[]).filter(x=>x.term)[Number(this.state.anConcept)]; if(c){ concept=c.term; eli5=c.eli5||''; } }
+    if(!concept){ this.setState({anError:'\u05d1\u05d7\u05e8/\u05d9 \u05de\u05d5\u05e9\u05d2 \u05d0\u05d5 \u05db\u05ea\u05d5\u05d1/\u05d9 \u05e0\u05d5\u05e9\u05d0 \u05d7\u05d5\u05e4\u05e9\u05d9.'}); return; }
+    if(!this.llmAvailable()){ this.setState({anError:'\u05d0\u05d9\u05df \u05d7\u05d9\u05d1\u05d5\u05e8 \u05dc\u05de\u05d5\u05d3\u05dc \u05e9\u05e4\u05d4 \u05db\u05e8\u05d2\u05e2.'}); return; }
+    const audMap={beginner:'\u05de\u05ea\u05d7\u05d9\u05dc\u05d9\u05dd \u05dc\u05dc\u05d0 \u05e8\u05e7\u05e2 \u05d8\u05db\u05e0\u05d9',tech:'\u05dc\u05d5\u05de\u05d3\u05d9\u05dd \u05e2\u05dd \u05e8\u05e7\u05e2 \u05d8\u05db\u05e0\u05d9',managers:'\u05de\u05e0\u05d4\u05dc\u05d9\u05dd \u05d5\u05d0\u05e0\u05e9\u05d9 \u05de\u05d5\u05e6\u05e8'};
+    const system='את/ה עוזר/ת הוראה בקורס של רילי לבבי. קבל/י מושג וקהל יעד והחזר/י שתי אנלוגיות קצרות מהחיים היומיומיים (משפט-שניים כל אחת) שממחישות אותו. שמור/י מונחים טכניים באנגלית. החזר/י JSON בלבד: {"analogies":[{"title":"כותרת קצרה","text":"האנלוגיה"}]}';
+    let user='מושג: '+concept; if(eli5) user+='\nהסבר: '+this._tTrunc(eli5,200); user+='\nקהל יעד: '+(audMap[this.state.anAudience]||audMap.beginner);
+    this.setState({anLoading:true,anError:'',anResults:[]});
+    try{
+      const raw=await this.llmComplete({model:'claude-haiku-4-5',max_tokens:400,system,messages:[{role:'user',content:user}]});
+      const list=this.parseAnalogies(raw);
+      if(!list.length) throw new Error('empty');
+      this.setState({anLoading:false,anResults:list});
+    }catch(e){ this.setState({anLoading:false,anError:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d9\u05d9\u05e6\u05e8 \u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4 \u05db\u05e8\u05d2\u05e2. \u05e0\u05e1\u05d4/\u05d9 \u05e9\u05d5\u05d1.'}); }
+  }
+  parseAnalogies(raw){
+    if(!raw) return [];
+    let t=String(raw).trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    try{ const o=JSON.parse(t); if(Array.isArray(o)) return o; if(o&&Array.isArray(o.analogies)) return o.analogies; }catch(e){}
+    const m=t.match(/\{[\s\S]*\}/);
+    if(m){ try{ const o=JSON.parse(m[0]); if(o&&Array.isArray(o.analogies)) return o.analogies; }catch(e){} }
+    return [{title:'\u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4',text:String(raw).trim()}];
+  }
+  copyToolText(text,key){ try{ navigator.clipboard.writeText(text); }catch(e){} this.setState({anCopied:key}); setTimeout(()=>{ if(this.state.anCopied===key) this.setState({anCopied:null}); },1400); }
+
+  toggleCheat(num){ const s=Object.assign({},this.state.cheatSel); s[num]=!s[num]; this.setState({cheatSel:s}); }
+  cheatAll(){ const s={}; this.data.lessons.forEach(l=>{s[l.num]=true;}); this.setState({cheatSel:s}); }
+  cheatClear(){ this.setState({cheatSel:{}}); }
+  cheatPrint(){ if(Object.keys(this.state.cheatSel).some(k=>this.state.cheatSel[k])) window.print(); }
+
+  toolVals(){
+    const st=this.state;
+    const lessons=this.data.lessons;
+    const cur=this._tLesson(st.lessonNum);
+    const inLesson=!!cur && st.view==='library';
+    const isAdmin=this.isAdminUser();
+    const lessonOpts=lessons.map(l=>({num:l.num,label:'\u05e9\u05d9\u05e2\u05d5\u05e8 '+l.num+' \u00b7 '+this._tTrunc(l.title,32)}));
+
+    // match
+    const defOrder=(st.matchDefOrder&&st.matchDefOrder.length)?st.matchDefOrder:st.matchConcepts.map(c=>c.id);
+    const byId={}; st.matchConcepts.forEach(c=>{byId[c.id]=c;});
+    const doneCount=Object.keys(st.matched).filter(k=>st.matched[k]).length;
+    const total=st.matchConcepts.length;
+    const matchTerms=st.matchConcepts.map(c=>{ const done=!!st.matched[c.id],seld=st.matchSelTerm===c.id;
+      return {term:c.term,onClick:()=>this.selectTerm(c.id),cursor:done?'default':'pointer',
+        bg:done?'rgba(134,214,164,.14)':(seld?'rgba(134,188,230,.16)':'var(--panel)'),
+        border:done?'var(--master)':(seld?'var(--accent)':'var(--bd)'),
+        color:done?'var(--master)':'var(--tx)'}; });
+    const matchDefs=defOrder.map(id=>byId[id]).filter(Boolean).map(c=>{ const done=!!st.matched[c.id],wrong=st.matchWrong===c.id;
+      return {def:c.def,onClick:()=>this.tryDef(c.id),cursor:done?'default':'pointer',
+        bg:done?'rgba(134,214,164,.14)':(wrong?'rgba(240,163,163,.14)':'var(--panel2)'),
+        border:done?'var(--master)':(wrong?'#e6928f':'var(--bd)'),
+        color:done?'var(--master)':'var(--tx2)',anim:wrong?'cbshake .4s':'none'}; });
+
+    // timeline
+    const tlById={}; st.tlItems.forEach(c=>{tlById[c.id]=c;});
+    const tlCorrect=st.tlItems.slice().sort((a,b)=>a.secs-b.secs).map(c=>c.id);
+    let tlScore=0;
+    const tlRows=st.tlOrder.map((id,idx)=>{ const it=tlById[id]; if(!it) return null;
+      const correct=st.tlChecked&&tlCorrect[idx]===id; if(correct) tlScore++;
+      const bad=st.tlChecked&&!correct; const secs=it.secs; const hh=Math.floor(secs/3600),mm=Math.floor((secs%3600)/60);
+      return {pos:idx+1,title:it.title,
+        bg:correct?'rgba(134,214,164,.1)':(bad?'rgba(240,163,163,.08)':'var(--panel)'),
+        border:correct?'var(--master)':(bad?'#e6928f':'var(--bd)'),
+        showTime:st.tlChecked,time:(hh?hh+':':'')+String(mm).padStart(2,'0'),
+        onUp:()=>this.tlMove(id,-1),onDown:()=>this.tlMove(id,1)}; }).filter(Boolean);
+    const tlN=st.tlItems.length;
+    const tlScoreLabel=st.tlChecked?(tlScore+' / '+tlN+' \u05d1\u05de\u05e7\u05d5\u05dd \u05d4\u05e0\u05db\u05d5\u05df'):'';
+    const tlScoreColor=tlScore===tlN?'var(--master)':(tlScore>=tlN/2?'var(--review)':'#e6928f');
+
+    // analogy — concepts from the current lesson only
+    const conceptOpts=cur?(cur.concepts||[]).filter(c=>c.term).map((c,i)=>({idx:String(i),label:this._tTrunc(c.term,46)})):[];
+    const audienceDefs=[{k:'beginner',label:'\u05de\u05ea\u05d7\u05d9\u05dc\u05d9\u05dd'},{k:'tech',label:'\u05e8\u05e7\u05e2 \u05d8\u05db\u05e0\u05d9'},{k:'managers',label:'\u05de\u05e0\u05d4\u05dc\u05d9\u05dd'}];
+    const audienceOpts=audienceDefs.map(a=>{ const on=st.anAudience===a.k;
+      return {label:a.label,onClick:()=>this.setToolAudience(a.k),
+        bg:on?'rgba(230,185,128,.16)':'var(--panel2)',border:on?'var(--review)':'var(--bd)',color:on?'var(--review)':'var(--tx3)'}; });
+    const anResults=(st.anResults||[]).map((r,i)=>({title:r.title||'\u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4',text:r.text||'',
+      copyLabel:st.anCopied===i?'\u05d4\u05d5\u05e2\u05ea\u05e7 \u2713':'\u05d4\u05e2\u05ea\u05e7\u05d4',onCopy:()=>this.copyToolText(r.text||'',i)}));
+
+    // cheat — the current lesson as a printable one-pager
+    const cheatConcepts=cur?(cur.concepts||[]).filter(c=>c.term).map(c=>({term:c.term,line:this._tFirst(c.eli5)})):[];
+    const cheatBlocks=cur?[{num:cur.num,title:this._tTrunc(cur.title,60),concepts:cheatConcepts}]:[];
+
+    const toolTabDefs=[{k:'match',label:'משחק התאמה'},{k:'analogy',label:'מחולל אנלוגיות'},{k:'cheat',label:'דף סיכום'}];
+    const lessonToolTabs=toolTabDefs.map(t=>{ const on=st.lessonTool===t.k;
+      return {label:t.label,onClick:()=>this.openLessonTool(t.k),
+        bg:on?'var(--accent)':'var(--panel2)',border:on?'var(--accent)':'var(--bd)',color:on?'var(--onaccent)':'var(--tx2)'}; });
+
+    return {
+      lessonToolsAdmin: isAdmin && inLesson,
+      lessonToolTabs,
+      ltNone: !st.lessonTool, ltMatch: st.lessonTool==='match', ltAnalogy: st.lessonTool==='analogy', ltCheat: st.lessonTool==='cheat',
+      onMatchReshuffle:()=>this.startMatch(st.lessonNum),
+      matchRows: matchTerms.map((t,i)=>({t, d: matchDefs[i]})).filter(r=>r.d),
+      matchActive: total>0, matchEmpty: total===0, matchTerms, matchDefs,
+      matchDoneCount:doneCount, matchTotal:total, matchPct: total?Math.round(doneCount/total*100):0, matchWin: total>0&&doneCount===total,
+      onTlReshuffle:()=>this.startTimeline(st.lessonNum),
+      tlActive: tlN>0, tlEmpty: tlN===0, tlRows, tlChecked: st.tlChecked, onTlCheck:()=>this.tlCheck(), tlScoreLabel, tlScoreColor,
+      conceptOpts, audienceOpts, anConcept: st.anConcept, anCustom: st.anCustom,
+      onAnConcept:(e)=>this.setState({anConcept:e.target.value}), onAnCustom:(e)=>this.setState({anCustom:e.target.value}),
+      onAnRun:()=>this.runAnalogy(), anLoading: st.anLoading, anError: st.anError,
+      anBtnLabel: st.anLoading?'יוצר…':'צור אנלוגיה', anBtnCursor: st.anLoading?'default':'pointer',
+      anHasResults: anResults.length>0, anResults, anNoLLM: !this.llmAvailable(), onGoAsk:()=>this.setView('ask'),
+      onCheatPrint:()=>window.print(), cheatBlocks, cheatConceptCount: cheatConcepts.length, cheatHas: cheatConcepts.length>0,
+      cheatTitle: cur?('שיעור '+cur.num+' · '+cur.title):'',
+    };
+  }
+
+  openLessonTool(t){
+    const num=this.state.lessonNum;
+    if(t==='match') this.startMatch(num);
+    else if(t==='analogy') this.setState({anConcept:'',anCustom:'',anResults:[],anError:''});
+    this.setState({lessonTool:t});
+  }
 
   // ---------- process guide (Rili's working template — "ספר מיישם AI") ----------
   toggleProcStep(id) { this.setState({ procOpen: this.state.procOpen === id ? null : id }); }
@@ -2635,7 +2915,7 @@ class Component extends DCLogic {
       const active = st.view === n.key;
       return {
         label:n.label, shortLabel:n.short,
-        isHome:n.key==='home', isLib:n.key==='library', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process',
+        isHome:n.key==='home', isLib:n.key==='library', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isTools:n.key==='tools',
         onClick:() => this.setView(n.key),
         weight: active ? 700 : 500,
         color: active ? 'var(--tx)' : (isMobile ? 'var(--tx3)' : 'var(--tx2)'),
@@ -3130,6 +3410,7 @@ class Component extends DCLogic {
       lessons, legend,
 
       showProcess: PROCESS_LIVE && st.view === 'process',
+      ...this.toolVals(),
       procStations, procModules,
       procDoneCount, procTotal, procPct, procPctW: procPct + '%',
       procHasProgress: procDoneCount > 0,
