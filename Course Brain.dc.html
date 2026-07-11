@@ -908,12 +908,12 @@
         <div style="margin-top:14px;background:var(--panel);border:1px dashed var(--bd2);border-radius:16px;padding:20px 22px">
           <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
             <span style="color:var(--tx3)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></span>
-            <div style="font-size:15px;font-weight:800">בהמשך — מודולים 3–6</div>
+            <div style="font-size:15px;font-weight:800">בהמשך — המשך מודול 3 ומודולים 4–6</div>
           </div>
-          <div style="font-size:13.5px;color:var(--tx2);line-height:1.65;margin-bottom:12px">מכאן נכנסים ל<b style="color:var(--tx)">בנייה המדורגת</b> ואז ל<b style="color:var(--tx)">הטמעה ותפעול</b>. כל שלב חדש ייכנס באותו מבנה בדיוק: קלט ממסמכי הפרויקט, פרומפט מבצע, ופלט שנשמר חזרה. השלבים יתווספו בשיעורים הבאים.</div>
+          <div style="font-size:13.5px;color:var(--tx2);line-height:1.65;margin-bottom:12px">סיימנו את שלב <b style="color:var(--tx)">סיפורי המשתמש</b>. מכאן נמשיך באפיון — <b style="color:var(--tx)">מקרי שימוש ותרשימי זרימה</b>, ואז <b style="color:var(--tx)">PRD</b> — ומשם לבנייה ולהטמעה. כל שלב חדש ייכנס באותו מבנה בדיוק: קלט ממסמכי הפרויקט, פרומפט מבצע, ופלט שנשמר חזרה. השלבים יתווספו בשיעורים הבאים.</div>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">סיפורי משתמש</span>
-            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">תרחישי שימוש</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">מקרי שימוש</span>
+            <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">תרשימי זרימה</span>
             <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">PRD</span>
             <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">אפיון ארכיטקטורה</span>
             <span style="font-size:12px;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:5px 12px">אב טיפוס</span>
@@ -1844,11 +1844,11 @@ class Component extends DCLogic {
     return [
       { id:1, name:'הבנה', tag:'מודול 1 + תחילת 2', sub:'מבינים את הבעיה לפני שנוגעים בכלים.',        points:['הערך','צורך מול רצון','חקר השוק'] },
       { id:2, name:'אבחון',          tag:'סוף מודול 2',        sub:'יורדים לשורש, ממפים בעלי עניין וקובעים מדדים.', points:['שורש הבעיה','בעלי עניין ומדדים','תעדוף ותהליכים'] },
-      { id:3, name:'בנייה מדורגת',   tag:'מודול 3–4',          sub:'הופכים את ההבנה לפתרון, נדבך אחר נדבך.',        points:['אפיון','פיתוח','בדיקות'], future:true },
+      { id:3, name:'בנייה מדורגת',   tag:'מודול 3–4',          sub:'הופכים את ההבנה לפתרון — מתחילים באפיון: סיפורי המשתמש.', points:['אפיון · סיפורי משתמש','פיתוח','בדיקות'] },
       { id:4, name:'הטמעה ותפעול',   tag:'מודול 5–6',          sub:'מלווים את המערכת לאורך כל חיי השירות.',          points:['אבטחה','סקייל','סגירה'], future:true },
     ];
   }
-  // Modules 1–2, the concrete steps. Each step draws its input from the project docs,
+  // Modules 1–3, the concrete steps. Each step draws its input from the project docs,
   // runs its prompt, and saves an output back — which becomes the next step's input.
   processModules() {
     return [
@@ -1905,6 +1905,39 @@ class Component extends DCLogic {
         { id:'s8', n:'8', station:2, title:'מיפוי תהליכים', tool:'Mermaid + DrawIO', does:'מציירים את התהליך הקיים מול הרצוי — בסיס לאפיון.',
           input:'סדר הביצוע', output:'התהליך הרצוי (תרשים Mermaid)',
           groups:[{ prompts:[{ text:'בהתבסס על סדר הביצוע שבמסמכי הפרויקט:\nשרטט את התהליך הקיים היום ואת התהליך הרצוי, וסמן איפה הפער ואיפה הפתרון נכנס. החזר את התרשים בתחביר Mermaid, מוכן להדבקה ולייבוא ל-DrawIO לעריכה ויזואלית.' }] }] },
+      ]},
+      { n:3, title:'אפיון: סיפור המשתמש', steps:[
+        { id:'s9', n:'9', station:3, title:'מסגור ובחירת דרישה', does:'קובעים למודל לייצר תוצר אחד ולעצור, ובוחרים דרישה אחת להתחיל בה.',
+          input:'התהליך הרצוי וסדר הביצוע', output:'כלל המסגור + הדרישה הנבחרת',
+          groups:[{ prompts:[{ text:'מעכשיו, בכל שלב באפיון: הפק אך ורק את התוצר שהתבקש ועצור בסופו. אל תתקדם לשלב הבא בלי בקשה מפורשת. סיים כל תשובה בשורה: "זהו תוצר השלב. השלב הבא ממתין לבקשה שלך."\n\nמתוך הדרישות המתועדפות שבמסמכי הפרויקט, בחר דרישה אחת להתחיל בה — רצוי המרכזית או הראשונה בסדר הביצוע. החזר את הדרישה הנבחרת ואת כלל המסגור, ועצור.', note:'המסגור נכנס להנחיות הפרויקט — הוא חל על כל שלבי האפיון, לא רק על השלב הזה. זה מה שמונע מהמודל לרוץ קדימה ולבנות סיפור שלם בבת אחת.' }] }] },
+        { id:'s10', n:'10', station:3, title:'ההקשר (CONTEXT)', does:'כותבים את הרקע של הדרישה — סביבה, מצב נוכחי, נתונים ומגבלות.',
+          input:'הדרישה הנבחרת', output:'CONTEXT לסיפור',
+          groups:[{ prompts:[{ text:'בהתבסס על הדרישה הנבחרת ומסמכי הפרויקט (שורש הבעיה, בעלי העניין, התהליך הרצוי):\nכתוב את ה-CONTEXT לסיפור המשתמש — הסביבה, המצב הנוכחי, הנתונים הרלוונטיים והמגבלות. השתמש רק במידע שכבר קיים במסמכי הפרויקט, אל תמציא. החזר בלוק CONTEXT ועצור.', note:'ההקשר בדרך כלל כללי לכל הפרויקט — שמרו אותו במקום אחד וחזרו אליו בכל דרישה.' }] }] },
+        { id:'s11', n:'11', station:3, title:'המשתמש (AS) — פרסונה', does:'מגדירים מי המשתמש של הדרישה, מתוך מפת בעלי העניין.',
+          input:'ה-CONTEXT', output:'הפרסונה (AS)',
+          groups:[{ prompts:[{ text:'בהתבסס על ה-CONTEXT ומפת בעלי העניין שבמסמכי הפרויקט, בטכניקת Persona:\nהגדר את המשתמש של הדרישה הזו בשורת AS אחת שמתחילה ב"אני כ...". אל תמציא משתמש חדש — קח אותו ממפת בעלי העניין. החזר את שורת ה-AS ועצור.' }] }] },
+        { id:'s12', n:'12', station:3, title:'הערך (SO THAT)', does:'מנסחים למה הדרישה נדרשת — הערך שמתקבל או הבזבוז שנחסך.',
+          input:'הפרסונה', output:'הערך (SO THAT)',
+          groups:[{ prompts:[{ text:'בהתבסס על הפרסונה ושורש הבעיה שבמסמכי הפרויקט, בטכניקת Chain of Thought:\nחשוב שלב אחר שלב, ואז נסח את ה-SO THAT — למה המשתמש צריך את זה: הערך שהוא מקבל או הבזבוז שנחסך. הצג קודם את שרשרת החשיבה, ואז את משפט ה-SO THAT הסופי. עצור.' }] }] },
+        { id:'s13', n:'13', station:3, title:'הפתרון (I WANT) — Recipe', does:'הופכים את הערך לפתרון מפורט שמפתח יכול לבנות ממנו.',
+          input:'הערך', output:'הפתרון (I WANT)',
+          groups:[{ prompts:[{ text:'בהתבסס על ה-SO THAT שבמסמכי הפרויקט, בטכניקת Recipe Pattern:\n1) המטרה = הערך מה-SO THAT.\n2) הוסף את הרכיבים הידועים מהדרישות ומהאבחון.\n3) השלם רכיבים חסרים.\n4) כתוב את הפתרון כ-I WANT מפורט — כל רכיב חייב לשרת את המטרה, ומפתח צריך לוכל לבנות ממנו. אם רכיב אינו משרת את המטרה — הסר אותו. החזר את ה-I WANT ועצור.', note:'המבחן: האם מפתח יכול לבנות את מה שנדרש מהתיאור שלנו? אם לא — פרטו יותר.' }] }] },
+        { id:'s14', n:'14', station:3, title:'קריטריוני קבלה — Fact Check List', does:'מגדירים איך נדע שהצלחנו, ומסווגים כל מספר לפני שהוא נכנס.',
+          input:'הפתרון', output:'קריטריוני קבלה מסווגים',
+          groups:[{ prompts:[{ text:'בהתבסס על ה-I WANT שבמסמכי הפרויקט, בטכניקת Fact Check List:\nנסח קריטריוני קבלה מדידים (ביצועים, דיוק, אנונימיות, תוצרים). סמן כל מספר: מאומת (מנתוני הפרויקט), מסתבר (הערכה שדורשת וידוא), או לא ידוע (דורש בדיקה). הצג טבלה בשלוש עמודות: הקריטריון, הסיווג, ומה נדרש כדי לאמת. לכל "מסתבר" ו"לא ידוע" הוסף משימת אימות. החזר את הטבלה ועצור.', note:'כלל הזהב — מספר בלי סיווג לא נכנס לסיפור, אחרת הוא הופך ליעד שהמערכת תיבחן מולו.' }] }] },
+        { id:'s15', n:'15', station:3, title:'תרחישים — Outline Expansion + Gherkin', does:'בונים תרחישי הצלחה, קצה וכשל בפורמט Given / When / Then.',
+          input:'הסיפור עד כה', output:'תרחישי Gherkin',
+          groups:[{ prompts:[{ text:'בהתבסס על הסיפור שנבנה עד כה שבמסמכי הפרויקט, בטכניקת Outline Expansion:\nבנה תרחישים בפורמט Gherkin (Given / When / Then). שלד קבוע: הצלחה (Sunny Day), מקרה גבולי (Edge Case), וכשל (Negative Case) — לפחות אחד מכל סוג. הרחב תרחיש אחד בכל פעם ועצור לאישור לפני הבא. תן דגש לתרחיש הכשל — הוא בודק כיצד המערכת מגנה על עצמה. החזר את התרחיש הראשון ועצור.', note:'העצירה בין תרחישים מונעת תרחישים שטחיים ועשרה עמודים שאיש לא ביקש.' }] }] },
+        { id:'s16', n:'16', station:3, title:'הרכבת פרומפט E2E והרצה בלופ', does:'מאחדים את ששת המרכיבים לפרומפט אחד קבוע, ומריצים אותו על כל דרישה.',
+          input:'ששת מרכיבי הסיפור', output:'סיפור משתמש לכל דרישה',
+          groups:[
+            { title:'נושא א · הרכבת תבנית ה-E2E', note:'שש הטכניקות מתחברות לפרומפט אחד שמקבל דרישה ומחזיר סיפור שלם.', prompts:[
+              { label:'בניית הפרומפט', text:'אחד את ששת המרכיבים שיצרנו (CONTEXT, AS, SO THAT, I WANT, קריטריוני קבלה, תרחישים) לפרומפט E2E אחד וקבוע, לפי הסדר, עם: בלוק מסגור בראש; הנחיה לכל מרכיב באיזו טכניקה נבנה; דוגמה אחת (Few-Shot) של סיפור משתמש מוכן; ופורמט פלט Markdown. הוסף בסוף שדה קלט משתנה: "הדרישה: ___ · המשתמש: ___". החזר את תבנית הפרומפט המלאה.', note:'רק שדה הקלט משתנה בין ריצות — לכן התוצר יציב ועקבי בכל פעם.' },
+            ]},
+            { title:'נושא ב · הרצה בלופ על כל הדרישות', note:'כאן מתחילה האוטומציה — תהליך אחד שרץ שוב ושוב.', prompts:[
+              { label:'הרצת הלופ', text:'קח את תבנית ה-E2E, ולכל דרישה ברשימת הדרישות המתועדפות שבמסמכי הפרויקט: מלא את שדה הקלט (הדרישה והמשתמש) והרץ. החזר סיפור משתמש מלא לכל דרישה — כולל קריטריוני קבלה ותרחישי Gherkin. עבור דרישה אחת בכל פעם ועצור לאישור לפני הבאה.', note:'זה גם תוצר שיעורי הבית של שיעור 9: סיפור משתמש מלא לכל דרישה ברשימה.' },
+            ]},
+          ] },
       ]},
     ];
   }
@@ -2585,9 +2618,9 @@ class Component extends DCLogic {
     const inLesson = st.lessonNum != null;
     const inMap = st.conceptMapOpen;
 
-    // Feature flag: מסלול העבודה ("process guide") is built but not rolled out yet.
-    // Flip to true to make it live everywhere (nav tab, home card, view). Code stays intact when off.
-    const PROCESS_LIVE = false;
+    // Feature flag: מסלול העבודה ("process guide").
+    // Currently rolled out to the admin user only. Set to `true` to make it live for everyone.
+    const PROCESS_LIVE = this.isAdminUser();
 
     // --- nav ---
     const navDef = [
@@ -2933,7 +2966,7 @@ class Component extends DCLogic {
         color:m.c, bg:m.bg, bd:m.bd,
         future:!!s.future, op: s.future ? 0.6 : 1,
         badge: s.future ? 'בקרוב' : ('תחנה ' + s.id),
-        here: s.id === 2,
+        here: s.id === 3,
         numBg: s.future ? 'var(--panel2)' : m.bg, numColor: s.future ? 'var(--tx3)' : m.c,
       };
     });
