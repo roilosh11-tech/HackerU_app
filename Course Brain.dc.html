@@ -13,6 +13,13 @@
 <script src="mc-distractors.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#ffffff">
+<link rel="icon" type="image/png" href="assets/icon-192.png">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="מוח הקורס">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -235,6 +242,17 @@
           <span style="flex:1;min-width:0">
             <span style="display:block;font-size:15px;font-weight:700">מסלול העבודה</span>
             <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">התהליך של רילי, שלב-שלב · מאיפה מתחילים</span>
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+        </sc-if>
+
+        <sc-if value="{{ showRetentionCard }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onOpenRetention }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;margin-top:10px;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:13px">
+          <span style="width:40px;height:40px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 3 4.5 6v5.5c0 4.3 3.1 7.4 7.5 9 4.4-1.6 7.5-4.7 7.5-9V6z"></path><path d="M9 12l2.2 2.2L15.5 10"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:15px;font-weight:700">הוכחת שימור</span>
+            <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">כמה באמת נשאר בזיכרון · למורה בלבד</span>
           </span>
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
         </button>
@@ -1915,7 +1933,7 @@
 
   <!-- ===================== MOBILE BOTTOM NAV ===================== -->
   <sc-if value="{{ isMobile }}" hint-placeholder-val="{{ false }}">
-  <nav style="position:fixed;bottom:0;inset-inline:0;z-index:40;display:flex;background:var(--panel);border-top:1px solid var(--bd);padding:6px 4px 8px">
+  <nav style="{{ themeVars }}position:fixed;bottom:0;inset-inline:0;z-index:40;display:flex;background:var(--panel);border-top:1px solid var(--bd);padding:6px 4px 8px">
     <sc-for list="{{ nav }}" as="item" hint-placeholder-count="4">
       <button onClick="{{ item.onClick }}" style="flex:1;background:none;border:none;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;color:{{ item.color }};position:relative">
         <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:{{ item.icColor }}">
@@ -1937,7 +1955,7 @@
 
   <!-- ===================== INTRO TUTORIAL ===================== -->
   <sc-if value="{{ tutorialOpen }}" hint-placeholder-val="{{ false }}">
-  <div style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
+  <div style="{{ themeVars }}position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
     <div style="width:100%;max-width:440px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:26px 24px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8);animation:cbup .3s ease">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
         <div style="font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.3px">שלב {{ tutStep.num }} מתוך {{ tutStep.total }}</div>
@@ -1965,7 +1983,7 @@
 
   <!-- ===================== DONATION MODAL ===================== -->
   <sc-if value="{{ donateOpen }}" hint-placeholder-val="{{ false }}">
-  <div onClick="{{ onCloseDonate }}" style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
+  <div onClick="{{ onCloseDonate }}" style="{{ themeVars }}position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(10,14,20,.72)">
     <div onClick="{{ stopEvt }}" style="width:100%;max-width:360px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:24px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.8);animation:cbup .3s ease">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
         <div style="font-size:16px;font-weight:800;letter-spacing:-.2px">תודה על התמיכה ♡</div>
@@ -3519,7 +3537,7 @@ class Component extends DCLogic {
       {key:'retention', label:'הוכחת שימור', short:'שימור'},
     ].filter(n => {
       if (n.key === 'process') return PROCESS_LIVE && !isMobile;
-      if (n.key === 'retention') return RETENTION_LIVE;
+      if (n.key === 'retention') return RETENTION_LIVE && !isMobile;
       return true;
     });
     const nav = navDef.map(n => {
@@ -3933,6 +3951,8 @@ class Component extends DCLogic {
       onOpenProcess:() => this.setView('process'),
       showNotebookShortcut: isMobile,
       showProcessCard: PROCESS_LIVE && isMobile,
+      showRetentionCard: RETENTION_LIVE && isMobile,
+      onOpenRetention:() => this.setView('retention'),
       onBackLibraryFromNb:() => this.setView('library'),
       noteQuery: st.noteQuery,
       onNoteQuery:(e) => this.setState({ noteQuery: e.target.value }),
