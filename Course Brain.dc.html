@@ -3368,6 +3368,12 @@ class Component extends DCLogic {
       streak = (ud.lastDay === y) ? (streak+1) : 1;
       ud.lastDay = today; ud.streak = streak;
     }
+    // ---- usage logging: app opens + distinct active days (accrues from deploy on) ----
+    const dayIdx = Math.floor(Date.now() / 86400000);
+    const activeDays = Array.isArray(ud.activeDays) ? ud.activeDays.slice() : [];
+    if (!activeDays.includes(dayIdx)) activeDays.push(dayIdx);
+    ud.activeDays = activeDays.slice(-400);
+    ud.opens = (ud.opens || 0) + 1;
     let cards;
     if (ud.cardsV === 2 && ud.cards && ud.cards.length) {
       cards = ud.cards.map(c=>Object.assign({},c));

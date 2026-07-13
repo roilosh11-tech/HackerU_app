@@ -107,6 +107,35 @@
     </div>
     </sc-if>
 
+    <!-- ENGAGEMENT leaderboard -->
+    <sc-if value="{{ hasLeaderboard }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-bottom:26px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#93e0b1"></span>
+        <div style="font-weight:700;font-size:16px">הכי פעילים</div>
+      </div>
+      <div style="font-size:12.5px;color:#8791a1;margin-bottom:12px">דירוג לפי ימים פעילים וחזרות. ספירת הפתיחות והימים הפעילים נאספת מרגע העלייה לאוויר.</div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ leaderboard }}" as="u" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:13px;background:#252d39;border:1px solid #3f4956;border-radius:14px;padding:12px 15px">
+            <div style="width:24px;flex:none;text-align:center;font-weight:800;font-size:16px;color:{{ u.rankColor }};font-variant-numeric:tabular-nums">{{ u.rank }}</div>
+            <div style="width:36px;height:36px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.displayName }}</div>
+              <div style="font-size:12px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+            </div>
+            <div style="display:flex;gap:15px;align-items:center;flex:none">
+              <div style="text-align:center"><div style="font-weight:800;font-size:16px;font-variant-numeric:tabular-nums">{{ u.activeDays30 }}</div><div style="font-size:10.5px;color:#8791a1">ימים (30)</div></div>
+              <div style="text-align:center"><div style="font-weight:800;font-size:16px;font-variant-numeric:tabular-nums">{{ u.opens }}</div><div style="font-size:10.5px;color:#8791a1">פתיחות</div></div>
+              <div style="text-align:center"><div style="font-weight:800;font-size:16px;font-variant-numeric:tabular-nums">{{ u.reviews }}</div><div style="font-size:10.5px;color:#8791a1">חזרות</div></div>
+              <div style="text-align:center;min-width:72px"><div style="font-weight:600;font-size:12.5px;color:#ccd4e1">{{ u.lastActiveLabel }}</div><div style="font-size:10.5px;color:#8791a1">נראה לאחרונה</div></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
     <!-- STUDENTS list -->
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
       <span style="width:8px;height:8px;border-radius:50%;background:#98b1ff"></span>
@@ -143,7 +172,65 @@
             </button>
           </div>
           <sc-if value="{{ u.expanded }}" hint-placeholder-val="{{ false }}">
-          <div style="padding:2px 16px 16px;background:#1f2733">
+          <div style="padding:4px 16px 18px;background:#1f2733">
+
+            <!-- learning metrics: reviews + recall accuracy -->
+            <sc-if value="{{ u.hasReviews }}" hint-placeholder-val="{{ true }}">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:14px">
+              <div style="background:#252d39;border:1px solid #3a4451;border-radius:11px;padding:10px 12px">
+                <div style="font-size:11.5px;color:#8791a1;margin-bottom:3px">חזרות שבוצעו</div>
+                <div style="font-weight:800;font-size:20px;font-variant-numeric:tabular-nums">{{ u.reviews }}</div>
+              </div>
+              <div style="background:#252d39;border:1px solid #3a4451;border-radius:11px;padding:10px 12px">
+                <div style="font-size:11.5px;color:#8791a1;margin-bottom:3px">דיוק זיכרון</div>
+                <div style="font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;color:{{ u.recallColor }}">{{ u.recallText }}</div>
+              </div>
+              <div style="background:#252d39;border:1px solid #3a4451;border-radius:11px;padding:10px 12px">
+                <div style="font-size:11.5px;color:#8791a1;margin-bottom:3px">חזרה אחרונה</div>
+                <div style="font-weight:700;font-size:14px;color:#ccd4e1">{{ u.lastReviewLabel }}</div>
+              </div>
+            </div>
+            <sc-if value="{{ u.hasRecentRecall }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12px;color:#8791a1;margin:-6px 0 10px">{{ u.recallRecentLabel }}</div>
+            </sc-if>
+            </sc-if>
+            <sc-if value="{{ u.noReviews }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:13px;color:#8791a1;padding:2px 0 10px">התלמיד/ה עדיין לא ביצע/ה חזרות בכרטיסיות.</div>
+            </sc-if>
+            <div style="font-size:12px;color:#8791a1;margin:0 0 14px">{{ u.usageLabel }}</div>
+
+            <!-- weak spots -->
+            <sc-if value="{{ u.hasWeak }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:14px">
+              <div style="font-size:12px;font-weight:700;color:#f0a3a3;margin-bottom:8px">נקודות תורפה — הכי הרבה טעויות בחזרה</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px">
+                <sc-for list="{{ u.weakList }}" as="w" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;gap:8px;background:rgba(240,163,163,.1);border:1px solid rgba(240,163,163,.3);border-radius:20px;padding:5px 12px">
+                    <span style="font-size:12.5px;color:#f0c4c4">{{ w.label }}</span>
+                    <span style="font-size:11px;color:#c98d8d;font-variant-numeric:tabular-nums">{{ w.rateLabel }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+
+            <!-- lessons touched with mastery -->
+            <sc-if value="{{ u.hasLessonStatus }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-bottom:14px">
+              <div style="font-size:12px;font-weight:700;color:#a4afc0;margin-bottom:8px">שיעורים שנגעו בהם</div>
+              <div style="display:flex;flex-wrap:wrap;gap:7px">
+                <sc-for list="{{ u.lessonStatusList }}" as="ls" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:7px;background:#252d39;border:1px solid #3a4451;border-radius:20px;padding:5px 12px">
+                    <span style="width:7px;height:7px;flex:none;border-radius:50%;background:{{ ls.color }}"></span>
+                    <span style="font-size:12.5px;color:#ccd4e1">{{ ls.label }}</span>
+                    <span style="font-size:11px;color:{{ ls.color }}">{{ ls.statusLabel }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            </sc-if>
+
+            <!-- notebook notes -->
             <sc-if value="{{ u.hasNotes }}" hint-placeholder-val="{{ false }}">
             <div style="font-size:12px;color:#8791a1;margin-bottom:9px">המחברת של {{ u.displayName }} · {{ u.noteCount }} הערות</div>
             <div style="display:flex;flex-direction:column;gap:8px">
@@ -156,7 +243,7 @@
             </div>
             </sc-if>
             <sc-if value="{{ u.noNotes }}" hint-placeholder-val="{{ true }}">
-            <div style="font-size:13px;color:#8791a1;padding:2px 0 6px">התלמיד/ה עדיין לא כתב/ה הערות.</div>
+            <div style="font-size:13px;color:#8791a1;padding:2px 0 2px">התלמיד/ה עדיין לא כתב/ה הערות.</div>
             </sc-if>
           </div>
           </sc-if>
@@ -211,6 +298,7 @@ class Component extends DCLogic {
 
   color(key) { return this.COLORS[key] || '#98b1ff'; }
   initial(name) { return (name || '?').trim().charAt(0) || '?'; }
+  trunc(s, n) { s = String(s || ''); return s.length > n ? s.slice(0, n - 1) + '…' : s; }
   toggleExpand(id) { const e = Object.assign({}, this.state.expanded); e[id] = !e[id]; this.setState({ expanded: e }); }
   lessonTitle(num) {
     const ls = (window.CourseData && window.CourseData.lessons) || [];
@@ -243,12 +331,38 @@ class Component extends DCLogic {
       onReject: () => this.reject(u.id),
     }));
 
+    const STATUS_META = {
+      'new':      { label: 'מושג חדש', color: '#98b1ff' },
+      'review':   { label: 'לחזרה',    color: '#eec38a' },
+      'mastered': { label: 'בשליטה',   color: '#93e0b1' },
+    };
+    const recallColor = (p) => p == null ? '#8791a1' : (p >= 80 ? '#93e0b1' : (p >= 60 ? '#eec38a' : '#f0a3a3'));
+
     const students = activeRaw.map(u => {
       const notesObj = u.notes || {};
       const notesList = Object.keys(notesObj)
         .filter(k => (notesObj[k] || '').trim())
         .sort((a,b) => Number(a) - Number(b))
         .map(k => ({ num: k, title: this.lessonTitle(k), text: notesObj[k] }));
+
+      const weakList = (u.weakLessons || []).map(w => {
+        const title = this.lessonTitle(w.lesson);
+        return {
+          num: w.lesson,
+          label: 'שיעור ' + w.lesson + (title ? ' · ' + this.trunc(title, 22) : ''),
+          rateLabel: w.fails + '/' + w.total + ' נכשלו',
+        };
+      });
+      const lessonStatusList = Object.keys(u.lessonStatus || {})
+        .sort((a,b) => Number(a) - Number(b))
+        .map(k => {
+          const m = STATUS_META[u.lessonStatus[k]] || STATUS_META['new'];
+          const title = this.lessonTitle(k);
+          return { num: k, label: 'שיעור ' + k + (title ? ' · ' + this.trunc(title, 18) : ''), statusLabel: m.label, color: m.color };
+        });
+      const recallPct = (u.recallPct == null) ? null : u.recallPct;
+      const reviews = u.reviewsLifetime || 0;
+
       return {
         displayName: u.displayName, username: u.username,
         color: this.color(u.avatar), initial: this.initial(u.displayName),
@@ -259,6 +373,19 @@ class Component extends DCLogic {
         lastActiveLabel: this.ago(u.lastActive),
         notesList, noteCount: notesList.length,
         hasNotes: notesList.length > 0, noNotes: notesList.length === 0,
+        // ---- learning metrics ----
+        reviews,
+        recallText: recallPct == null ? '—' : recallPct + '%',
+        recallColor: recallColor(recallPct),
+        recallRecentLabel: (u.recallRecentPct == null || !u.recallRecentN)
+          ? '' : u.recallRecentPct + '% ב-30 הימים האחרונים (' + u.recallRecentN + ' חזרות)',
+        hasRecentRecall: !(u.recallRecentPct == null || !u.recallRecentN),
+        lastReviewLabel: this.ago(u.lastReview),
+        hasReviews: reviews > 0,
+        noReviews: reviews === 0,
+        weakList, hasWeak: weakList.length > 0,
+        lessonStatusList, hasLessonStatus: lessonStatusList.length > 0,
+        usageLabel: 'פתיחות: ' + (u.opens || 0) + '  ·  ימים פעילים: ' + (u.activeDays || 0),
         expanded: !!this.state.expanded[u.id],
         onToggle: () => this.toggleExpand(u.id),
         onDelete: (e) => { if (e && e.stopPropagation) e.stopPropagation(); this.del(u.id, u.displayName); },
@@ -269,12 +396,32 @@ class Component extends DCLogic {
       ? Math.round(activeRaw.reduce((s, u) => s + (u.completion || 0), 0) / activeRaw.length) : 0;
     const totalPoints = activeRaw.reduce((s, u) => s + (u.points || 0), 0);
 
+    // ---- engagement leaderboard: who opens & uses the app the most ----
+    const rankColors = ['#eec38a', '#c8d0dd', '#d29b6b'];
+    const leaderboard = activeRaw
+      .filter(u => u.role !== 'admin')
+      .map(u => ({
+        displayName: u.displayName, username: u.username,
+        color: this.color(u.avatar), initial: this.initial(u.displayName),
+        activeDays30: u.activeDays30 || 0,
+        opens: u.opens || 0,
+        reviews: u.reviewsLifetime || 0,
+        lastActiveRaw: u.lastActive || 0,
+        lastActiveLabel: this.ago(u.lastActive),
+      }))
+      .sort((a, b) => (b.activeDays30 - a.activeDays30) || (b.reviews - a.reviews)
+        || (b.opens - a.opens) || (b.lastActiveRaw - a.lastActiveRaw))
+      .slice(0, 5)
+      .map((u, i) => Object.assign(u, { rank: i + 1, rankColor: rankColors[i] || '#8791a1' }));
+    const hasLeaderboard = leaderboard.some(u => u.activeDays30 || u.reviews || u.opens);
+
     return {
       loading: st.loading,
       denied: st.denied,
       ready: !st.loading && !st.denied,
       pending, students,
       hasPending: pending.length > 0,
+      leaderboard, hasLeaderboard,
       stats: {
         active: activeRaw.length,
         pending: pendingRaw.length,
