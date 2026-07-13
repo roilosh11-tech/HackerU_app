@@ -538,6 +538,75 @@ def gallery_comment_delete(pid: int, cid: int, request: Request):
 # ---------------------------------------------------------------------------
 # Admin endpoints
 # ---------------------------------------------------------------------------
+_RECALL_OK = {"good", "easy"}
+_RECALL_FAIL = {"again", "hard"}
+
+
+def learning_metrics(data: dict) -> dict:
+    """Derive review / recall / weak-spot metrics from a user's saved data blob.
+
+    Reads `retLog` (list of {t, r, lesson, tag} recall events; `t` is ms since epoch,
+    `r` is one of again/hard/good/easy). No DB schema change — computed on read.
+    """
+    retlog = data.get("retLog")
+    if not isinstance(retlog, list):
+        retlog = []
+    now_ms = time.time() * 1000
+    cutoff = now_ms - 30 * 86400 * 1000  # last 30 days
+    total = ok = recent_total = recent_ok = 0
+    per_lesson = {}
+    last_review = 0
+    day_set = set()
+    for e in retlog:
+        if not isinstance(e, dict):
+            continue
+        r = e.get("r")
+        t = e.get("t") or 0
+        if t:
+            day_set.add(int(t // 86400000))
+        if r not in _RECALL_OK and r not in _RECALL_FAIL:
+            continue
+        good = r in _RECALL_OK
+        total += 1
+        if good:
+            ok += 1
+        if t > last_review:
+            last_review = t
+        if t >= cutoff:
+            recent_total += 1
+            if good:
+                recent_ok += 1
+        ls = e.get("lesson")
+        if ls is not None:
+            d = per_lesson.setdefault(str(ls), {"lesson": str(ls), "total": 0, "fails": 0})
+            d["total"] += 1
+            if not good:
+                d["fails"] += 1
+    weak = [d for d in per_lesson.values() if d["fails"] > 0]
+    weak.sort(key=lambda d: (d["fails"], d["fails"] / max(1, d["total"])), reverse=True)
+    # usage: distinct active days (review-history days ∪ logged open-days) + total opens
+    for d in (data.get("activeDays") or []):
+        try:
+            day_set.add(int(d))
+        except (TypeError, ValueError):
+            pass
+    day_set.discard(0)
+    today_idx = int(now_ms // 86400000)
+    active_days = len(day_set)
+    active_days_30 = len([d for d in day_set if d >= today_idx - 30])
+    return {
+        "recallPct": round(ok / total * 100) if total else None,
+        "recallRecentPct": round(recent_ok / recent_total * 100) if recent_total else None,
+        "recallRecentN": recent_total,
+        "reviewsLogged": total,
+        "lastReview": (last_review / 1000) if last_review else None,  # → seconds, like lastActive
+        "weakLessons": weak[:3],
+        "opens": int(data.get("opens") or 0),
+        "activeDays": active_days,
+        "activeDays30": active_days_30,
+    }
+
+
 @app.get("/api/admin/users")
 def admin_users(request: Request):
     require_admin(request)
@@ -549,7 +618,11 @@ def admin_users(request: Request):
         u = user_public(r)
         u["createdAt"] = r["created_at"]
         u["lastActive"] = r["last_active"]
-        u["notes"] = json.loads(r["data_json"] or "{}").get("notes", {})
+        data = json.loads(r["data_json"] or "{}")
+        u["notes"] = data.get("notes", {})
+        u.update(learning_metrics(data))
+        u["reviewsLifetime"] = data.get("reviewsTotal") or u["reviewsLogged"]
+        u["lessonStatus"] = {k: v for k, v in (data.get("statusOverride") or {}).items() if v}
         out.append(u)
     return {"users": out}
 
