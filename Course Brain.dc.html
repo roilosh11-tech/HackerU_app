@@ -2334,19 +2334,35 @@ class Component extends DCLogic {
     let user='מושג: '+concept; if(eli5) user+='\nהסבר: '+this._tTrunc(eli5,200); user+='\nקהל יעד: '+(audMap[this.state.anAudience]||audMap.beginner);
     this.setState({anLoading:true,anError:'',anResults:[]});
     try{
-      const raw=await this.llmComplete({model:'claude-haiku-4-5',max_tokens:400,system,messages:[{role:'user',content:user}]});
+      const raw=await this.llmComplete({model:'claude-haiku-4-5',max_tokens:800,system,messages:[{role:'user',content:user}]});
       const list=this.parseAnalogies(raw);
       if(!list.length) throw new Error('empty');
       this.setState({anLoading:false,anResults:list});
     }catch(e){ this.setState({anLoading:false,anError:'\u05dc\u05d0 \u05d4\u05e6\u05dc\u05d7\u05ea\u05d9 \u05dc\u05d9\u05d9\u05e6\u05e8 \u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4 \u05db\u05e8\u05d2\u05e2. \u05e0\u05e1\u05d4/\u05d9 \u05e9\u05d5\u05d1.'}); }
   }
+  _unescJSONStr(s){ try{ return JSON.parse('"'+String(s).replace(/\n/g,'\\n').replace(/\r/g,'')+'"'); }catch(e){ return String(s).replace(/\\"/g,'"').replace(/\\n/g,'\n').replace(/\\\\/g,'\\'); } }
+  _normAnalogies(list){
+    if(!Array.isArray(list)) return [];
+    return list.filter(a=>a&&(a.title||a.text))
+      .map(a=>({title:String(a.title||'\u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4').trim(),text:String(a.text||'').trim()}))
+      .filter(a=>a.text);
+  }
   parseAnalogies(raw){
     if(!raw) return [];
     let t=String(raw).trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
-    try{ const o=JSON.parse(t); if(Array.isArray(o)) return o; if(o&&Array.isArray(o.analogies)) return o.analogies; }catch(e){}
-    const m=t.match(/\{[\s\S]*\}/);
-    if(m){ try{ const o=JSON.parse(m[0]); if(o&&Array.isArray(o.analogies)) return o.analogies; }catch(e){} }
-    return [{title:'\u05d0\u05e0\u05dc\u05d5\u05d2\u05d9\u05d4',text:String(raw).trim()}];
+    const tryJSON=(s)=>{ try{ const o=JSON.parse(s); if(Array.isArray(o)) return o; if(o&&Array.isArray(o.analogies)) return o.analogies; }catch(e){} return null; };
+    // 1) strict JSON: whole string, then first {...} / [...] block
+    let list=tryJSON(t);
+    if(!list){ const m=t.match(/[\[{][\s\S]*[\]}]/); if(m) list=tryJSON(m[0]); }
+    let norm=this._normAnalogies(list);
+    if(norm.length) return norm;
+    // 2) regex-extract title/text pairs — survives truncated / prose-wrapped JSON
+    const out=[]; const re=/"title"\s*:\s*"((?:[^"\\]|\\.)*)"\s*,\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)"/g; let mm;
+    while((mm=re.exec(t))){ out.push({title:this._unescJSONStr(mm[1]),text:this._unescJSONStr(mm[2])}); }
+    norm=this._normAnalogies(out);
+    if(norm.length) return norm;
+    // 3) nothing parseable — return empty so the caller shows a friendly error (never dump raw JSON)
+    return [];
   }
   copyToolText(text,key){ try{ navigator.clipboard.writeText(text); }catch(e){} this.setState({anCopied:key}); setTimeout(()=>{ if(this.state.anCopied===key) this.setState({anCopied:null}); },1400); }
 
