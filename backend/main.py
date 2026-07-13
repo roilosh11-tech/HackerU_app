@@ -211,6 +211,18 @@ app.add_middleware(
 )
 
 
+# Force revalidation of the app shell (HTML/JS/manifest) so a new deploy is picked
+# up immediately instead of a stale browser-cached copy. Hashed assets could be
+# cached long-term, but here we keep it simple and just no-cache the shell.
+@app.middleware("http")
+async def no_cache_app_shell(request: Request, call_next):
+    resp = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.endswith((".dc.html", ".html", ".js", ".webmanifest")):
+        resp.headers["Cache-Control"] = "no-cache, must-revalidate"
+    return resp
+
+
 @app.on_event("startup")
 def _startup():
     init_db()
