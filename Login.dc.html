@@ -55,10 +55,10 @@
       <!-- GOOGLE sign-in (custom button → OAuth token popup) -->
       <sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ false }}">
       <div style="margin-bottom:16px">
-        <a href="{{ googleAuthUrl }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:11px;background:#ffffff;color:#3c4043;border:1px solid #dadce0;border-radius:11px;padding:12px 14px;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none" style-hover="background:#f7f8f8">
+        <button onClick="{{ onGoogleStart }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:11px;background:#ffffff;color:#3c4043;border:1px solid #dadce0;border-radius:11px;padding:12px 14px;font-weight:600;font-size:15px;cursor:pointer" style-hover="background:#f7f8f8">
           <img src="https://developers.google.com/identity/images/g-logo.png" alt="" width="18" height="18" style="display:block;flex:0 0 auto" />
           <span>כניסה באמצעות Google</span>
-        </a>
+        </button>
       </div>
       </sc-if>
       <sc-if value="{{ showDivider }}" hint-placeholder-val="{{ false }}">
@@ -439,7 +439,7 @@ class Component extends DCLogic {
       gClaim: st.googleView === 'claim',
       gCreate: st.googleView === 'create',
       gName, gEmail: st.gEmail, gInitial,
-      googleAuthUrl,
+      onGoogleStart: () => { window.location.href = '/api/auth/google/start'; },
       onGoClaim: () => this.setState({ googleView: 'claim', error: '', username: '', password: '' }),
       onGoCreate: () => this.setState({ googleView: 'create', error: '' }),
       onGoBackChoice: () => this.setState({ googleView: 'choice', error: '' }),
