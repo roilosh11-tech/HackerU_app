@@ -222,6 +222,37 @@ def verify_google_credential(credential: str) -> dict:
     return claims
 
 
+def verify_google_access_token(access_token: str) -> dict:
+    """Verify a Google OAuth access token (from the token-client popup) and return
+    its claims. tokeninfo validates the token and tells us which client it was
+    minted for (aud/azp) plus the user's sub/email."""
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(503, "google sign-in not configured")
+    if not access_token:
+        raise HTTPException(400, "missing access token")
+    try:
+        url = "https://oauth2.googleapis.com/tokeninfo?access_token=" + urllib.parse.quote(access_token)
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            claims = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        raise HTTPException(401, "could not verify google token")
+    if claims.get("aud") != GOOGLE_CLIENT_ID and claims.get("azp") != GOOGLE_CLIENT_ID:
+        raise HTTPException(401, "google token audience mismatch")
+    if not claims.get("sub"):
+        raise HTTPException(401, "google token missing sub")
+    return claims
+
+
+def resolve_google_identity(credential=None, access_token=None) -> dict:
+    """Accept either a GIS ID token (credential) or an OAuth access token and
+    return normalized claims (sub / email / email_verified / name)."""
+    if credential:
+        return verify_google_credential(credential)
+    if access_token:
+        return verify_google_access_token(access_token)
+    raise HTTPException(400, "missing google credential")
+
+
 def make_token(user_id: int) -> str:
     payload = {
         "sub": str(user_id),
@@ -316,17 +347,20 @@ class LoginIn(BaseModel):
 
 
 class GoogleAuthIn(BaseModel):
-    credential: str
+    credential: Optional[str] = None
+    accessToken: Optional[str] = None
 
 
 class GoogleClaimIn(BaseModel):
-    credential: str
+    credential: Optional[str] = None
+    accessToken: Optional[str] = None
     username: str
     password: str
 
 
 class GoogleCreateIn(BaseModel):
-    credential: str
+    credential: Optional[str] = None
+    accessToken: Optional[str] = None
     displayName: str
     avatar: Optional[str] = ""
 
@@ -429,7 +463,7 @@ def google_auth(body: GoogleAuthIn):
     existing password account). If no account matches, returns status='unlinked'
     so the front-end can offer the one-time claim step or a new-account form.
     """
-    claims = verify_google_credential(body.credential)
+    claims = resolve_google_identity(body.credential, body.accessToken)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     email_verified = str(claims.get("email_verified")).lower() == "true"
@@ -463,7 +497,7 @@ def google_auth(body: GoogleAuthIn):
 def google_claim(body: GoogleClaimIn):
     """One-time link: prove ownership of an existing account with its old
     username+password, then bind this Google account to it (progress preserved)."""
-    claims = verify_google_credential(body.credential)
+    claims = resolve_google_identity(body.credential, body.accessToken)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     uname = body.username.strip().lower()
@@ -501,7 +535,7 @@ def google_create(body: GoogleCreateIn):
     exactly like a password registration — admin approves before first entry."""
     if not ALLOW_SIGNUP:
         raise HTTPException(403, "signups are closed")
-    claims = verify_google_credential(body.credential)
+    claims = resolve_google_identity(body.credential, body.accessToken)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     dn = (body.displayName or claims.get("name") or "").strip()
