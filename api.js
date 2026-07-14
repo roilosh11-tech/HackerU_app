@@ -165,9 +165,9 @@
 
   // Sign in with a Google ID token. Resolves to {token,user} (logged in) or
   // {status:'unlinked', email, name} — the caller then offers claim / create.
-  API.googleAuth = async function (credential) {
+  API.googleAuth = async function (payload) {
     if (API.mode === "offline") return { offline: true };
-    var r = await req("POST", "/api/auth/google", { credential: credential });
+    var r = await req("POST", "/api/auth/google", payload);
     if (r && r.token) { setToken(r.token); API.user = r.user; }
     return r;
   };
