@@ -73,8 +73,10 @@ ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
 # Google Sign-In. Set GOOGLE_CLIENT_ID (the OAuth 2.0 Web client ID from Google
 # Cloud Console) to enable "התחברות עם Google". If empty, the Google button is
-# hidden and only username/password auth is available.
+# hidden and only username/password auth is available. GOOGLE_CLIENT_SECRET is
+# required for the authorization-code flow (server-side code→token exchange).
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 
 
 # ---------------------------------------------------------------------------
@@ -253,6 +255,71 @@ def resolve_google_identity(credential=None, access_token=None) -> dict:
     raise HTTPException(400, "missing google credential")
 
 
+def resolve_google_identity(credential=None, access_token=None, code=None, redirect_uri=None, link_token=None) -> dict:
+    """Accept a GIS ID token, an OAuth access token, an authorization code (exchanged
+    server-side), or a short-lived link ticket, and return normalized claims."""
+    if link_token:
+        return read_glink(link_token)
+    if code:
+        return exchange_google_code(code, redirect_uri or "")
+    if credential:
+        return verify_google_credential(credential)
+    if access_token:
+        return verify_google_access_token(access_token)
+    raise HTTPException(400, "missing google credential")
+
+
+def exchange_google_code(code: str, redirect_uri: str) -> dict:
+    """Exchange an authorization code for tokens (server-side, using the client
+    secret), then return the verified identity claims."""
+    if not (GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET):
+        raise HTTPException(503, "google sign-in not configured")
+    data = urllib.parse.urlencode({
+        "code": code,
+        "client_id": GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri": redirect_uri,
+        "grant_type": "authorization_code",
+    }).encode()
+    try:
+        req_obj = urllib.request.Request(
+            "https://oauth2.googleapis.com/token", data=data, method="POST",
+            headers={"Content-Type": "application/x-www-form-urlencoded"})
+        with urllib.request.urlopen(req_obj, timeout=10) as resp:
+            tok = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        raise HTTPException(401, "could not exchange google code")
+    if tok.get("id_token"):
+        return verify_google_credential(tok["id_token"])
+    if tok.get("access_token"):
+        return verify_google_access_token(tok["access_token"])
+    raise HTTPException(401, "google token missing")
+
+
+def make_glink(claims: dict) -> str:
+    """Short-lived signed ticket proving a verified Google identity, handed to the
+    client so the follow-up claim/create call needn't re-exchange the (single-use) code."""
+    payload = {
+        "gsub": claims["sub"],
+        "gemail": (claims.get("email") or "").strip().lower(),
+        "gname": claims.get("name") or "",
+        "typ": "glink",
+        "exp": dt.datetime.utcnow() + dt.timedelta(minutes=15),
+    }
+    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALG)
+
+
+def read_glink(token: str) -> dict:
+    try:
+        p = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALG])
+    except Exception:
+        raise HTTPException(401, "link session expired")
+    if p.get("typ") != "glink":
+        raise HTTPException(401, "bad link token")
+    return {"sub": p["gsub"], "email": p.get("gemail", ""),
+            "email_verified": "true", "name": p.get("gname", "")}
+
+
 def make_token(user_id: int) -> str:
     payload = {
         "sub": str(user_id),
@@ -349,11 +416,14 @@ class LoginIn(BaseModel):
 class GoogleAuthIn(BaseModel):
     credential: Optional[str] = None
     accessToken: Optional[str] = None
+    code: Optional[str] = None
+    redirectUri: Optional[str] = None
 
 
 class GoogleClaimIn(BaseModel):
     credential: Optional[str] = None
     accessToken: Optional[str] = None
+    linkToken: Optional[str] = None
     username: str
     password: str
 
@@ -361,6 +431,7 @@ class GoogleClaimIn(BaseModel):
 class GoogleCreateIn(BaseModel):
     credential: Optional[str] = None
     accessToken: Optional[str] = None
+    linkToken: Optional[str] = None
     displayName: str
     avatar: Optional[str] = ""
 
@@ -463,7 +534,7 @@ def google_auth(body: GoogleAuthIn):
     existing password account). If no account matches, returns status='unlinked'
     so the front-end can offer the one-time claim step or a new-account form.
     """
-    claims = resolve_google_identity(body.credential, body.accessToken)
+    claims = resolve_google_identity(body.credential, body.accessToken, body.code, body.redirectUri)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     email_verified = str(claims.get("email_verified")).lower() == "true"
@@ -481,7 +552,7 @@ def google_auth(body: GoogleAuthIn):
             row = conn.execute("SELECT * FROM users WHERE id=?", (cand["id"],)).fetchone()
     if row is None:
         conn.close()
-        return {"status": "unlinked", "email": email, "name": name}
+        return {"status": "unlinked", "email": email, "name": name, "linkToken": make_glink(claims)}
     try:
         _google_status_gate(row)
     except HTTPException:
@@ -497,7 +568,7 @@ def google_auth(body: GoogleAuthIn):
 def google_claim(body: GoogleClaimIn):
     """One-time link: prove ownership of an existing account with its old
     username+password, then bind this Google account to it (progress preserved)."""
-    claims = resolve_google_identity(body.credential, body.accessToken)
+    claims = resolve_google_identity(body.credential, body.accessToken, None, None, body.linkToken)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     uname = body.username.strip().lower()
@@ -535,7 +606,7 @@ def google_create(body: GoogleCreateIn):
     exactly like a password registration — admin approves before first entry."""
     if not ALLOW_SIGNUP:
         raise HTTPException(403, "signups are closed")
-    claims = resolve_google_identity(body.credential, body.accessToken)
+    claims = resolve_google_identity(body.credential, body.accessToken, None, None, body.linkToken)
     sub = claims["sub"]
     email = (claims.get("email") or "").strip().lower()
     dn = (body.displayName or claims.get("name") or "").strip()
