@@ -286,16 +286,26 @@ class Component extends DCLogic {
     start();
   }
 
-  setGBtn = (el) => { this._gEl = el; this.renderGButton(); };
+  setGBtn = (el) => { this._gEl = el; this._gRetry = 0; if (el) this.renderGButton(); };
 
   renderGButton() {
     if (!this._gEl || !this._gReady) return;
     if (!(window.google && google.accounts && google.accounts.id)) return;
-    this._gEl.innerHTML = '';
-    google.accounts.id.renderButton(this._gEl, {
-      theme: 'filled_blue', size: 'large', shape: 'pill',
-      text: 'signin_with', locale: 'he', width: 300,
-    });
+    try {
+      this._gEl.innerHTML = '';
+      google.accounts.id.renderButton(this._gEl, {
+        theme: 'filled_blue', size: 'large', shape: 'pill',
+        text: 'signin_with', locale: 'he', width: 300,
+      });
+    } catch (e) {}
+    // GIS occasionally no-ops if called a hair too early (esp. after a logout
+    // navigation) — retry until an actual button element appears.
+    if (this._gEl.childElementCount === 0) {
+      this._gRetry = (this._gRetry || 0) + 1;
+      if (this._gRetry < 40) setTimeout(() => this.renderGButton(), 200);
+    } else {
+      this._gRetry = 0;
+    }
   }
 
   async handleGoogle(credential) {
