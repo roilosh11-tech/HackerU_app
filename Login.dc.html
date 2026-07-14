@@ -9,6 +9,7 @@
 <x-dc>
 <helmet>
 <script src="api.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -48,6 +49,95 @@
         <button onClick="{{ onModeLogin }}" style="flex:1;padding:9px;border:0;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;background:{{ loginTabBg }};color:{{ loginTabColor }}">התחברות</button>
         <button onClick="{{ onModeRegister }}" style="flex:1;padding:9px;border:0;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;background:{{ registerTabBg }};color:{{ registerTabColor }}">הרשמה</button>
       </div>
+
+      <!-- GOOGLE sign-in + divider -->
+      <sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ false }}">
+      <div style="margin-bottom:16px">
+        <div ref="{{ setGBtn }}" style="display:flex;justify-content:center;min-height:44px;color-scheme:dark"></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
+          <div style="flex:1;height:1px;background:#3a4451"></div>
+          <div style="font-size:12px;color:#7f8a9b">או</div>
+          <div style="flex:1;height:1px;background:#3a4451"></div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- GOOGLE flow: link existing progress, or open a new account -->
+      <sc-if value="{{ googleView }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <div style="display:flex;align-items:center;gap:10px;background:#1f2733;border:1px solid #3a4451;border-radius:12px;padding:10px 12px">
+          <div style="width:34px;height:34px;flex:0 0 auto;border-radius:50%;background:#98b1ff;color:#141a24;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px">{{ gInitial }}</div>
+          <div style="min-width:0">
+            <div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ gName }}</div>
+            <div dir="ltr" style="font-size:12.5px;color:#a4afc0;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ gEmail }}</div>
+          </div>
+        </div>
+
+        <!-- choice -->
+        <sc-if value="{{ gChoice }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <div style="font-size:14.5px;color:#ccd4e1;line-height:1.6">לא נמצא חשבון מקושר לכתובת הזו. אם כבר יש לך התקדמות בקורס — חבר/י אותה עכשיו כדי לא לאבד שום דבר.</div>
+          <button onClick="{{ onGoClaim }}" style="display:flex;align-items:center;justify-content:center;background:#98b1ff;border:0;color:#141a24;font-weight:800;font-size:15px;padding:13px;border-radius:12px;cursor:pointer">כבר יש לי חשבון — חיבור ההתקדמות</button>
+          <button onClick="{{ onGoCreate }}" style="display:flex;align-items:center;justify-content:center;background:#2e3743;border:1px solid #505c6d;color:#ccd4e1;font-weight:700;font-size:14.5px;padding:12px;border-radius:12px;cursor:pointer">אני חדש/ה — פתיחת חשבון</button>
+          <button onClick="{{ onGoCancel }}" style="background:none;border:0;color:#7f8a9b;font-size:13px;cursor:pointer;padding:2px">ביטול</button>
+        </div>
+        </sc-if>
+
+        <!-- claim: prove ownership of the old account -->
+        <sc-if value="{{ gClaim }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="font-size:14px;color:#a4afc0;line-height:1.6">התחבר/י פעם אחת עם שם המשתמש והסיסמה הישנים. נחבר אותם לחשבון Google שלך — וכל ההתקדמות תישמר.</div>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#ccd4e1">
+            שם משתמש קיים
+            <input value="{{ username }}" onInput="{{ onUsername }}" placeholder="באנגלית, ללא רווחים" dir="ltr" style="width:100%;background:#1f2733;border:1px solid #3f4956;border-radius:11px;padding:11px 13px;color:#f6f8fc;font-size:15px;outline:none;text-align:right" />
+          </label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#ccd4e1">
+            סיסמה קיימת
+            <input value="{{ password }}" onInput="{{ onPassword }}" onKeyDown="{{ onGoClaimKey }}" type="password" dir="ltr" style="width:100%;background:#1f2733;border:1px solid #3f4956;border-radius:11px;padding:11px 13px;color:#f6f8fc;font-size:15px;outline:none;text-align:right" />
+          </label>
+          <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+          <div style="background:rgba(240,163,163,.1);border:1px solid rgba(240,163,163,.32);color:#f0a3a3;font-size:13.5px;font-weight:500;padding:10px 13px;border-radius:11px;line-height:1.5">{{ error }}</div>
+          </sc-if>
+          <button onClick="{{ onGoClaimSubmit }}" disabled="{{ busy }}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#98b1ff;border:0;color:#141a24;font-weight:800;font-size:15.5px;padding:13px;border-radius:12px;cursor:pointer;opacity:{{ submitOpacity }}">
+            <sc-if value="{{ busy }}" hint-placeholder-val="{{ false }}"><span style="width:15px;height:15px;border:2.4px solid rgba(20,26,36,.35);border-top-color:#141a24;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span></sc-if>
+            חיבור ושמירת ההתקדמות
+          </button>
+          <button onClick="{{ onGoBackChoice }}" style="background:none;border:0;color:#7f8a9b;font-size:13px;cursor:pointer;padding:2px">חזרה</button>
+        </div>
+        </sc-if>
+
+        <!-- create: brand-new student via Google -->
+        <sc-if value="{{ gCreate }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#ccd4e1">
+            שם תצוגה
+            <input value="{{ displayName }}" onInput="{{ onDisplayName }}" placeholder="איך שיופיע בכיתה" style="width:100%;background:#1f2733;border:1px solid #3f4956;border-radius:11px;padding:11px 13px;color:#f6f8fc;font-size:15px;outline:none" />
+          </label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:600;color:#ccd4e1">בחר/י צבע לפרופיל</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ onPickIndigo }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#98b1ff;box-shadow:{{ av.indigo }}"></button>
+              <button onClick="{{ onPickGreen }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#93e0b1;box-shadow:{{ av.green }}"></button>
+              <button onClick="{{ onPickSky }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#95c8f0;box-shadow:{{ av.sky }}"></button>
+              <button onClick="{{ onPickAmber }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#eec38a;box-shadow:{{ av.amber }}"></button>
+              <button onClick="{{ onPickRose }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#f0a3a3;box-shadow:{{ av.rose }}"></button>
+              <button onClick="{{ onPickViolet }}" style="width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;background:#b6a0f0;box-shadow:{{ av.violet }}"></button>
+            </div>
+          </div>
+          <sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+          <div style="background:rgba(240,163,163,.1);border:1px solid rgba(240,163,163,.32);color:#f0a3a3;font-size:13.5px;font-weight:500;padding:10px 13px;border-radius:11px;line-height:1.5">{{ error }}</div>
+          </sc-if>
+          <button onClick="{{ onGoCreateSubmit }}" disabled="{{ busy }}" style="display:flex;align-items:center;justify-content:center;gap:9px;background:#98b1ff;border:0;color:#141a24;font-weight:800;font-size:15.5px;padding:13px;border-radius:12px;cursor:pointer;opacity:{{ submitOpacity }}">
+            <sc-if value="{{ busy }}" hint-placeholder-val="{{ false }}"><span style="width:15px;height:15px;border:2.4px solid rgba(20,26,36,.35);border-top-color:#141a24;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span></sc-if>
+            פתיחת חשבון
+          </button>
+          <button onClick="{{ onGoBackChoice }}" style="background:none;border:0;color:#7f8a9b;font-size:13px;cursor:pointer;padding:2px">חזרה</button>
+        </div>
+        </sc-if>
+
+      </div>
+      </sc-if>
 
       <!-- SUCCESS / pending state -->
       <sc-if value="{{ done }}" hint-placeholder-val="{{ false }}">
@@ -135,6 +225,11 @@ class Component extends DCLogic {
     doneTitle: '',
     doneMsg: '',
     offline: false,
+    googleEnabled: false,
+    googleView: null,        // null | 'choice' | 'claim' | 'create'
+    gCredential: '',
+    gEmail: '',
+    gName: '',
   };
 
   async componentDidMount() {
@@ -147,10 +242,96 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ booting: false, offline: !API.isOnline() });
+    if (API.googleClientId) { this.setState({ googleEnabled: true }); this.initGoogle(); }
   }
 
   setField(k) { return (e) => this.setState({ [k]: e.target.value, error: '' }); }
   pick(a) { return () => this.setState({ avatar: a }); }
+
+  // ---- Google Sign-In ----------------------------------------------------
+  initGoogle() {
+    const API = window.CourseAPI;
+    if (!API || !API.googleClientId) return;
+    const start = () => {
+      if (!(window.google && google.accounts && google.accounts.id)) {
+        this._gTries = (this._gTries || 0) + 1;
+        if (this._gTries < 60) setTimeout(start, 150);
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: API.googleClientId,
+        callback: (resp) => this.handleGoogle(resp && resp.credential),
+      });
+      this._gReady = true;
+      this.renderGButton();
+    };
+    start();
+  }
+
+  setGBtn = (el) => { this._gEl = el; this.renderGButton(); };
+
+  renderGButton() {
+    if (!this._gEl || !this._gReady) return;
+    if (!(window.google && google.accounts && google.accounts.id)) return;
+    this._gEl.innerHTML = '';
+    google.accounts.id.renderButton(this._gEl, {
+      theme: 'filled_blue', size: 'large', shape: 'pill',
+      text: 'signin_with', locale: 'he', width: 300,
+    });
+  }
+
+  async handleGoogle(credential) {
+    if (!credential || this.state.busy) return;
+    this.setState({ busy: true, error: '' });
+    try {
+      const r = await window.CourseAPI.googleAuth(credential);
+      if (r && r.offline) {
+        this.setState({ busy: false, error: 'התחברות Google תעבוד בגרסה החיה של האתר לאחר הפריסה.' });
+        return;
+      }
+      if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
+      if (r && r.status === 'unlinked') {
+        this.setState({ busy: false, googleView: 'choice', gCredential: credential,
+          gEmail: r.email || '', gName: r.name || '', displayName: r.name || '',
+          username: '', password: '', error: '' });
+        return;
+      }
+      this.setState({ busy: false });
+    } catch (e) {
+      this.setState({ busy: false, error: e.message || 'שגיאה בהתחברות עם Google' });
+    }
+  }
+
+  async goClaim() {
+    if (this.state.busy) return;
+    const { username, password, gCredential } = this.state;
+    if (username.trim().length < 3 || password.length < 4) {
+      this.setState({ error: 'הזן/י את שם המשתמש והסיסמה הקיימים' }); return;
+    }
+    this.setState({ busy: true, error: '' });
+    try {
+      const r = await window.CourseAPI.googleClaim({ credential: gCredential, username: username.trim(), password });
+      if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
+      this.setState({ busy: false });
+    } catch (e) {
+      this.setState({ busy: false, error: e.message || 'החיבור נכשל, נסה/י שוב' });
+    }
+  }
+
+  async goCreate() {
+    if (this.state.busy) return;
+    const { displayName, avatar, gCredential } = this.state;
+    if (!displayName.trim()) { this.setState({ error: 'נא להזין שם תצוגה' }); return; }
+    this.setState({ busy: true, error: '' });
+    try {
+      await window.CourseAPI.googleCreate({ credential: gCredential, displayName: displayName.trim(), avatar });
+      this.setState({ busy: false, googleView: null, done: true,
+        doneTitle: 'הבקשה נשלחה!',
+        doneMsg: 'החשבון שלך נוצר וממתין לאישור המנהל/ת. תקבל/י גישה מיד לאחר האישור.' });
+    } catch (e) {
+      this.setState({ busy: false, error: e.message || 'פתיחת החשבון נכשלה' });
+    }
+  }
 
   async submit() {
     if (this.state.busy) return;
@@ -199,8 +380,25 @@ class Component extends DCLogic {
       ? 'מצב תצוגה מקדימה — הנתונים נשמרים מקומית בדפדפן. לאחר פריסה לשרת, ההתחברות והשמירה יעבדו לכל הכיתה.'
       : 'חשבון חדש מצריך אישור מהמנהל/ת לפני הכניסה הראשונה.';
 
+    const gName = st.gName || (st.gEmail ? st.gEmail.split('@')[0] : 'חשבון Google');
+    const gInitial = (gName.trim()[0] || 'G').toUpperCase();
+
     return {
-      showForm: !st.done,
+      showForm: !st.done && !st.googleView,
+      showGoogle: st.googleEnabled && !st.done && !st.googleView,
+      googleView: !!st.googleView,
+      gChoice: st.googleView === 'choice',
+      gClaim: st.googleView === 'claim',
+      gCreate: st.googleView === 'create',
+      gName, gEmail: st.gEmail, gInitial,
+      setGBtn: this.setGBtn,
+      onGoClaim: () => this.setState({ googleView: 'claim', error: '', username: '', password: '' }),
+      onGoCreate: () => this.setState({ googleView: 'create', error: '' }),
+      onGoBackChoice: () => this.setState({ googleView: 'choice', error: '' }),
+      onGoCancel: () => this.setState({ googleView: null, error: '', username: '', password: '' }),
+      onGoClaimSubmit: () => this.goClaim(),
+      onGoClaimKey: (e) => { if (e.key === 'Enter') this.goClaim(); },
+      onGoCreateSubmit: () => this.goCreate(),
       done: st.done,
       doneTitle: st.doneTitle,
       doneMsg: st.doneMsg,

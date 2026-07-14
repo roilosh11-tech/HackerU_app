@@ -95,6 +95,7 @@
         API.mode = "online";
         if (typeof payload.signupOpen === "boolean") API.signupOpen = payload.signupOpen;
         API.chatServer = payload.chat === true;
+        API.googleClientId = payload.googleClientId || null;
       } else {
         API.mode = "offline";
       }
@@ -155,6 +156,33 @@
   API.logout = function () {
     setToken(null);
     API.user = null;
+  };
+
+  // ---- Google Sign-In -----------------------------------------------------
+  // googleClientId is discovered in boot() from /api/health; null = disabled.
+  API.googleClientId = null;
+
+  // Sign in with a Google ID token. Resolves to {token,user} (logged in) or
+  // {status:'unlinked', email, name} — the caller then offers claim / create.
+  API.googleAuth = async function (credential) {
+    if (API.mode === "offline") return { offline: true };
+    var r = await req("POST", "/api/auth/google", { credential: credential });
+    if (r && r.token) { setToken(r.token); API.user = r.user; }
+    return r;
+  };
+
+  // One-time link of an existing account to this Google account.
+  API.googleClaim = async function (payload) {
+    if (API.mode === "offline") return { offline: true };
+    var r = await req("POST", "/api/auth/google/claim", payload);
+    if (r && r.token) { setToken(r.token); API.user = r.user; }
+    return r;
+  };
+
+  // Brand-new student signing up via Google (lands pending).
+  API.googleCreate = async function (payload) {
+    if (API.mode === "offline") return { offline: true };
+    return req("POST", "/api/auth/google/create", payload);
   };
 
   API.updateProfile = async function (payload) {
