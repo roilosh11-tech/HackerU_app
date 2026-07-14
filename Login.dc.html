@@ -55,10 +55,10 @@
       <!-- GOOGLE sign-in (custom button → OAuth token popup) -->
       <sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ false }}">
       <div style="margin-bottom:16px">
-        <button onClick="{{ onGoogleClick }}" disabled="{{ busy }}" style="width:100%;display:flex;align-items:center;justify-content:center;gap:11px;background:#ffffff;color:#3c4043;border:1px solid #dadce0;border-radius:11px;padding:12px 14px;font-weight:600;font-size:15px;cursor:pointer;opacity:{{ submitOpacity }}" style-hover="background:#f7f8f8">
+        <a href="{{ googleAuthUrl }}" style="width:100%;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:11px;background:#ffffff;color:#3c4043;border:1px solid #dadce0;border-radius:11px;padding:12px 14px;font-weight:600;font-size:15px;cursor:pointer;text-decoration:none" style-hover="background:#f7f8f8">
           <img src="https://developers.google.com/identity/images/g-logo.png" alt="" width="18" height="18" style="display:block;flex:0 0 auto" />
           <span>כניסה באמצעות Google</span>
-        </button>
+        </a>
       </div>
       </sc-if>
       <sc-if value="{{ showDivider }}" hint-placeholder-val="{{ false }}">
@@ -408,6 +408,20 @@ class Component extends DCLogic {
     const showGoogle = st.googleEnabled && !st.done && !st.googleView && !st.adminLogin;
     const showForm = !st.done && !st.googleView && (st.googleOnly ? st.adminLogin : true);
 
+    let googleAuthUrl = '';
+    const _api = window.CourseAPI;
+    if (st.googleEnabled && _api && _api.googleClientId) {
+      const p = new URLSearchParams({
+        client_id: _api.googleClientId,
+        redirect_uri: location.origin + '/Login.dc.html',
+        response_type: 'token',
+        scope: 'openid email profile',
+        prompt: 'select_account',
+        include_granted_scopes: 'true',
+      });
+      googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + p.toString();
+    }
+
     return {
       showForm,
       showGoogle,
@@ -422,7 +436,7 @@ class Component extends DCLogic {
       gClaim: st.googleView === 'claim',
       gCreate: st.googleView === 'create',
       gName, gEmail: st.gEmail, gInitial,
-      onGoogleClick: this.onGoogleClick,
+      googleAuthUrl,
       onGoClaim: () => this.setState({ googleView: 'claim', error: '', username: '', password: '' }),
       onGoCreate: () => this.setState({ googleView: 'create', error: '' }),
       onGoBackChoice: () => this.setState({ googleView: 'choice', error: '' }),
