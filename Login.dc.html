@@ -276,35 +276,42 @@ class Component extends DCLogic {
     const API = window.CourseAPI;
     if (!API || !API.googleClientId) return;
     const start = () => {
-      if (window.google && google.accounts && google.accounts.oauth2) {
-        try {
-          this._tokenClient = google.accounts.oauth2.initTokenClient({
-            client_id: API.googleClientId,
-            scope: 'openid email profile',
-            callback: (resp) => {
-              if (resp && resp.access_token) this.handleGoogleToken(resp.access_token);
-              else this.setState({ busy: false });
-            },
-            error_callback: () => this.setState({ busy: false }),
-          });
-        } catch (e) {}
-        return;
-      }
+      if (this.buildTokenClient()) return;
       this._gTries = (this._gTries || 0) + 1;
       if (this._gTries < 80) setTimeout(start, 150);
     };
     start();
   }
 
+  buildTokenClient() {
+    const API = window.CourseAPI;
+    if (!(window.google && google.accounts && google.accounts.oauth2)) return null;
+    if (!this._tokenClient) {
+      this._tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: API.googleClientId,
+        scope: 'openid email profile',
+        callback: (resp) => {
+          if (resp && resp.access_token) this.handleGoogleToken(resp.access_token);
+          else this.setState({ busy: false });
+        },
+        error_callback: () => this.setState({ busy: false }),
+      });
+    }
+    return this._tokenClient;
+  }
+
   onGoogleClick = () => {
     if (this.state.busy) return;
-    if (!this._tokenClient) {
+    // Build the client synchronously on click if it wasn't ready at mount — keeps
+    // the popup inside the user gesture so the browser doesn't block it.
+    const client = this.buildTokenClient();
+    if (!client) {
       this.setState({ error: 'שירות Google עדיין נטען — נסה/י שוב בעוד רגע.' });
       return;
     }
     this.setState({ busy: true, error: '' });
     try {
-      this._tokenClient.requestAccessToken({ prompt: 'select_account' });
+      client.requestAccessToken({ prompt: 'select_account' });
     } catch (e) {
       this.setState({ busy: false, error: 'שגיאה בפתיחת חלון Google' });
     }
