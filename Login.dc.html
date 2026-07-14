@@ -263,32 +263,21 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ booting: false, offline: !API.isOnline() });
-    if (API.googleClientId) { this.setState({ googleEnabled: true, googleOnly: !!API.googleOnly }); }
+    if (API.googleClientId) { this.setState({ googleEnabled: true, googleOnly: !!API.googleOnly }); this.initTokenClient(); }
   }
 
   setField(k) { return (e) => this.setState({ [k]: e.target.value, error: '' }); }
   pick(a) { return () => this.setState({ avatar: a }); }
 
   // ---- Google Sign-In (OAuth token popup — our own button, no GIS widget) -
-  ensureGoogleReady(cb) {
-    const ok = () => window.google && google.accounts && google.accounts.oauth2;
-    const start = () => {
-      if (ok()) { cb(); return; }
-      this._gTries = (this._gTries || 0) + 1;
-      if (this._gTries < 80) { setTimeout(start, 150); return; }
-      this.setState({ busy: false, error: 'שירות Google לא נטען. רענן/י את הדף ונסה/י שוב.' });
-    };
-    start();
-  }
-
-  onGoogleClick = () => {
-    if (this.state.busy) return;
+  // Build the token client up-front once GIS loads, so the click handler can open
+  // the popup synchronously (a deferred/async open gets blocked by the browser).
+  initTokenClient() {
     const API = window.CourseAPI;
     if (!API || !API.googleClientId) return;
-    this.setState({ busy: true, error: '' });
-    this.ensureGoogleReady(() => {
-      try {
-        if (!this._tokenClient) {
+    const start = () => {
+      if (window.google && google.accounts && google.accounts.oauth2) {
+        try {
           this._tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: API.googleClientId,
             scope: 'openid email profile',
@@ -298,12 +287,27 @@ class Component extends DCLogic {
             },
             error_callback: () => this.setState({ busy: false }),
           });
-        }
-        this._tokenClient.requestAccessToken({ prompt: 'select_account' });
-      } catch (e) {
-        this.setState({ busy: false, error: 'שגיאה בפתיחת חלון Google' });
+        } catch (e) {}
+        return;
       }
-    });
+      this._gTries = (this._gTries || 0) + 1;
+      if (this._gTries < 80) setTimeout(start, 150);
+    };
+    start();
+  }
+
+  onGoogleClick = () => {
+    if (this.state.busy) return;
+    if (!this._tokenClient) {
+      this.setState({ error: 'שירות Google עדיין נטען — נסה/י שוב בעוד רגע.' });
+      return;
+    }
+    this.setState({ busy: true, error: '' });
+    try {
+      this._tokenClient.requestAccessToken({ prompt: 'select_account' });
+    } catch (e) {
+      this.setState({ busy: false, error: 'שגיאה בפתיחת חלון Google' });
+    }
   };
 
   async handleGoogleToken(accessToken) {
