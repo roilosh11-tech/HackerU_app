@@ -29,7 +29,7 @@ from typing import Optional
 
 import jwt
 from fastapi import FastAPI, HTTPException, Depends, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -959,6 +959,27 @@ def admin_delete(uid: int, request: Request):
     conn.commit()
     conn.close()
     return {"ok": True}
+
+
+@app.get("/api/auth/google/start")
+def google_start(request: Request):
+    """Server-side redirect into Google's OAuth (authorization-code flow). The
+    Google button is just a link here — the server builds the URL so nothing can
+    go wrong client-side. Google returns to /Login.dc.html?code=… afterwards."""
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(503, "google sign-in not configured")
+    host = request.headers.get("host", "")
+    redirect_uri = "https://" + host + "/Login.dc.html"
+    params = urllib.parse.urlencode({
+        "client_id": GOOGLE_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "openid email profile",
+        "prompt": "select_account",
+        "access_type": "online",
+        "include_granted_scopes": "true",
+    })
+    return RedirectResponse("https://accounts.google.com/o/oauth2/v2/auth?" + params, status_code=302)
 
 
 @app.get("/api/health")
