@@ -248,7 +248,7 @@ class Component extends DCLogic {
     googleOnly: false,       // students must use Google; password form hidden
     adminLogin: false,       // admin escape hatch: reveal password form in google-only mode
     googleView: null,        // null | 'choice' | 'claim' | 'create'
-    gToken: '',
+    gLinkToken: '',
     gEmail: '',
     gName: '',
   };
@@ -264,12 +264,14 @@ class Component extends DCLogic {
     }
     this.setState({ booting: false, offline: !API.isOnline() });
     if (API.googleClientId) { this.setState({ googleEnabled: true, googleOnly: !!API.googleOnly }); }
-    // Returned from the Google sign-in redirect? (URL carries #access_token=…)
-    const hash = location.hash || '';
-    if (hash.indexOf('access_token=') !== -1) {
-      const at = new URLSearchParams(hash.slice(1)).get('access_token');
-      try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-      if (at) this.handleGoogleToken(at);
+    // Returned from the Google sign-in redirect? (URL carries ?code=… or ?error=…)
+    const q = new URLSearchParams(location.search || '');
+    if (q.get('code') || q.get('error')) {
+      const code = q.get('code');
+      const err = q.get('error');
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+      if (code) this.handleGoogleCode(code);
+      else if (err) this.setState({ error: 'ההתחברות עם Google בוטלה. נסה/י שוב.' });
     }
   }
 
@@ -297,18 +299,18 @@ class Component extends DCLogic {
     location.href = 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
   };
 
-  async handleGoogleToken(accessToken) {
-    if (!accessToken) { this.setState({ busy: false }); return; }
+  async handleGoogleCode(code) {
+    if (!code) { this.setState({ busy: false }); return; }
     this.setState({ busy: true, error: '' });
     try {
-      const r = await window.CourseAPI.googleAuth({ accessToken });
+      const r = await window.CourseAPI.googleAuth({ code, redirectUri: this.googleRedirectUri() });
       if (r && r.offline) {
         this.setState({ busy: false, error: 'התחברות Google תעבוד בגרסה החיה של האתר לאחר הפריסה.' });
         return;
       }
       if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
       if (r && r.status === 'unlinked') {
-        this.setState({ busy: false, googleView: 'choice', gToken: accessToken,
+        this.setState({ busy: false, googleView: 'choice', gLinkToken: r.linkToken || '',
           gEmail: r.email || '', gName: r.name || '', displayName: r.name || '',
           username: '', password: '', error: '' });
         return;
@@ -321,13 +323,13 @@ class Component extends DCLogic {
 
   async goClaim() {
     if (this.state.busy) return;
-    const { username, password, gToken } = this.state;
+    const { username, password, gLinkToken } = this.state;
     if (username.trim().length < 3 || password.length < 4) {
       this.setState({ error: 'הזן/י את שם המשתמש והסיסמה הקיימים' }); return;
     }
     this.setState({ busy: true, error: '' });
     try {
-      const r = await window.CourseAPI.googleClaim({ accessToken: gToken, username: username.trim(), password });
+      const r = await window.CourseAPI.googleClaim({ linkToken: gLinkToken, username: username.trim(), password });
       if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
       this.setState({ busy: false });
     } catch (e) {
@@ -337,11 +339,11 @@ class Component extends DCLogic {
 
   async goCreate() {
     if (this.state.busy) return;
-    const { displayName, avatar, gToken } = this.state;
+    const { displayName, avatar, gLinkToken } = this.state;
     if (!displayName.trim()) { this.setState({ error: 'נא להזין שם תצוגה' }); return; }
     this.setState({ busy: true, error: '' });
     try {
-      await window.CourseAPI.googleCreate({ accessToken: gToken, displayName: displayName.trim(), avatar });
+      await window.CourseAPI.googleCreate({ linkToken: gLinkToken, displayName: displayName.trim(), avatar });
       this.setState({ busy: false, googleView: null, done: true,
         doneTitle: 'הבקשה נשלחה!',
         doneMsg: 'החשבון שלך נוצר וממתין לאישור המנהל/ת. תקבל/י גישה מיד לאחר האישור.' });
@@ -414,9 +416,10 @@ class Component extends DCLogic {
       const p = new URLSearchParams({
         client_id: _api.googleClientId,
         redirect_uri: location.origin + '/Login.dc.html',
-        response_type: 'token',
+        response_type: 'code',
         scope: 'openid email profile',
         prompt: 'select_account',
+        access_type: 'online',
         include_granted_scopes: 'true',
       });
       googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?' + p.toString();
