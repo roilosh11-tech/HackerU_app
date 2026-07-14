@@ -96,6 +96,7 @@
         if (typeof payload.signupOpen === "boolean") API.signupOpen = payload.signupOpen;
         API.chatServer = payload.chat === true;
         API.googleClientId = payload.googleClientId || null;
+        API.googleOnly = payload.googleOnly === true;
       } else {
         API.mode = "offline";
       }

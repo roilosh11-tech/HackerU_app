@@ -45,20 +45,24 @@
     <div style="background:#252d39;border:1px solid #3f4956;border-radius:20px;padding:26px 24px 24px;box-shadow:0 24px 60px -28px rgba(0,0,0,.7)">
 
       <!-- segmented -->
+      <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
       <div style="display:flex;gap:5px;padding:4px;background:#1f2733;border:1px solid #3a4451;border-radius:13px;margin-bottom:20px">
         <button onClick="{{ onModeLogin }}" style="flex:1;padding:9px;border:0;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;background:{{ loginTabBg }};color:{{ loginTabColor }}">התחברות</button>
         <button onClick="{{ onModeRegister }}" style="flex:1;padding:9px;border:0;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;transition:.15s;background:{{ registerTabBg }};color:{{ registerTabColor }}">הרשמה</button>
       </div>
+      </sc-if>
 
-      <!-- GOOGLE sign-in + divider -->
+      <!-- GOOGLE sign-in -->
       <sc-if value="{{ showGoogle }}" hint-placeholder-val="{{ false }}">
-      <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:center;margin-bottom:16px">
         <div ref="{{ setGBtn }}" style="display:flex;justify-content:center;min-height:44px;color-scheme:dark"></div>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:16px">
-          <div style="flex:1;height:1px;background:#3a4451"></div>
-          <div style="font-size:12px;color:#7f8a9b">או</div>
-          <div style="flex:1;height:1px;background:#3a4451"></div>
-        </div>
+      </div>
+      </sc-if>
+      <sc-if value="{{ showDivider }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+        <div style="flex:1;height:1px;background:#3a4451"></div>
+        <div style="font-size:12px;color:#7f8a9b">או</div>
+        <div style="flex:1;height:1px;background:#3a4451"></div>
       </div>
       </sc-if>
 
@@ -204,6 +208,18 @@
 
     </div>
 
+    <!-- admin escape hatch (google-only mode) -->
+    <sc-if value="{{ showAdminLink }}" hint-placeholder-val="{{ false }}">
+    <div style="text-align:center;margin-top:14px">
+      <button onClick="{{ onShowAdmin }}" style="background:none;border:0;color:#7f8a9b;font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px">כניסת מנהל/ת</button>
+    </div>
+    </sc-if>
+    <sc-if value="{{ adminLogin }}" hint-placeholder-val="{{ false }}">
+    <div style="text-align:center;margin-top:14px">
+      <button onClick="{{ onHideAdmin }}" style="background:none;border:0;color:#7f8a9b;font-size:12.5px;cursor:pointer">← חזרה להתחברות עם Google</button>
+    </div>
+    </sc-if>
+
     <!-- footer note -->
     <div style="text-align:center;margin-top:18px;font-size:12.5px;color:#7f8a9b;line-height:1.6">{{ footNote }}</div>
 
@@ -226,6 +242,8 @@ class Component extends DCLogic {
     doneMsg: '',
     offline: false,
     googleEnabled: false,
+    googleOnly: false,       // students must use Google; password form hidden
+    adminLogin: false,       // admin escape hatch: reveal password form in google-only mode
     googleView: null,        // null | 'choice' | 'claim' | 'create'
     gCredential: '',
     gEmail: '',
@@ -242,7 +260,7 @@ class Component extends DCLogic {
       return;
     }
     this.setState({ booting: false, offline: !API.isOnline() });
-    if (API.googleClientId) { this.setState({ googleEnabled: true }); this.initGoogle(); }
+    if (API.googleClientId) { this.setState({ googleEnabled: true, googleOnly: !!API.googleOnly }); this.initGoogle(); }
   }
 
   setField(k) { return (e) => this.setState({ [k]: e.target.value, error: '' }); }
@@ -379,13 +397,27 @@ class Component extends DCLogic {
     let footNote = st.offline
       ? 'מצב תצוגה מקדימה — הנתונים נשמרים מקומית בדפדפן. לאחר פריסה לשרת, ההתחברות והשמירה יעבדו לכל הכיתה.'
       : 'חשבון חדש מצריך אישור מהמנהל/ת לפני הכניסה הראשונה.';
+    if (!st.offline && st.googleOnly) {
+      footNote = st.adminLogin
+        ? 'כניסת מנהל/ת בלבד. תלמידים מתחברים דרך חשבון Google.'
+        : 'ההתחברות לקורס היא דרך חשבון Google. חשבון חדש ממתין לאישור המנהל/ת.';
+    }
 
     const gName = st.gName || (st.gEmail ? st.gEmail.split('@')[0] : 'חשבון Google');
     const gInitial = (gName.trim()[0] || 'G').toUpperCase();
 
+    const showGoogle = st.googleEnabled && !st.done && !st.googleView && !st.adminLogin;
+    const showForm = !st.done && !st.googleView && (st.googleOnly ? st.adminLogin : true);
+
     return {
-      showForm: !st.done && !st.googleView,
-      showGoogle: st.googleEnabled && !st.done && !st.googleView,
+      showForm,
+      showGoogle,
+      showTabs: !st.done && !st.googleView && !st.googleOnly,
+      showDivider: showGoogle && showForm,
+      showAdminLink: st.googleOnly && st.googleEnabled && !st.adminLogin && !st.googleView && !st.done,
+      adminLogin: st.adminLogin,
+      onShowAdmin: () => this.setState({ adminLogin: true, mode: 'login', error: '', username: '', password: '' }),
+      onHideAdmin: () => this.setState({ adminLogin: false, error: '', username: '', password: '' }),
       googleView: !!st.googleView,
       gChoice: st.googleView === 'choice',
       gClaim: st.googleView === 'claim',
