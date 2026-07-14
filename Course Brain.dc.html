@@ -3376,7 +3376,14 @@ class Component extends DCLogic {
     ud.opens = (ud.opens || 0) + 1;
     let cards;
     if (ud.cardsV === 2 && ud.cards && ud.cards.length) {
-      cards = ud.cards.map(c=>Object.assign({},c));
+      // start from the full current deck, overlay saved SRS state for cards we've seen,
+      // and append any cards added to course-data.js since the last save (new lessons)
+      const saved = {};
+      ud.cards.forEach(c => { saved[c.id] = c; });
+      cards = this.data.flashcards.map(c => {
+        const s = saved[c.id];
+        return s ? Object.assign({}, c, { due:s.due, interval:s.interval, reps:s.reps, lapses:s.lapses }) : Object.assign({}, c, { due:0, interval:0, reps:0, lapses:0 });
+      });
     } else {
       // one-time migration: clear baked/legacy SRS scheduling so the quiz area starts clean
       cards = this.state.cards.map(c=>Object.assign({},c,{ due:0, interval:0, reps:0, lapses:0 }));
