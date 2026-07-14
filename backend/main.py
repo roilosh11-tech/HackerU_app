@@ -24,6 +24,7 @@ import secrets
 import datetime as dt
 import urllib.request
 import urllib.error
+import urllib.parse
 from typing import Optional
 
 import jwt
@@ -64,6 +65,11 @@ ALLOW_SIGNUP = os.environ.get("ALLOW_SIGNUP", "1") != "0"
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
 
+# Google Sign-In. Set GOOGLE_CLIENT_ID (the OAuth 2.0 Web client ID from Google
+# Cloud Console) to enable "התחברות עם Google". If empty, the Google button is
+# hidden and only username/password auth is available.
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+
 
 # ---------------------------------------------------------------------------
 # Database
@@ -85,6 +91,8 @@ def init_db():
             display_name  TEXT NOT NULL,
             password_hash TEXT NOT NULL,
             avatar        TEXT DEFAULT '',
+            email         TEXT DEFAULT '',           -- Google email (once linked); may be empty
+            google_sub    TEXT DEFAULT '',           -- Google account id ('sub' claim); '' = not linked
             role          TEXT DEFAULT 'student',   -- 'student' | 'admin'
             status        TEXT DEFAULT 'pending',   -- 'pending' | 'approved' | 'rejected'
             points        INTEGER DEFAULT 0,
@@ -124,6 +132,12 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_comments_post ON post_comments(post_id);
         """
     )
+    # --- migrations for databases created before Google Sign-In existed -------
+    cols = {r["name"] for r in conn.execute("PRAGMA table_info(users)").fetchall()}
+    if "email" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN email TEXT DEFAULT ''")
+    if "google_sub" not in cols:
+        conn.execute("ALTER TABLE users ADD COLUMN google_sub TEXT DEFAULT ''")
     conn.commit()
     conn.close()
     seed_admin()
@@ -174,6 +188,32 @@ def verify_pw(password: str, stored: str) -> bool:
         return secrets.compare_digest(dk.hex(), dk_hex)
     except Exception:
         return False
+
+
+def verify_google_credential(credential: str) -> dict:
+    """Verify a Google Identity Services ID token and return its claims.
+
+    Uses Google's tokeninfo endpoint, which validates the signature and expiry
+    server-side (no extra crypto deps needed). Raises HTTPException on any problem.
+    Returns a dict with at least sub / email / email_verified / name / picture.
+    """
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(503, "google sign-in not configured")
+    if not credential:
+        raise HTTPException(400, "missing credential")
+    try:
+        url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + urllib.parse.quote(credential)
+        with urllib.request.urlopen(url, timeout=10) as resp:
+            claims = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        raise HTTPException(401, "could not verify google token")
+    if claims.get("aud") != GOOGLE_CLIENT_ID:
+        raise HTTPException(401, "google token audience mismatch")
+    if claims.get("iss") not in ("accounts.google.com", "https://accounts.google.com"):
+        raise HTTPException(401, "google token issuer mismatch")
+    if not claims.get("sub"):
+        raise HTTPException(401, "google token missing sub")
+    return claims
 
 
 def make_token(user_id: int) -> str:
@@ -269,6 +309,22 @@ class LoginIn(BaseModel):
     password: str
 
 
+class GoogleAuthIn(BaseModel):
+    credential: str
+
+
+class GoogleClaimIn(BaseModel):
+    credential: str
+    username: str
+    password: str
+
+
+class GoogleCreateIn(BaseModel):
+    credential: str
+    displayName: str
+    avatar: Optional[str] = ""
+
+
 class ProfileIn(BaseModel):
     displayName: Optional[str] = None
     avatar: Optional[str] = None
@@ -345,6 +401,124 @@ def login(body: LoginIn):
     conn.commit()
     conn.close()
     return {"token": make_token(row["id"]), "user": user_public(row)}
+
+
+def _google_status_gate(row):
+    if row["status"] == "pending":
+        raise HTTPException(403, "החשבון עדיין ממתין לאישור המנהל/ת")
+    if row["status"] == "rejected":
+        raise HTTPException(403, "החשבון נדחה. פנה/י למנהל/ת")
+
+
+@app.post("/api/auth/google")
+def google_auth(body: GoogleAuthIn):
+    """Sign in with a Google ID token.
+
+    Links by google_sub (returning user) or by verified email (auto-link to an
+    existing password account). If no account matches, returns status='unlinked'
+    so the front-end can offer the one-time claim step or a new-account form.
+    """
+    claims = verify_google_credential(body.credential)
+    sub = claims["sub"]
+    email = (claims.get("email") or "").strip().lower()
+    email_verified = str(claims.get("email_verified")).lower() == "true"
+    name = claims.get("name") or ""
+    conn = db()
+    row = conn.execute("SELECT * FROM users WHERE google_sub=?", (sub,)).fetchone()
+    if row is None and email and email_verified:
+        cand = conn.execute(
+            "SELECT * FROM users WHERE email=? AND (google_sub='' OR google_sub IS NULL)",
+            (email,),
+        ).fetchone()
+        if cand is not None:
+            conn.execute("UPDATE users SET google_sub=? WHERE id=?", (sub, cand["id"]))
+            conn.commit()
+            row = conn.execute("SELECT * FROM users WHERE id=?", (cand["id"],)).fetchone()
+    if row is None:
+        conn.close()
+        return {"status": "unlinked", "email": email, "name": name}
+    try:
+        _google_status_gate(row)
+    except HTTPException:
+        conn.close()
+        raise
+    conn.execute("UPDATE users SET last_active=? WHERE id=?", (time.time(), row["id"]))
+    conn.commit()
+    conn.close()
+    return {"token": make_token(row["id"]), "user": user_public(row)}
+
+
+@app.post("/api/auth/google/claim")
+def google_claim(body: GoogleClaimIn):
+    """One-time link: prove ownership of an existing account with its old
+    username+password, then bind this Google account to it (progress preserved)."""
+    claims = verify_google_credential(body.credential)
+    sub = claims["sub"]
+    email = (claims.get("email") or "").strip().lower()
+    uname = body.username.strip().lower()
+    conn = db()
+    row = conn.execute("SELECT * FROM users WHERE username=?", (uname,)).fetchone()
+    if row is None or not verify_pw(body.password, row["password_hash"]):
+        conn.close()
+        raise HTTPException(401, "שם משתמש או סיסמה שגויים")
+    other = conn.execute(
+        "SELECT id FROM users WHERE google_sub=? AND id<>?", (sub, row["id"])
+    ).fetchone()
+    if other is not None:
+        conn.close()
+        raise HTTPException(409, "חשבון Google זה כבר מקושר למשתמש אחר")
+    conn.execute(
+        "UPDATE users SET google_sub=?, email=? WHERE id=?",
+        (sub, email or row["email"], row["id"]),
+    )
+    conn.commit()
+    row = conn.execute("SELECT * FROM users WHERE id=?", (row["id"],)).fetchone()
+    try:
+        _google_status_gate(row)
+    except HTTPException:
+        conn.close()
+        raise
+    conn.execute("UPDATE users SET last_active=? WHERE id=?", (time.time(), row["id"]))
+    conn.commit()
+    conn.close()
+    return {"token": make_token(row["id"]), "user": user_public(row)}
+
+
+@app.post("/api/auth/google/create")
+def google_create(body: GoogleCreateIn):
+    """Brand-new student signing up via Google (no prior account). Lands pending,
+    exactly like a password registration — admin approves before first entry."""
+    if not ALLOW_SIGNUP:
+        raise HTTPException(403, "signups are closed")
+    claims = verify_google_credential(body.credential)
+    sub = claims["sub"]
+    email = (claims.get("email") or "").strip().lower()
+    dn = (body.displayName or claims.get("name") or "").strip()
+    if not dn:
+        raise HTTPException(400, "invalid fields")
+    conn = db()
+    if conn.execute("SELECT id FROM users WHERE google_sub=?", (sub,)).fetchone():
+        conn.close()
+        raise HTTPException(409, "חשבון Google זה כבר רשום")
+    base = (email.split("@")[0] if email else "user").lower()
+    base = "".join(ch for ch in base if ch.isalnum() or ch in "._-") or "user"
+    if len(base) < 3:
+        base = base + "123"
+    uname = base
+    i = 1
+    while conn.execute("SELECT id FROM users WHERE username=?", (uname,)).fetchone():
+        i += 1
+        uname = base + str(i)
+    now = time.time()
+    conn.execute(
+        """INSERT INTO users (username, display_name, password_hash, avatar, email, google_sub,
+           role, status, created_at, updated_at, last_active)
+           VALUES (?,?,?,?,?,?, 'student', 'pending', ?,?,?)""",
+        (uname, dn, "google-only$" + secrets.token_hex(8), body.avatar or "", email, sub, now, now, now),
+    )
+    conn.commit()
+    conn.close()
+    return {"ok": True, "status": "pending", "message": "החשבון נוצר וממתין לאישור המנהל/ת."}
 
 
 @app.get("/api/me")
@@ -673,7 +847,8 @@ def admin_delete(uid: int, request: Request):
 
 @app.get("/api/health")
 def health():
-    return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY)}
+    return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY),
+            "googleClientId": GOOGLE_CLIENT_ID or None}
 
 
 # ---------------------------------------------------------------------------
