@@ -59,6 +59,12 @@ ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")  # if empty, admin isn't a
 # Whether brand-new registrations are allowed at all (signup_open = "requires approval").
 ALLOW_SIGNUP = os.environ.get("ALLOW_SIGNUP", "1") != "0"
 
+# Google-only mode: when "1", students may sign in ONLY via Google. Username/password
+# login and password registration are refused for non-admins (the admin can still use
+# a password so the Admin screen stays reachable). The one-time Google "claim" flow is
+# unaffected — students still link their old account once to migrate their progress.
+GOOGLE_ONLY = os.environ.get("GOOGLE_ONLY", "0") == "1"
+
 # Anthropic (for the "שאל את הקורס" chat). Set ANTHROPIC_API_KEY in the deploy env to
 # enable the chat in production. If empty, /api/chat returns 503 and the app shows a
 # graceful "chat unavailable" message.
@@ -362,6 +368,8 @@ class ChatIn(BaseModel):
 def register(body: RegisterIn):
     if not ALLOW_SIGNUP:
         raise HTTPException(403, "signups are closed")
+    if GOOGLE_ONLY:
+        raise HTTPException(403, "ההרשמה לקורס היא דרך חשבון Google בלבד")
     uname = body.username.strip().lower()
     if len(uname) < 3 or len(body.password) < 4 or not body.displayName.strip():
         raise HTTPException(400, "invalid fields")
@@ -391,6 +399,9 @@ def login(body: LoginIn):
     if row is None or not verify_pw(body.password, row["password_hash"]):
         conn.close()
         raise HTTPException(401, "שם משתמש או סיסמה שגויים")
+    if GOOGLE_ONLY and row["role"] != "admin":
+        conn.close()
+        raise HTTPException(403, "התחברות לתלמידים היא דרך חשבון Google בלבד")
     if row["status"] == "pending":
         conn.close()
         raise HTTPException(403, "החשבון עדיין ממתין לאישור המנהל/ת")
@@ -848,7 +859,7 @@ def admin_delete(uid: int, request: Request):
 @app.get("/api/health")
 def health():
     return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY),
-            "googleClientId": GOOGLE_CLIENT_ID or None}
+            "googleClientId": GOOGLE_CLIENT_ID or None, "googleOnly": GOOGLE_ONLY}
 
 
 # ---------------------------------------------------------------------------
