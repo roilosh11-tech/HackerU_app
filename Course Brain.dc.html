@@ -3804,7 +3804,7 @@ class Component extends DCLogic {
           deckConceptCount: l.deck ? l.deck.coreConcepts.length : 0,
           deckConcepts: l.deck ? l.deck.coreConcepts.map((c, i) => ({ title:c.title, num: i+1, detail: c.detail.map((t, j) => ({ text:t, key:j })), open: !!st.openDeckCards[i], closed: !st.openDeckCards[i], onToggle:() => this.toggleDeckCard(i) })) : [],
           deckGaps: l.deck ? l.deck.gaps.map((t, i) => ({ text:t, key:i })) : [],
-          hasExplainer: this.isAdminUser() && !!l.explainer,
+          hasExplainer: !!l.explainer,
           explainerOpen: st.openSec.explainer,
           explainerClosed: !st.openSec.explainer,
           onToggleExplainer:() => this.toggleSec('explainer'),
