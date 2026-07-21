@@ -38,6 +38,8 @@
   @keyframes cbpulse{0%,100%{opacity:.35}50%{opacity:1}}
   @keyframes cbup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   @keyframes cbdot{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+  @keyframes jdot{0%{top:0;opacity:0}20%{opacity:1}80%{opacity:1}100%{top:26px;opacity:0}}
+  @keyframes jpulse{0%,100%{box-shadow:0 0 0 0 rgba(152,177,255,.35)}50%{box-shadow:0 0 0 7px rgba(152,177,255,0)}}
   @keyframes cbshake{10%,90%{transform:translateX(-1px)}30%,70%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
   @media print{
     body *{visibility:hidden !important}
@@ -82,6 +84,7 @@
           <span style="width:20px;display:flex;justify-content:center;color:{{ item.icColor }}">
             <sc-if value="{{ item.isHome }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><path d="M3 10.7 12 3.5l9 7.2"></path><path d="M5.5 9.7V20h13V9.7"></path></svg></sc-if>
             <sc-if value="{{ item.isLib }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="4" y="4" width="6" height="16" rx="1.2"></rect><rect x="14" y="4" width="6" height="16" rx="1.2"></rect></svg></sc-if>
+            <sc-if value="{{ item.isJourney }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><path d="M5 21V4"></path><path d="M5 4c3-1.6 5.5 1.6 8.5 0S19 5.6 19 5.6v7.6s-2.5-1.6-5.5 0-5.5-1.6-8.5 0"></path></svg></sc-if>
             <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
             <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
             <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
@@ -1682,6 +1685,191 @@
       </div>
       </sc-if>
 
+      <!-- ===================== JOURNEY (המסע) ===================== -->
+      <sc-if value="{{ showJourney }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="journey" style="max-width:1080px;margin:0 auto;padding:30px 26px 64px;animation:cbup .3s ease">
+
+        <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:5px">התמונה הגדולה · כל מה שכוסה עד עכשיו</div>
+        <h1 style="margin:0 0 8px;font-size:28px;font-weight:800;letter-spacing:-.5px">המסע</h1>
+        <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:var(--tx2);max-width:660px">מפה אחת של כל מה שנלמד — כדי לחבר את הנקודות, להיזכר במה שחשוב, ולראות איך כל שיעור נבנה על הקודם. מתעדכן אוטומטית עם כל שיעור חדש.</p>
+
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px">
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:9px 15px"><span style="font-size:18px;font-weight:800">{{ journeyCount }}</span> <span style="font-size:12.5px;color:var(--tx2)">שיעורים</span></div>
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:9px 15px"><span style="font-size:18px;font-weight:800">{{ journeyConceptTotal }}</span> <span style="font-size:12.5px;color:var(--tx2)">מושגים</span></div>
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:9px 15px"><span style="font-size:18px;font-weight:800;color:var(--master)">{{ journeyMastered }}</span> <span style="font-size:12.5px;color:var(--tx2)">בשליטה</span></div>
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:9px 15px"><span style="font-size:18px;font-weight:800;color:var(--newc)">{{ journeyRecurring }}</span> <span style="font-size:12.5px;color:var(--tx2)">מושגים חוזרים</span></div>
+        </div>
+
+        <div style="font-size:15px;font-weight:800;margin-bottom:13px">3 הרעיונות שהכול נשען עליהם</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-bottom:36px">
+          <sc-for list="{{ big3 }}" as="b" hint-placeholder-count="3">
+            <button onClick="{{ b.onOpen }}" style="text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-inline-start:3px solid {{ b.color }};border-radius:16px;padding:18px" style-hover="background:var(--raise)">
+              <div style="font-size:11.5px;font-weight:700;color:{{ b.color }};letter-spacing:.3px;margin-bottom:10px">{{ b.beat }}</div>
+              <div style="font-size:15px;line-height:1.55;font-weight:600;margin-bottom:13px">{{ b.text }}</div>
+              <div style="font-size:11.5px;color:var(--tx3)">שיעור {{ b.num }} · {{ b.title }}</div>
+            </button>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:5px;background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:5px;margin-bottom:28px;max-width:440px">
+          <button onClick="{{ onJourneyPath }}" style="{{ jModePathStyle }}">המסלול</button>
+          <button onClick="{{ onJourneyMap }}" style="{{ jModeMapStyle }}">מפת מושגים</button>
+          <button onClick="{{ onJourneyFlow }}" style="{{ jModeFlowStyle }}">איך הכל מתחבר</button>
+        </div>
+
+        <!-- PATH MODE -->
+        <sc-if value="{{ jModePath }}" hint-placeholder-val="{{ true }}">
+        <div style="position:relative">
+          <div style="position:absolute;top:10px;bottom:10px;inset-inline-start:19px;width:2px;background:linear-gradient(var(--accent),var(--bd));opacity:.5"></div>
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <sc-for list="{{ jPath }}" as="l" hint-placeholder-count="4">
+              <div style="position:relative;padding-inline-start:52px;animation:cbup .5s ease both;animation-delay:{{ l.delay }}">
+                <div style="position:absolute;inset-inline-start:6px;top:6px;width:28px;height:28px;border-radius:50%;background:var(--panel);border:2px solid {{ l.color }};color:{{ l.color }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;z-index:1">{{ l.num }}</div>
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;overflow:hidden">
+                  <button onClick="{{ l.onToggle }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;background:none;border:none;padding:16px 18px;display:flex;flex-direction:column;gap:7px">
+                    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                      <span style="font-size:11px;font-weight:700;color:{{ l.color }};background:{{ l.bg }};border-radius:7px;padding:3px 9px">{{ l.statusLabel }}</span>
+                      <span style="font-size:11.5px;color:var(--tx3)">שיעור {{ l.num }} · {{ l.date }}</span>
+                    </div>
+                    <div style="font-size:17px;font-weight:700;line-height:1.35">{{ l.title }}</div>
+                    <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)">{{ l.hook }}</div>
+                    <span style="font-size:12.5px;font-weight:700;color:var(--accent);margin-top:3px">{{ l.toggleLabel }} ›</span>
+                  </button>
+                  <sc-if value="{{ l.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:0 18px 18px;display:flex;flex-direction:column;gap:18px;border-top:1px solid var(--bd)">
+                    <p style="margin:16px 0 0;font-size:15.5px;line-height:1.75;color:var(--tx)">{{ l.intro }}</p>
+                    <sc-for list="{{ l.sections }}" as="s" hint-placeholder-count="2">
+                      <div>
+                        <div style="font-size:14.5px;font-weight:800;margin-bottom:7px">{{ s.h }}</div>
+                        <sc-for list="{{ s.paras }}" as="p" hint-placeholder-count="1">
+                          <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:var(--tx2)">{{ p.text }}</p>
+                        </sc-for>
+                      </div>
+                    </sc-for>
+                    <sc-if value="{{ l.hasTakeaway }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--panel2);border:1px solid var(--bd);border-inline-start:3px solid var(--accent);border-radius:12px;padding:14px 16px">
+                      <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:.3px;margin-bottom:6px">בשורה התחתונה</div>
+                      <div style="font-size:14.5px;line-height:1.65;font-weight:600">{{ l.takeaway }}</div>
+                    </div>
+                    </sc-if>
+                    <sc-if value="{{ l.conceptCount }}" hint-placeholder-val="{{ 0 }}">
+                    <div>
+                      <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:9px">מושגי מפתח מהשיעור</div>
+                      <div style="display:flex;flex-direction:column;gap:8px">
+                        <sc-for list="{{ l.concepts }}" as="c" hint-placeholder-count="3">
+                          <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:11px;overflow:hidden">
+                            <button onClick="{{ c.onToggle }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;background:none;border:none;padding:11px 13px;display:flex;align-items:center;gap:9px">
+                              <span style="flex:1;font-size:13.5px;font-weight:700">{{ c.term }}</span>
+                              <sc-if value="{{ c.recurring }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;color:var(--newc);background:rgba(149,200,240,.13);border-radius:20px;padding:2px 8px;white-space:nowrap">{{ c.recurringLabel }}</span></sc-if>
+                            </button>
+                            <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
+                            <div style="padding:0 13px 12px;font-size:13px;line-height:1.65;color:var(--tx2)">{{ c.eli5 }}</div>
+                            </sc-if>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    </sc-if>
+                    <sc-if value="{{ l.hasQuotes }}" hint-placeholder-val="{{ false }}">
+                    <div>
+                      <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:9px">רילי אמרה</div>
+                      <div style="display:flex;flex-direction:column;gap:10px">
+                        <sc-for list="{{ l.quotes }}" as="q" hint-placeholder-count="2">
+                          <div style="background:rgba(127,212,207,.09);border:1px solid rgba(127,212,207,.28);border-radius:12px;padding:13px 15px">
+                            <div style="font-size:14px;line-height:1.6;font-weight:600">„{{ q.text }}”</div>
+                            <div style="font-size:12px;line-height:1.55;color:var(--tx3);margin-top:6px">{{ q.why }}</div>
+                          </div>
+                        </sc-for>
+                      </div>
+                    </div>
+                    </sc-if>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap">
+                      <button onClick="{{ l.onOpenLesson }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:11px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">לעמוד השיעור המלא</button>
+                      <button onClick="{{ l.onReview }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:11px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">חזרה על השיעור ↺</button>
+                    </div>
+                  </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- MAP MODE -->
+        <sc-if value="{{ jModeMap }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="position:relative;width:100%;max-width:520px;margin:0 auto 26px;aspect-ratio:1">
+            <sc-for list="{{ jOrbit }}" as="o" hint-placeholder-count="6">
+              <div style="position:absolute;left:50%;top:50%;height:2px;width:38%;transform-origin:left center;transform:rotate({{ o.lineDeg }});background:linear-gradient(to right,{{ o.color }},transparent);opacity:.35"></div>
+            </sc-for>
+            <div style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:98px;height:98px;border-radius:50%;background:var(--panel);border:1px solid var(--bd2);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2">
+              <div style="font-size:25px;font-weight:800;line-height:1">{{ journeyConceptTotal }}</div>
+              <div style="font-size:10.5px;color:var(--tx3);margin-top:2px">מושגים</div>
+              <div style="font-size:10.5px;color:var(--tx3)">{{ journeyCount }} שיעורים</div>
+            </div>
+            <sc-for list="{{ jOrbit }}" as="o" hint-placeholder-count="6">
+              <button onClick="{{ o.onSelect }}" style="position:absolute;left:{{ o.xPct }};top:{{ o.yPct }};transform:translate(-50%,-50%);width:{{ o.size }};height:{{ o.size }};border-radius:50%;cursor:pointer;font-family:inherit;font-weight:800;font-size:14px;background:var(--panel);border:2px solid {{ o.ring }};color:{{ o.color }};z-index:3;display:flex;align-items:center;justify-content:center;{{ o.pulse }}">{{ o.num }}</button>
+            </sc-for>
+          </div>
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:20px">
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px">
+              <span style="width:26px;height:26px;flex:none;border-radius:50%;background:var(--panel2);border:2px solid {{ jMapSelColor }};color:{{ jMapSelColor }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px">{{ jMapSelNum }}</span>
+              <span style="font-size:16px;font-weight:700">{{ jMapSelTitle }}</span>
+            </div>
+            <p style="margin:0 0 16px;font-size:13.5px;line-height:1.6;color:var(--tx2)">{{ jMapSelHook }}</p>
+            <div style="font-size:12.5px;font-weight:700;color:var(--tx3);margin-bottom:10px">בחר מושג כדי להיזכר · לחיצה חושפת הסבר</div>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+              <sc-for list="{{ jMapConcepts }}" as="c" hint-placeholder-count="4">
+                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:11px;overflow:hidden">
+                  <button onClick="{{ c.onToggle }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;background:none;border:none;padding:11px 13px;display:flex;align-items:center;gap:9px">
+                    <span style="flex:1;font-size:13.5px;font-weight:700">{{ c.term }}</span>
+                    <sc-if value="{{ c.recurring }}" hint-placeholder-val="{{ false }}"><span style="font-size:10px;font-weight:700;color:var(--newc);background:rgba(149,200,240,.13);border-radius:20px;padding:2px 8px;white-space:nowrap">{{ c.recurringLabel }}</span></sc-if>
+                  </button>
+                  <sc-if value="{{ c.open }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding:0 13px 12px;font-size:13px;line-height:1.65;color:var(--tx2)">{{ c.eli5 }}</div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button onClick="{{ jMapOpenLesson }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:11px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">לעמוד השיעור</button>
+              <button onClick="{{ jMapReview }}" style="font-family:inherit;font-weight:700;font-size:13px;padding:10px 16px;border-radius:11px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">חזרה על השיעור ↺</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- FLOW MODE -->
+        <sc-if value="{{ jModeFlow }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <p style="margin:0 0 22px;font-size:14px;line-height:1.7;color:var(--tx2);max-width:620px">כל שיעור נבנה על הקודם — מהיסודות והבנת הכלי, דרך הבנת הבעיה והמשתמש, ועד להפיכת הכל למוצר. זו השרשרת המלאה עד עכשיו:</p>
+          <div style="display:flex;flex-direction:column">
+            <sc-for list="{{ jFlow }}" as="f" hint-placeholder-count="4">
+              <div>
+                <button onClick="{{ f.onOpen }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:15px 17px;display:flex;align-items:center;gap:13px" style-hover="border-color:var(--bd2)">
+                  <span style="width:34px;height:34px;flex:none;border-radius:10px;background:var(--panel2);border:1px solid {{ f.color }};color:{{ f.color }};display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px">{{ f.num }}</span>
+                  <span style="flex:1;min-width:0">
+                    <span style="display:block;font-size:15px;font-weight:700;line-height:1.35">{{ f.title }}</span>
+                    <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:3px">{{ f.hook }}</span>
+                  </span>
+                </button>
+                <sc-if value="{{ f.notLast }}" hint-placeholder-val="{{ true }}">
+                <div style="height:30px;display:flex;justify-content:center">
+                  <div style="width:2px;height:100%;background:var(--bd2);position:relative;overflow:hidden">
+                    <div style="position:absolute;left:-1px;width:4px;height:4px;border-radius:50%;background:var(--accent);animation:jdot 1.6s linear infinite"></div>
+                  </div>
+                </div>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+      </sc-if>
+
       <!-- ===================== RETENTION PROOF (admin) ===================== -->
       <sc-if value="{{ showRetention }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="retention" style="max-width:1000px;margin:0 auto;padding:30px 26px 56px;animation:cbup .3s ease">
@@ -1984,6 +2172,7 @@
         <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:{{ item.icColor }}">
           <sc-if value="{{ item.isHome }}" hint-placeholder-val="{{ true }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M3 10.7 12 3.5l9 7.2"></path><path d="M5.5 9.7V20h13V9.7"></path></svg></sc-if>
           <sc-if value="{{ item.isLib }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="4" y="4" width="6" height="16" rx="1.2"></rect><rect x="14" y="4" width="6" height="16" rx="1.2"></rect></svg></sc-if>
+          <sc-if value="{{ item.isJourney }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M5 21V4"></path><path d="M5 4c3-1.6 5.5 1.6 8.5 0S19 5.6 19 5.6v7.6s-2.5-1.6-5.5 0-5.5-1.6-8.5 0"></path></svg></sc-if>
           <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
           <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
           <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
@@ -2127,6 +2316,7 @@ class Component extends DCLogic {
     tbConcept: null, tbInput: '', tbChat: [], tbBusy: false, tbUnderstood: 0, tbDone: false, tbFullOpen: false,
     apConcept: null, apCard: null, apBusy: false, apChoice: null, apError: '',
     applyClassify: {}, // lessonNum -> { loading, terms:[applicable term strings] | null }
+    journeyMode: 'path', journeyOpen: {}, journeyLesson: null, journeyConcept: null,
     retDetailOpen: false, // retention screen: reveal the full analytical detail
     retDemo: false, // retention screen: preview with mock data
     matchLesson: '', matchConcepts: [], matched: {}, matchSelTerm: null, matchWrong: null, matchDefOrder: [],
@@ -2287,6 +2477,80 @@ class Component extends DCLogic {
   setView(v) { this.setState({ view: v, lessonNum: null, conceptMapOpen: false, tool: null, lessonTool: null }); }
   toggleDeckCard(i) { const o = Object.assign({}, this.state.openDeckCards); o[i] = !o[i]; this.setState({ openDeckCards: o }); }
   toggleRecurring(theme) { const o = Object.assign({}, this.state.openThemes); o[theme] = !o[theme]; this.setState({ openThemes: o }); }
+  setJourneyMode(m) { this.setState({ journeyMode: m }); }
+  toggleJourneyLesson(n) { const o = Object.assign({}, this.state.journeyOpen); o[n] = !o[n]; this.setState({ journeyOpen: o }); }
+  selectJourneyLesson(n) { this.setState({ journeyLesson: n, journeyConcept: null }); }
+  toggleJourneyConcept(k) { this.setState({ journeyConcept: this.state.journeyConcept === k ? null : k }); }
+  jSeg(active) {
+    return 'flex:1;text-align:center;font-family:inherit;font-size:13.5px;font-weight:' + (active?800:600) + ';padding:9px 8px;border-radius:11px;cursor:pointer;border:none;transition:.15s;background:' + (active?'var(--panel)':'transparent') + ';color:' + (active?'var(--tx)':'var(--tx3)') + ';' + (active?'box-shadow:0 1px 4px rgba(0,0,0,.16)':'');
+  }
+  journeyVals() {
+    const D = this.data, st = this.state;
+    const lessons = D.lessons.slice().sort((a,b)=>a.num-b.num);
+    const N = lessons.length;
+    const mode = st.journeyMode || 'path';
+    const mastered = lessons.filter(l=>this.effStatus(l)==='mastered').length;
+    const totalConcepts = lessons.reduce((s,l)=>s+((l.concepts||[]).length),0);
+    const trunc = (s,n)=>{ s=s||''; return s.length>n ? s.slice(0,n-1).trim()+'…' : s; };
+
+    const termMap = {};
+    lessons.forEach(l=>(l.concepts||[]).forEach(c=>{ const k=(c.term||'').trim(); if(!k)return; (termMap[k]=termMap[k]||[]).push(l.num); }));
+    const recurringCount = Object.keys(termMap).filter(k=>termMap[k].length>1).length;
+
+    const idx = [0, Math.floor((N-1)/2), N-1].filter((v,i,a)=>a.indexOf(v)===i);
+    const beatLabels = ['הבסיס — מאיפה יצאנו','אמצע הדרך','כאן ועכשיו'];
+    const big3 = idx.map((li,bi)=>{ const l=lessons[li]; const sm=this.statusMeta(this.effStatus(l));
+      return { beat: beatLabels[bi]||('פרק '+(bi+1)), num:l.num, title:l.title,
+        text: trunc((l.explainer&&l.explainer.takeaway)||l.hook,150), color:sm.c, onOpen:()=>this.openLesson(l.num) }; });
+
+    const openMap = st.journeyOpen || {};
+    const jPath = lessons.map((l,i)=>{
+      const sm=this.statusMeta(this.effStatus(l));
+      const ex=l.explainer;
+      const concepts=(l.concepts||[]).map(c=>{
+        const k=(c.term||'').trim(); const others=(termMap[k]||[]).filter(n=>n!==l.num); const key='L'+l.num+'::'+k;
+        return { term:c.term, eli5:c.eli5, recurring:others.length>0,
+          recurringLabel: others.length>0?('חוזר בשיעור '+others.join(', ')):'',
+          open: st.journeyConcept===key, onToggle:()=>this.toggleJourneyConcept(key) }; });
+      const quotes=(l.quotes||[]).slice(0,3).map(q=>({ text:q.text, why:q.why }));
+      const open=!!openMap[l.num];
+      return { num:l.num, date:l.date, title:l.title, hook:l.hook, color:sm.c, bg:sm.bg, statusLabel:sm.label,
+        intro: ex? ex.intro : (l.summary?l.summary.overview:''),
+        sections: ex? ex.sections.map(s=>({ h:s.h, paras:s.p.map(t=>({text:t})) })) : [],
+        takeaway: ex? ex.takeaway : '', hasTakeaway: !!(ex&&ex.takeaway),
+        concepts, conceptCount:concepts.length, quotes, hasQuotes:quotes.length>0,
+        open, onToggle:()=>this.toggleJourneyLesson(l.num),
+        onOpenLesson:()=>this.openLesson(l.num), onReview:()=>this.startReview('lesson', l.num),
+        toggleLabel: open?'הסתר את הפירוט':'פתח את ההסבר המלא', delay:(i*0.05).toFixed(2)+'s' }; });
+
+    const R=38;
+    const selNum = st.journeyLesson || lessons[N-1].num;
+    const jOrbit = lessons.map((l,i)=>{
+      const ang=(-90 + i*360/N)*Math.PI/180; const sm=this.statusMeta(this.effStatus(l)); const sel=selNum===l.num;
+      return { num:l.num, xPct:(50+R*Math.cos(ang)).toFixed(2)+'%', yPct:(50+R*Math.sin(ang)).toFixed(2)+'%',
+        lineDeg:(i*360/N - 90)+'deg', color:sm.c, selected:sel, ring: sel?sm.c:'var(--bd2)', size: sel?'46px':'38px',
+        pulse: sel?'animation:jpulse 2.2s ease-in-out infinite;':'', onSelect:()=>this.selectJourneyLesson(l.num) }; });
+    const selLesson = lessons.find(l=>l.num===selNum) || lessons[N-1];
+    const selSm = this.statusMeta(this.effStatus(selLesson));
+    const jMapConcepts=(selLesson.concepts||[]).map(c=>{
+      const k=(c.term||'').trim(); const others=(termMap[k]||[]).filter(n=>n!==selLesson.num); const key='M'+selLesson.num+'::'+k;
+      return { term:c.term, eli5:c.eli5, recurring:others.length>0,
+        recurringLabel: others.length>0?('חוזר בשיעור '+others.join(', ')):'',
+        open: st.journeyConcept===key, onToggle:()=>this.toggleJourneyConcept(key) }; });
+
+    const jFlow = lessons.map((l,i)=>{ const sm=this.statusMeta(this.effStatus(l));
+      return { num:l.num, title:l.title, hook:trunc(l.hook,90), color:sm.c, notLast:i<N-1, onOpen:()=>this.openLesson(l.num) }; });
+
+    return {
+      journeyCount:N, journeyMastered:mastered, journeyConceptTotal:totalConcepts, journeyRecurring:recurringCount,
+      jModePath: mode==='path', jModeMap: mode==='map', jModeFlow: mode==='flow',
+      onJourneyPath:()=>this.setJourneyMode('path'), onJourneyMap:()=>this.setJourneyMode('map'), onJourneyFlow:()=>this.setJourneyMode('flow'),
+      jModePathStyle:this.jSeg(mode==='path'), jModeMapStyle:this.jSeg(mode==='map'), jModeFlowStyle:this.jSeg(mode==='flow'),
+      big3, jPath, jOrbit, jFlow, jMapConcepts,
+      jMapSelNum:selNum, jMapSelTitle:selLesson.title, jMapSelColor:selSm.c, jMapSelHook:selLesson.hook,
+      jMapReview:()=>this.startReview('lesson', selNum), jMapOpenLesson:()=>this.openLesson(selNum),
+    };
+  }
   openLesson(n) { this.setState({ view: 'library', lessonNum: n, conceptMapOpen: false, qualityOpen: false, qualityDismissed: false, openDeckCards: {}, openSec: { chapters:false, concepts:false, quotes:false, deck:false, explainer:false }, lessonTool: null, matchConcepts: [], matched: {}, matchSelTerm: null, matchWrong: null, tlItems: [], tlOrder: [], tlChecked: false, anConcept: '', anCustom: '', anResults: [], anError: '', tbConcept:null, tbChat:[], tbDone:false, tbUnderstood:0, tbFullOpen:false, apConcept:null, apCard:null, apChoice:null, apError:'' }); document.querySelector('main') && document.querySelector('main').scrollTo(0,0); }
   backLibrary() { this.setState({ lessonNum: null, conceptMapOpen: false, activeConceptTerm: null }); }
   openConceptMap() { this.setState({ conceptMapOpen: true, lessonNum: null, conceptQuery: '', conceptFilter: null }); }
@@ -3646,7 +3910,7 @@ class Component extends DCLogic {
       const active = st.view === n.key;
       return {
         label:n.label, shortLabel:n.short,
-        isHome:n.key==='home', isLib:n.key==='library', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools',
+        isHome:n.key==='home', isLib:n.key==='library', isJourney:n.key==='journey', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools',
         onClick:() => this.setView(n.key),
         weight: active ? 700 : 500,
         color: active ? 'var(--tx)' : (isMobile ? 'var(--tx3)' : 'var(--tx2)'),
@@ -4154,6 +4418,9 @@ class Component extends DCLogic {
       showRetention: RETENTION_LIVE && st.view === 'retention',
       ...this.retentionVals(),
       ...this.toolVals(),
+      showJourney: st.view === 'journey',
+      onOpenJourney:() => this.setView('journey'),
+      ...this.journeyVals(),
       procStations, procModules,
       procDoneCount, procTotal, procPct, procPctW: procPct + '%',
       procHasProgress: procDoneCount > 0,
