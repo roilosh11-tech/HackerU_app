@@ -2336,6 +2336,7 @@ class Component extends DCLogic {
     qualityOpen: false,
     qualityDismissed: false,
     isMobile: false,
+    isTablet: false,
     lessonNum: null,
     conceptMapOpen: false,
     activeConceptTerm: null,
@@ -2464,8 +2465,11 @@ class Component extends DCLogic {
     });
     this.forceUpdate();
     this._onResize = () => {
-      const m = window.innerWidth < 820;
-      if (m !== this.state.isMobile) this.setState({ isMobile: m });
+      const w = window.innerWidth;
+      const m = w < 820;
+      // iPad mini / small-tablet tier: touch chrome (header + bottom nav) but two-column density.
+      const t = m && w >= 680;
+      if (m !== this.state.isMobile || t !== this.state.isTablet) this.setState({ isMobile: m, isTablet: t });
     };
     this._onResize();
     window.addEventListener('resize', this._onResize);
@@ -3883,6 +3887,8 @@ class Component extends DCLogic {
     const st = this.state;
     const D = this.data;
     const isMobile = st.isMobile;
+    const isTablet = st.isTablet;
+    const phone = isMobile && !isTablet;
     const inLesson = st.lessonNum != null;
     const inMap = st.conceptMapOpen;
 
@@ -4297,15 +4303,15 @@ class Component extends DCLogic {
     }));
 
     return {
-      isMobile, isDesktop: !isMobile,
+      isMobile, isDesktop: !isMobile, isTablet,
       mainPadBottom: isMobile ? 74 : 0,
-      gridCols: isMobile ? '1fr' : 'repeat(auto-fill,minmax(300px,1fr))',
-      conceptGridCols: isMobile ? '1fr' : '1fr 1fr',
-      summaryCols: isMobile ? '1fr' : '1fr 1fr',
-      recurringCols: isMobile ? '1fr' : 'repeat(auto-fit,minmax(240px,1fr))',
-      statCols: isMobile ? '1fr 1fr' : 'repeat(3,1fr)',
-      scopeCols: isMobile ? '1fr' : 'repeat(3,1fr)',
-      dashCols: isMobile ? '1fr' : '1fr 1fr',
+      gridCols: phone ? '1fr' : (isTablet ? 'repeat(2,1fr)' : 'repeat(auto-fill,minmax(300px,1fr))'),
+      conceptGridCols: phone ? '1fr' : '1fr 1fr',
+      summaryCols: phone ? '1fr' : '1fr 1fr',
+      recurringCols: phone ? '1fr' : 'repeat(auto-fit,minmax(240px,1fr))',
+      statCols: isTablet ? 'repeat(3,1fr)' : (isMobile ? '1fr 1fr' : 'repeat(3,1fr)'),
+      scopeCols: phone ? '1fr' : 'repeat(3,1fr)',
+      dashCols: phone ? '1fr' : '1fr 1fr',
       nav, streak: st.streak, todayDue:this.dueCards().length, todayInsight,
       themeVars: this.themeCSS(),
       isLight: this.isLight(),
@@ -4424,8 +4430,8 @@ class Component extends DCLogic {
       procStations, procModules,
       procDoneCount, procTotal, procPct, procPctW: procPct + '%',
       procHasProgress: procDoneCount > 0,
-      procStationCols: isMobile ? '1fr' : 'repeat(4,1fr)',
-      procStationArrow: isMobile ? '90deg' : '0deg',
+      procStationCols: phone ? '1fr' : (isTablet ? 'repeat(2,1fr)' : 'repeat(4,1fr)'),
+      procStationArrow: phone ? '90deg' : '0deg',
       onOpenConceptMap:() => this.openConceptMap(),
       onBackLibrary:() => this.backLibrary(),
       conceptGroups, activeConcept, noConcept: !activeConcept,
