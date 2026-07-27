@@ -40,6 +40,7 @@
     <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px">
       <div style="font-weight:800;font-size:20px">אין לך הרשאת מנהל/ת</div>
       <div style="color:#a4afc0;font-size:15px">הדף הזה זמין רק לחשבון המנהל/ת.</div>
+      <div style="color:#7f8a9b;font-size:12.5px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;direction:ltr">{{ deniedWho }}</div>
       <a href="Course Brain.dc.html" style="background:#2e3743;border:1px solid #505c6d;color:#ccd4e1;font-weight:600;padding:10px 18px;border-radius:11px">חזרה לאפליקציה</a>
     </div>
   </sc-if>
@@ -273,7 +274,9 @@ class Component extends DCLogic {
     if (API.isOnline() && !API.isAdmin()) {
       // not an admin (or not logged in) — bounce
       if (!API.isLoggedIn()) { API.gotoLogin(); return; }
-      this.setState({ loading: false, denied: true });
+      const u = API.user || {};
+      this.setState({ loading: false, denied: true,
+        deniedWho: 'מחובר/ת כ: ' + (u.username || '—') + ' · role: ' + (u.role || '—') + ' · status: ' + (u.status || '—') });
       return;
     }
     await this.load();
@@ -418,6 +421,7 @@ class Component extends DCLogic {
     return {
       loading: st.loading,
       denied: st.denied,
+      deniedWho: st.deniedWho || '',
       ready: !st.loading && !st.denied,
       pending, students,
       hasPending: pending.length > 0,
