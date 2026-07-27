@@ -65,6 +65,18 @@ ALLOW_SIGNUP = not (
     or os.environ.get("ALLOW_SIGNUP", "1") == "0"
 )
 
+# Google accounts that are ALWAYS admins (comma-separated emails). Signing in with one
+# of these Google accounts promotes it to role='admin' + status='approved' automatically,
+# so the teacher can reach the Admin screen through Google like everyone else.
+ADMIN_EMAILS = set(
+    e.strip().lower() for e in os.environ.get("ADMIN_EMAILS", "").split(",") if e.strip()
+)
+
+
+def is_admin_email(email: str) -> bool:
+    return bool(email) and email.strip().lower() in ADMIN_EMAILS
+
+
 # Google-only mode (DEFAULT ON): students may sign in ONLY via their Google account.
 # Username/password login and password registration are refused for non-admins (the
 # admin can still use a password so the Admin screen stays reachable). The one-time
@@ -565,6 +577,10 @@ def google_auth(body: GoogleAuthIn):
     if row is None:
         conn.close()
         return {"status": "unlinked", "email": email, "name": name, "linkToken": make_glink(claims)}
+    if is_admin_email(email):
+        conn.execute("UPDATE users SET role='admin', status='approved' WHERE id=?", (row["id"],))
+        conn.commit()
+        row = conn.execute("SELECT * FROM users WHERE id=?", (row["id"],)).fetchone()
     try:
         _google_status_gate(row)
     except HTTPException:
@@ -641,10 +657,16 @@ def google_create(body: GoogleCreateIn):
     conn.execute(
         """INSERT INTO users (username, display_name, password_hash, avatar, email, google_sub,
            role, status, created_at, updated_at, last_active)
-           VALUES (?,?,?,?,?,?, 'student', 'pending', ?,?,?)""",
-        (uname, dn, "google-only$" + secrets.token_hex(8), body.avatar or "", email, sub, now, now, now),
+           VALUES (?,?,?,?,?,?, ?, ?, ?,?,?)""",
+        (uname, dn, "google-only$" + secrets.token_hex(8), body.avatar or "", email, sub,
+         "admin" if is_admin_email(email) else "student",
+         "approved" if is_admin_email(email) else "pending", now, now, now),
     )
     conn.commit()
+    if is_admin_email(email):
+        row = conn.execute("SELECT * FROM users WHERE google_sub=?", (sub,)).fetchone()
+        conn.close()
+        return {"token": make_token(row["id"]), "user": user_public(row)}
     conn.close()
     return {"ok": True, "status": "pending", "message": "החשבון נוצר וממתין לאישור המנהל/ת."}
 
