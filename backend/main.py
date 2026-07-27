@@ -56,20 +56,33 @@ TOKEN_TTL_DAYS = 60
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "")  # if empty, admin isn't auto-seeded
 
-# Whether brand-new registrations are allowed at all (signup_open = "requires approval").
-ALLOW_SIGNUP = os.environ.get("ALLOW_SIGNUP", "1") != "0"
+# Signups are OPEN by default: students may create an account, and every new account
+# lands status='pending' until the admin approves it. Kill switch: SIGNUP_CLOSED=1.
+# (The legacy ALLOW_SIGNUP=0 var is still honoured, but only if SIGNUP_CLOSED is unset
+# and it is explicitly set — so a stale deploy env can be cleared by removing it.)
+ALLOW_SIGNUP = not (
+    os.environ.get("SIGNUP_CLOSED", "0") == "1"
+    or os.environ.get("ALLOW_SIGNUP", "1") == "0"
+)
 
-# Google-only mode: when "1", students may sign in ONLY via Google. Username/password
-# login and password registration are refused for non-admins (the admin can still use
-# a password so the Admin screen stays reachable). The one-time Google "claim" flow is
-# unaffected — students still link their old account once to migrate their progress.
-GOOGLE_ONLY = os.environ.get("GOOGLE_ONLY", "0") == "1"
+# Google-only mode (DEFAULT ON): students may sign in ONLY via their Google account.
+# Username/password login and password registration are refused for non-admins (the
+# admin can still use a password so the Admin screen stays reachable). The one-time
+# Google "claim" flow is unaffected — students still link an older account once to
+# migrate their progress. Set GOOGLE_ONLY=0 to re-open password accounts.
+GOOGLE_ONLY = os.environ.get("GOOGLE_ONLY", "1") != "0"
 
 # Anthropic (for the "שאל את הקורס" chat). Set ANTHROPIC_API_KEY in the deploy env to
 # enable the chat in production. If empty, /api/chat returns 503 and the app shows a
 # graceful "chat unavailable" message.
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+
+# Per-user usage caps for the LLM chat, so one student can't run up the Anthropic
+# bill. One unit = one successful chat request. 0 disables that particular limit.
+# Admins are exempt. Counts reset daily / at the start of each calendar month (UTC).
+CHAT_DAILY_LIMIT = int(os.environ.get("CHAT_DAILY_LIMIT", "25"))
+CHAT_MONTHLY_LIMIT = int(os.environ.get("CHAT_MONTHLY_LIMIT", "250"))
 
 # Google Sign-In. Set GOOGLE_CLIENT_ID (the OAuth 2.0 Web client ID from Google
 # Cloud Console) to enable "התחברות עם Google". If empty, the Google button is
@@ -138,6 +151,15 @@ def init_db():
             created_at    REAL
         );
         CREATE INDEX IF NOT EXISTS idx_comments_post ON post_comments(post_id);
+
+        -- One row per user per UTC day; count = successful chat requests that day.
+        -- Daily usage = today's row; monthly usage = SUM over the 'YYYY-MM-' prefix.
+        CREATE TABLE IF NOT EXISTS chat_usage (
+            user_id INTEGER NOT NULL,
+            day     TEXT NOT NULL,          -- 'YYYY-MM-DD' (UTC)
+            count   INTEGER DEFAULT 0,
+            PRIMARY KEY (user_id, day)
+        );
         """
     )
     # --- migrations for databases created before Google Sign-In existed -------
@@ -243,16 +265,6 @@ def verify_google_access_token(access_token: str) -> dict:
     if not claims.get("sub"):
         raise HTTPException(401, "google token missing sub")
     return claims
-
-
-def resolve_google_identity(credential=None, access_token=None) -> dict:
-    """Accept either a GIS ID token (credential) or an OAuth access token and
-    return normalized claims (sub / email / email_verified / name)."""
-    if credential:
-        return verify_google_credential(credential)
-    if access_token:
-        return verify_google_access_token(access_token)
-    raise HTTPException(400, "missing google credential")
 
 
 def resolve_google_identity(credential=None, access_token=None, code=None, redirect_uri=None, link_token=None) -> dict:
@@ -923,6 +935,9 @@ def admin_users(request: Request):
         data = json.loads(r["data_json"] or "{}")
         u["notes"] = data.get("notes", {})
         u.update(learning_metrics(data))
+        ct, cm, _ = chat_usage_counts(conn, r["id"])
+        u["chatToday"] = ct
+        u["chatMonth"] = cm
         u["reviewsLifetime"] = data.get("reviewsTotal") or u["reviewsLogged"]
         u["lessonStatus"] = {k: v for k, v in (data.get("statusOverride") or {}).items() if v}
         out.append(u)
@@ -985,19 +1000,57 @@ def google_start(request: Request):
 @app.get("/api/health")
 def health():
     return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY),
-            "googleClientId": GOOGLE_CLIENT_ID or None, "googleOnly": GOOGLE_ONLY}
+            "googleClientId": GOOGLE_CLIENT_ID or None, "googleOnly": GOOGLE_ONLY,
+            "chatDailyLimit": CHAT_DAILY_LIMIT, "chatMonthlyLimit": CHAT_MONTHLY_LIMIT}
 
 
 # ---------------------------------------------------------------------------
 # LLM chat proxy (שאל את הקורס)
 # ---------------------------------------------------------------------------
+def chat_usage_counts(conn, uid):
+    """Return (used_today, used_this_month, today_str) for a user's chat quota."""
+    today = dt.datetime.utcnow().strftime("%Y-%m-%d")
+    drow = conn.execute(
+        "SELECT count FROM chat_usage WHERE user_id=? AND day=?", (uid, today)
+    ).fetchone()
+    mrow = conn.execute(
+        "SELECT COALESCE(SUM(count),0) AS c FROM chat_usage WHERE user_id=? AND day LIKE ?",
+        (uid, today[:7] + "-%"),
+    ).fetchone()
+    return (drow["count"] if drow else 0), (mrow["c"] if mrow else 0), today
+
+
+def chat_usage_bump(conn, uid, day):
+    conn.execute(
+        "INSERT INTO chat_usage (user_id, day, count) VALUES (?,?,1) "
+        "ON CONFLICT(user_id, day) DO UPDATE SET count = count + 1",
+        (uid, day),
+    )
+    conn.commit()
+
 # The front-end sends {system, messages, max_tokens}. We forward to Anthropic with
 # the server-side key and return {text}. Auth-gated so only approved students can use it.
 @app.post("/api/chat")
 def chat(body: ChatIn, request: Request):
-    current_user(request)  # must be logged in + approved
+    user = current_user(request)  # must be logged in + approved
     if not ANTHROPIC_API_KEY:
         raise HTTPException(503, "chat not configured")
+
+    # Per-user usage caps (admins exempt) so one student can't run up the bill.
+    conn = db()
+    used_today, used_month, today = chat_usage_counts(conn, user["id"])
+    conn.close()
+    if user["role"] != "admin":
+        if CHAT_DAILY_LIMIT and used_today >= CHAT_DAILY_LIMIT:
+            raise HTTPException(
+                429,
+                f"\u05d4\u05d2\u05e2\u05ea \u05dc\u05de\u05db\u05e1\u05ea \u05d4\u05e9\u05d0\u05dc\u05d5\u05ea \u05d4\u05d9\u05d5\u05de\u05d9\u05ea ({CHAT_DAILY_LIMIT} \u05e9\u05d0\u05dc\u05d5\u05ea). \u05e0\u05e1\u05d4/\u05d9 \u05e9\u05d5\u05d1 \u05de\u05d7\u05e8.",
+            )
+        if CHAT_MONTHLY_LIMIT and used_month >= CHAT_MONTHLY_LIMIT:
+            raise HTTPException(
+                429,
+                f"\u05d4\u05d2\u05e2\u05ea \u05dc\u05de\u05db\u05e1\u05ea \u05d4\u05e9\u05d0\u05dc\u05d5\u05ea \u05d4\u05d7\u05d5\u05d3\u05e9\u05d9\u05ea ({CHAT_MONTHLY_LIMIT} \u05e9\u05d0\u05dc\u05d5\u05ea). \u05d4\u05de\u05db\u05e1\u05d4 \u05de\u05ea\u05d0\u05e4\u05e1\u05ea \u05d1\u05ea\u05d7\u05d9\u05dc\u05ea \u05d4\u05d7\u05d5\u05d3\u05e9.",
+            )
 
     # Whitelist message shape: [{role: 'user'|'assistant', content: str}, ...]
     msgs = []
@@ -1045,7 +1098,17 @@ def chat(body: ChatIn, request: Request):
     text = "".join(
         b.get("text", "") for b in data.get("content", []) if b.get("type") == "text"
     )
-    return {"text": text}
+    # Count this successful request against the user's quota.
+    conn = db()
+    chat_usage_bump(conn, user["id"], today)
+    conn.close()
+    return {
+        "text": text,
+        "usage": {
+            "dailyUsed": used_today + 1, "dailyLimit": CHAT_DAILY_LIMIT,
+            "monthlyUsed": used_month + 1, "monthlyLimit": CHAT_MONTHLY_LIMIT,
+        },
+    }
 
 
 # ---------------------------------------------------------------------------
