@@ -271,14 +271,8 @@ class Component extends DCLogic {
     const API = window.CourseAPI;
     if (!API) { this.setState({ loading: false, denied: true }); return; }
     await API.boot();
-    if (API.isOnline() && !API.isAdmin()) {
-      // not an admin (or not logged in) — bounce
-      if (!API.isLoggedIn()) { API.gotoLogin(); return; }
-      const u = API.user || {};
-      this.setState({ loading: false, denied: true,
-        deniedWho: 'מחובר/ת כ: ' + (u.username || '—') + ' · role: ' + (u.role || '—') + ' · status: ' + (u.status || '—') });
-      return;
-    }
+    if (API.isOnline() && !API.isLoggedIn()) { API.gotoLogin(); return; }
+    // Don't trust the cached role — ask the server. Only a real 403 denies.
     await this.load();
   }
 
@@ -288,7 +282,10 @@ class Component extends DCLogic {
       const r = await API.adminUsers();
       this.setState({ loading: false, denied: false, users: r.users || [] });
     } catch (e) {
-      this.setState({ loading: false, denied: true });
+      const u = (API && API.user) || {};
+      this.setState({ loading: false, denied: true,
+        deniedWho: (u.username || '—') + ' · role: ' + (u.role || '—') + ' · status: ' + (u.status || '—')
+          + ' · ' + (e && e.status ? e.status : '?') + ' ' + ((e && e.message) || '') });
     }
   }
 
