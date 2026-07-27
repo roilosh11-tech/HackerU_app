@@ -948,7 +948,6 @@ def admin_users(request: Request):
     require_admin(request)
     conn = db()
     rows = conn.execute("SELECT * FROM users ORDER BY status='pending' DESC, created_at DESC").fetchall()
-    conn.close()
     out = []
     for r in rows:
         u = user_public(r)
@@ -963,6 +962,7 @@ def admin_users(request: Request):
         u["reviewsLifetime"] = data.get("reviewsTotal") or u["reviewsLogged"]
         u["lessonStatus"] = {k: v for k, v in (data.get("statusOverride") or {}).items() if v}
         out.append(u)
+    conn.close()
     return {"users": out}
 
 
