@@ -14,6 +14,7 @@
 <script src="api.js"></script>
 <script src="course-data.js"></script>
 <script src="mc-distractors.js"></script>
+<script src="games-data.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <meta name="theme-color" content="#ffffff">
 <link rel="icon" type="image/png" href="assets/icon-192.png">
@@ -41,6 +42,10 @@
   @keyframes jdot{0%{top:0;opacity:0}20%{opacity:1}80%{opacity:1}100%{top:26px;opacity:0}}
   @keyframes jpulse{0%,100%{box-shadow:0 0 0 0 rgba(152,177,255,.35)}50%{box-shadow:0 0 0 7px rgba(152,177,255,0)}}
   @keyframes cbshake{10%,90%{transform:translateX(-1px)}30%,70%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+  @keyframes gsnap{0%{transform:translateY(-10px) scale(.97);opacity:0}60%{transform:translateY(2px) scale(1.01)}100%{transform:none;opacity:1}}
+  @keyframes gstamp{0%{transform:scale(.4) rotate(-18deg);opacity:0}70%{transform:scale(1.12) rotate(-6deg);opacity:1}100%{transform:scale(1) rotate(-6deg);opacity:1}}
+  @keyframes gdrop{from{opacity:0;transform:translateY(-14px) rotate(-1.2deg)}to{opacity:1;transform:none}}
+  @keyframes gglow{0%,100%{box-shadow:0 0 0 0 rgba(152,177,255,.28)}50%{box-shadow:0 0 0 9px rgba(152,177,255,0)}}
   @media print{
     body *{visibility:hidden !important}
     .cheat-print,.cheat-print *{visibility:visible !important}
@@ -88,6 +93,7 @@
             <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
             <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
             <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
+            <sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
             <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
             <sc-if value="{{ item.isRet }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><path d="M12 3 4.5 6v5.5c0 4.3 3.1 7.4 7.5 9 4.4-1.6 7.5-4.7 7.5-9V6z"></path><path d="M9 12l2.2 2.2L15.5 10"></path></svg></sc-if>
             <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
@@ -833,240 +839,6 @@
           <button onClick="{{ lesson.onAsk }}" style="flex:1;min-width:160px;font-family:inherit;font-weight:700;font-size:14px;padding:13px;border-radius:12px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx)">שאל שאלה על השיעור</button>
         </div>
 
-        <!-- ===== TEACHING TOOLS (admin, scoped to this lesson) ===== -->
-        <sc-if value="{{ lessonToolsAdmin }}" hint-placeholder-val="{{ false }}">
-        <div style="margin-top:30px;border-top:1px solid var(--bd);padding-top:22px">
-          <div class="cheat-noprint" style="display:flex;align-items:center;gap:9px;margin-bottom:5px">
-            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></span>
-            <div style="font-size:16px;font-weight:800">כלי תרגול</div>
-          </div>
-          <div class="cheat-noprint" style="font-size:13px;color:var(--tx3);margin-bottom:15px">פעילויות שנבנות אוטומטית מהשיעור הזה.</div>
-          <div class="cheat-noprint" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
-            <sc-for list="{{ lessonToolTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ t.bg }};border:1.5px solid {{ t.border }};color:{{ t.color }};font-weight:700;font-size:13px;padding:8px 15px;border-radius:10px">{{ t.label }}</button></sc-for>
-          </div>
-
-          <sc-if value="{{ ltNone }}" hint-placeholder-val="{{ true }}"><div class="cheat-noprint" style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:34px 24px;text-align:center;color:var(--tx3);font-size:14px">בחר/י כלי כדי להתחיל.</div></sc-if>
-
-          <!-- TEACH-BACK (הסבר לרון בן 10) -->
-          <sc-if value="{{ ltTeach }}" hint-placeholder-val="{{ false }}">
-          <div style="max-width:680px">
-            <sc-if value="{{ tbHasConcept }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
-                <div style="font-size:14px;font-weight:700">מסביר/ה: {{ tbConceptName }}</div>
-                <button onClick="{{ onTbReset }}" style="font-family:inherit;font-size:12.5px;color:var(--tx3);background:none;border:none;cursor:pointer">מושג אחר</button>
-              </div>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-                <span style="font-size:12px;color:var(--tx3);white-space:nowrap">רון הבין</span>
-                <div style="flex:1;height:7px;border-radius:5px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ tbUnderstood }}%;background:{{ tbBarColor }};transition:width .4s"></div></div>
-                <span style="font-size:12.5px;font-weight:700;color:{{ tbBarColor }};white-space:nowrap;font-variant-numeric:tabular-nums">{{ tbUnderstood }}%</span>
-              </div>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-                <button onClick="{{ onTbFull }}" style="display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;padding:7px 13px;border-radius:20px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2)">📖 {{ tbFullLabel }}</button>
-              </div>
-              <sc-if value="{{ tbFullOpen }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--panel2);border:1px solid var(--bd2);border-radius:12px;padding:13px 15px;margin-bottom:12px;animation:cbup .2s ease">
-                  <div style="font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.3px;margin-bottom:5px">ההגדרה המלאה · {{ tbConceptName }}</div>
-                  <div style="font-size:14px;line-height:1.6;color:var(--tx)">{{ tbFull }}</div>
-                </div>
-              </sc-if>
-              <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
-                <sc-for list="{{ tbChatView }}" as="m" hint-placeholder-count="2">
-                  <sc-if value="{{ m.isKid }}" hint-placeholder-val="{{ true }}">
-                    <div style="display:flex;gap:10px;align-items:flex-start;max-width:88%">
-                      <div style="width:30px;height:30px;flex:none;border-radius:50%;background:linear-gradient(145deg,#98b1ff,#7f8fe0);display:flex;align-items:center;justify-content:center;font-size:15px">🧒</div>
-                      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:4px 15px 15px 15px;padding:12px 15px;font-size:14.5px;line-height:1.55">{{ m.text }}</div>
-                    </div>
-                  </sc-if>
-                  <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
-                    <div style="align-self:flex-end;max-width:88%;background:rgba(152,177,255,.14);border:1px solid rgba(152,177,255,.28);border-radius:15px 4px 15px 15px;padding:12px 15px;font-size:14.5px;line-height:1.55">{{ m.text }}</div>
-                  </sc-if>
-                </sc-for>
-                <sc-if value="{{ tbBusy }}" hint-placeholder-val="{{ false }}">
-                  <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13px"><span style="width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>רון חושב…</div>
-                </sc-if>
-              </div>
-              <sc-if value="{{ tbDone }}" hint-placeholder-val="{{ false }}">
-                <div style="background:linear-gradient(160deg,rgba(147,224,177,.16),var(--panel));border:1px solid rgba(147,224,177,.32);border-radius:15px;padding:20px;text-align:center;animation:cbup .3s ease">
-                  <div style="font-size:30px;margin-bottom:6px">🎉</div>
-                  <div style="font-size:17px;font-weight:800;margin-bottom:5px">רון הבין! ואם הצלחת להסביר לילד — סימן שאתה באמת מבין.</div>
-                  <div style="font-size:13px;color:var(--tx2);margin-bottom:16px">זה בדיוק המבחן האמיתי של הבנה.</div>
-                  <button onClick="{{ onTbReset }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:12px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster)">מושג נוסף →</button>
-                </div>
-              </sc-if>
-              <sc-if value="{{ tbInputVisible }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--bd2);border-radius:14px;padding:10px">
-                  <textarea value="{{ tbInput }}" onInput="{{ onTbInput }}" onKeyDown="{{ onTbKey }}" rows="2" placeholder="הסבר/י לרון במילים פשוטות…" style="flex:1;resize:none;background:none;border:none;outline:none;font-family:inherit;font-size:14.5px;line-height:1.5;color:var(--tx);padding:4px 6px"></textarea>
-                  <button onClick="{{ onTbSend }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);flex:none">שלח</button>
-                </div>
-              </sc-if>
-            </sc-if>
-            <sc-if value="{{ tbPickVisible }}" hint-placeholder-val="{{ true }}">
-              <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">הסבר/י מושג מהשיעור בעברית פשוטה — ורון, ילד סקרן בן 10, ישאל שאלות עד שההסבר באמת מתיישב. אם הצלחת להסביר לילד, אתה באמת מבין.</div>
-              <sc-if value="{{ comprehensionNoLLM }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--tx2);margin-bottom:16px">כדי שרון יגיב צריך מפתח API — אפשר להוסיף מפתח חינמי במסך „שאל את הקורס”.</div>
-              </sc-if>
-              <div style="font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:11px">בחר/י מושג מהשיעור להסביר לרון</div>
-              <div style="display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto">
-                <sc-for list="{{ lessonPickList }}" as="c" hint-placeholder-count="5">
-                  <button onClick="{{ c.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px 15px">
-                    <div style="font-weight:700;font-size:14px">{{ c.term }}</div>
-                  </button>
-                </sc-for>
-              </div>
-            </sc-if>
-          </div>
-          </sc-if>
-
-          <!-- APPLY (אתה היועץ) -->
-          <sc-if value="{{ ltApply }}" hint-placeholder-val="{{ false }}">
-          <div style="max-width:680px">
-            <sc-if value="{{ apHasConcept }}" hint-placeholder-val="{{ false }}">
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
-                <div style="font-size:14px;font-weight:700">{{ apConceptName }}</div>
-                <button onClick="{{ onApReset }}" style="font-family:inherit;font-size:12.5px;color:var(--tx3);background:none;border:none;cursor:pointer">מושג אחר</button>
-              </div>
-              <sc-if value="{{ apBusy }}" hint-placeholder-val="{{ true }}">
-                <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13.5px;padding:20px 0"><span style="width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--master);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>בונה תרחיש מהשטח…</div>
-              </sc-if>
-              <sc-if value="{{ apHasError }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:16px;font-size:13.5px;color:var(--tx2)">{{ apError }} <button onClick="{{ onApRetry }}" style="font-family:inherit;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer">נסה שוב</button></div>
-              </sc-if>
-              <sc-if value="{{ apHasCard }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:16px">
-                  <div style="font-size:11px;color:var(--tx3);letter-spacing:.4px;margin-bottom:9px">התרחיש</div>
-                  <div style="font-size:15.5px;line-height:1.6;color:var(--tx);margin-bottom:16px">{{ apCard.scenario }}</div>
-                  <div style="font-size:15px;font-weight:700;line-height:1.5">{{ apCard.question }}</div>
-                </div>
-                <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:16px">
-                  <sc-for list="{{ apOptions }}" as="o" hint-placeholder-count="3">
-                    <button onClick="{{ o.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;padding:14px 15px;border-radius:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);opacity:{{ o.op }};display:flex;align-items:center;gap:11px;font-size:14.5px;line-height:1.45">
-                      <span style="flex:1">{{ o.text }}</span>
-                      <span style="font-size:15px;font-weight:800;width:16px;text-align:center;flex:none">{{ o.mark }}</span>
-                    </button>
-                  </sc-for>
-                </div>
-                <sc-if value="{{ apAnswered }}" hint-placeholder-val="{{ false }}">
-                  <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:16px;animation:cbup .25s ease">
-                    <div style="font-size:12px;font-weight:700;color:var(--master);letter-spacing:.3px;margin-bottom:7px">למה</div>
-                    <div style="font-size:14px;line-height:1.6;color:var(--tx);margin-bottom:15px">{{ apCard.explain }}</div>
-                    <div style="display:flex;gap:9px;flex-wrap:wrap">
-                      <button onClick="{{ onApRetry }}" style="font-family:inherit;font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:11px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster)">תרחיש נוסף</button>
-                      <button onClick="{{ onApReset }}" style="font-family:inherit;font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:11px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel);color:var(--tx)">מושג אחר</button>
-                    </div>
-                  </div>
-                </sc-if>
-              </sc-if>
-            </sc-if>
-            <sc-if value="{{ apPickVisible }}" hint-placeholder-val="{{ true }}">
-              <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">תרחיש אמיתי מהשטח על מושג מהשיעור — אתה מקבל החלטה, ומגלה למה היא הנכונה. ככה מושג הופך למיומנות.</div>
-              <sc-if value="{{ comprehensionNoLLM }}" hint-placeholder-val="{{ false }}">
-                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--tx2);margin-bottom:16px">כדי לייצר תרחישים צריך מפתח API — אפשר להוסיף מפתח חינמי במסך „שאל את הקורס”.</div>
-              </sc-if>
-              <sc-if value="{{ applyLoading }}" hint-placeholder-val="{{ false }}">
-                <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13.5px;padding:16px 0"><span style="width:15px;height:15px;border:2px solid var(--bd2);border-top-color:var(--master);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>בורר מושגים מהשיעור שמתאימים לתרגול יישום…</div>
-              </sc-if>
-              <sc-if value="{{ applyPickReady }}" hint-placeholder-val="{{ true }}">
-                <div style="font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:11px">על איזה מושג מהשיעור להתאמן?</div>
-                <div style="display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto">
-                  <sc-for list="{{ applyPickList }}" as="c" hint-placeholder-count="5">
-                    <button onClick="{{ c.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:13px 15px">
-                      <div style="font-weight:700;font-size:14px;margin-bottom:2px">{{ c.term }}</div>
-                      <div style="font-size:12px;color:var(--tx3);line-height:1.4">{{ c.eli5 }}</div>
-                    </button>
-                  </sc-for>
-                </div>
-              </sc-if>
-            </sc-if>
-          </div>
-          </sc-if>
-
-          <!-- MATCH -->
-          <sc-if value="{{ ltMatch }}" hint-placeholder-val="{{ false }}">
-          <div>
-            <div class="cheat-noprint" style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onClick="{{ onMatchReshuffle }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer">סבב חדש</button></div>
-            <sc-if value="{{ matchEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:30px 24px;text-align:center;color:var(--tx3);font-size:14px">אין מספיק מושגים בשיעור הזה למשחק.</div></sc-if>
-            <sc-if value="{{ matchActive }}" hint-placeholder-val="{{ true }}">
-            <div>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-                <div style="flex:1;height:7px;border-radius:5px;background:var(--panel2);overflow:hidden"><div style="height:100%;width:{{ matchPct }}%;background:var(--master);transition:width .3s"></div></div>
-                <span style="font-size:13px;font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums">{{ matchDoneCount }} / {{ matchTotal }}</span>
-              </div>
-              <sc-if value="{{ matchWin }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(134,214,164,.13);border:1px solid var(--master);color:var(--master);border-radius:13px;padding:12px 16px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center">כל הכבוד! כל ההתאמות נכונות 🎉</div></sc-if>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;align-items:stretch">
-                <div style="font-size:12px;font-weight:700;color:var(--tx3)">מושגים</div>
-                <div style="font-size:12px;font-weight:700;color:var(--tx3)">הגדרות</div>
-                <sc-for list="{{ matchRows }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.t.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.t.cursor }};background:{{ r.t.bg }};border:1.5px solid {{ r.t.border }};color:{{ r.t.color }};font-weight:700;font-size:14px;padding:12px 14px;border-radius:12px;transition:.12s">{{ r.t.term }}</button><button onClick="{{ r.d.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.d.cursor }};background:{{ r.d.bg }};border:1.5px solid {{ r.d.border }};color:{{ r.d.color }};font-size:13px;line-height:1.5;padding:12px 14px;border-radius:12px;transition:.12s;animation:{{ r.d.anim }}">{{ r.d.def }}</button></sc-for>
-              </div>
-              <div style="font-size:12px;color:var(--tx3);margin-top:12px;text-align:center">בחר/י מושג ואז את ההגדרה המתאימה לו.</div>
-            </div>
-            </sc-if>
-          </div>
-          </sc-if>
-
-          <!-- ANALOGY -->
-          <sc-if value="{{ ltAnalogy }}" hint-placeholder-val="{{ false }}">
-          <div>
-            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:15px;padding:18px;margin-bottom:18px;max-width:640px">
-              <div style="display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-bottom:15px">
-                <span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--tx3);color:var(--tx3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">i</span>
-                <div style="font-size:12.5px;color:var(--tx3);line-height:1.55">הכלי משתמש במפתח ה-API האישי — אותו מפתח שמזינים ב”שאל את הקורס”. ללא מפתח לא ניתן לייצר אנלוגיות.</div>
-              </div>
-              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">מושג מהשיעור</div>
-              <select value="{{ anConcept }}" onChange="{{ onAnConcept }}" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;cursor:pointer;margin-bottom:14px">
-                <option value="">— בחר/י מושג —</option>
-                <sc-for list="{{ conceptOpts }}" as="c" hint-placeholder-count="4"><option value="{{ c.idx }}">{{ c.label }}</option></sc-for>
-              </select>
-              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">או נושא חופשי</div>
-              <input value="{{ anCustom }}" onInput="{{ onAnCustom }}" placeholder="למשל: ההבדל בין Instructions ל-Prompt" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;margin-bottom:14px">
-              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:8px">קהל יעד</div>
-              <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:17px">
-                <sc-for list="{{ audienceOpts }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ a.bg }};border:1.5px solid {{ a.border }};color:{{ a.color }};font-weight:600;font-size:13px;padding:8px 14px;border-radius:10px">{{ a.label }}</button></sc-for>
-              </div>
-              <button onClick="{{ onAnRun }}" style="cursor:{{ anBtnCursor }};font-family:inherit;background:var(--review);border:none;color:var(--onreview);font-weight:800;font-size:14.5px;padding:11px 22px;border-radius:11px;display:inline-flex;align-items:center;gap:9px">
-                <sc-if value="{{ anLoading }}" hint-placeholder-val="{{ false }}"><span style="width:15px;height:15px;border:2.4px solid rgba(0,0,0,.25);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span></sc-if>
-                {{ anBtnLabel }}
-              </button>
-              <sc-if value="{{ anNoLLM }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:var(--review);margin-top:11px;line-height:1.6">לא נמצא מפתח API. הוסיפו מפתח (חינמי מ-Google AI Studio) במסך <button onClick="{{ onGoAsk }}" style="background:none;border:none;padding:0;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--accent);cursor:pointer;text-decoration:underline">שאל את הקורס ›</button></div></sc-if>
-            </div>
-            <sc-if value="{{ anError }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(240,163,163,.1);border:1px solid #e6928f;color:#e6928f;border-radius:12px;padding:12px 15px;font-size:13.5px;margin-bottom:14px;max-width:640px">{{ anError }}</div></sc-if>
-            <sc-if value="{{ anHasResults }}" hint-placeholder-val="{{ false }}">
-            <div style="display:flex;flex-direction:column;gap:12px;max-width:720px">
-              <sc-for list="{{ anResults }}" as="r" hint-placeholder-count="2">
-                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px 17px">
-                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-                    <div style="font-weight:800;font-size:15.5px;color:var(--review)">{{ r.title }}</div>
-                    <button onClick="{{ r.onCopy }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:12px;padding:5px 11px;border-radius:9px;cursor:pointer">{{ r.copyLabel }}</button>
-                  </div>
-                  <div style="font-size:14.5px;line-height:1.75;color:var(--tx)">{{ r.text }}</div>
-                </div>
-              </sc-for>
-            </div>
-            </sc-if>
-          </div>
-          </sc-if>
-
-          <!-- CHEAT -->
-          <sc-if value="{{ ltCheat }}" hint-placeholder-val="{{ false }}">
-          <div>
-            <div class="cheat-noprint" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">
-              <div style="font-size:13px;color:var(--tx3)">דף סיכום לשיעור זה · {{ cheatConceptCount }} מושגים</div>
-              <button onClick="{{ onCheatPrint }}" style="cursor:pointer;font-family:inherit;background:#9678e6;border:none;color:#fff;font-weight:800;font-size:13.5px;padding:9px 16px;border-radius:10px">הדפסה / PDF</button>
-            </div>
-            <sc-if value="{{ cheatHas }}" hint-placeholder-val="{{ true }}">
-            <div class="cheat-print" style="background:#fbfbfa;color:#111;border:1px solid var(--bd);border-radius:14px;padding:26px 28px">
-              <div style="border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:16px;font-weight:800;font-size:20px">{{ cheatTitle }}</div>
-              <sc-for list="{{ cheatBlocks }}" as="b" hint-placeholder-count="1">
-                <div style="columns:2;column-gap:30px">
-                  <sc-for list="{{ b.concepts }}" as="c" hint-placeholder-count="6"><div style="break-inside:avoid;font-size:12.5px;line-height:1.55;margin-bottom:7px"><span style="font-weight:700;color:#111">{{ c.term }}</span><span style="color:#444"> — {{ c.line }}</span></div></sc-for>
-                </div>
-              </sc-for>
-            </div>
-            </sc-if>
-          </div>
-          </sc-if>
-
-        </div>
-        </sc-if>
       </div>
       </sc-if>
 
@@ -1642,6 +1414,252 @@
             </sc-if>
           </div>
           </sc-if>
+
+          <!-- ===== TEACHING TOOLS (admin) — moved here from the lesson page ===== -->
+        <sc-if value="{{ toolsSection }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:30px;border-top:1px solid var(--bd);padding-top:22px">
+          <div class="cheat-noprint" style="display:flex;align-items:center;gap:9px;margin-bottom:5px">
+            <span style="width:22px;height:22px;display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></span>
+            <div style="font-size:16px;font-weight:800">כלי תרגול</div>
+          </div>
+          <div class="cheat-noprint" style="font-size:13px;color:var(--tx3);margin-bottom:15px">פעילויות שנבנות אוטומטית מהשיעור שתבחר/י.</div>
+          <div class="cheat-noprint" style="font-size:12.5px;font-weight:700;color:var(--tx2);margin-bottom:8px">בחר/י שיעור</div>
+          <div class="cheat-noprint" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:18px">
+            <sc-for list="{{ toolLessonChips }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.onClick }}" style="font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 13px;border-radius:20px;background:{{ c.bg }};border:1px solid {{ c.bd }};color:{{ c.color }}">{{ c.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ toolsNoLesson }}" hint-placeholder-val="{{ false }}">
+          <div class="cheat-noprint" style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:26px 22px;text-align:center;color:var(--tx3);font-size:13.5px;line-height:1.6">בחר/י שיעור למעלה כדי לבנות ממנו פעילויות תרגול.</div>
+          </sc-if>
+          <sc-if value="{{ toolsHasLesson }}" hint-placeholder-val="{{ true }}">
+          <div>
+          <div class="cheat-noprint" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px">
+            <sc-for list="{{ lessonToolTabs }}" as="t" hint-placeholder-count="4"><button onClick="{{ t.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ t.bg }};border:1.5px solid {{ t.border }};color:{{ t.color }};font-weight:700;font-size:13px;padding:8px 15px;border-radius:10px">{{ t.label }}</button></sc-for>
+          </div>
+
+          <sc-if value="{{ ltNone }}" hint-placeholder-val="{{ true }}"><div class="cheat-noprint" style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:34px 24px;text-align:center;color:var(--tx3);font-size:14px">בחר/י כלי כדי להתחיל.</div></sc-if>
+
+          <!-- TEACH-BACK (הסבר לרון בן 10) -->
+          <sc-if value="{{ ltTeach }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:680px">
+            <sc-if value="{{ tbHasConcept }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+                <div style="font-size:14px;font-weight:700">מסביר/ה: {{ tbConceptName }}</div>
+                <button onClick="{{ onTbReset }}" style="font-family:inherit;font-size:12.5px;color:var(--tx3);background:none;border:none;cursor:pointer">מושג אחר</button>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+                <span style="font-size:12px;color:var(--tx3);white-space:nowrap">רון הבין</span>
+                <div style="flex:1;height:7px;border-radius:5px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ tbUnderstood }}%;background:{{ tbBarColor }};transition:width .4s"></div></div>
+                <span style="font-size:12.5px;font-weight:700;color:{{ tbBarColor }};white-space:nowrap;font-variant-numeric:tabular-nums">{{ tbUnderstood }}%</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+                <button onClick="{{ onTbFull }}" style="display:flex;align-items:center;gap:6px;font-family:inherit;font-size:12.5px;font-weight:600;cursor:pointer;padding:7px 13px;border-radius:20px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2)">📖 {{ tbFullLabel }}</button>
+              </div>
+              <sc-if value="{{ tbFullOpen }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--panel2);border:1px solid var(--bd2);border-radius:12px;padding:13px 15px;margin-bottom:12px;animation:cbup .2s ease">
+                  <div style="font-size:11px;font-weight:700;color:var(--tx3);letter-spacing:.3px;margin-bottom:5px">ההגדרה המלאה · {{ tbConceptName }}</div>
+                  <div style="font-size:14px;line-height:1.6;color:var(--tx)">{{ tbFull }}</div>
+                </div>
+              </sc-if>
+              <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+                <sc-for list="{{ tbChatView }}" as="m" hint-placeholder-count="2">
+                  <sc-if value="{{ m.isKid }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:10px;align-items:flex-start;max-width:88%">
+                      <div style="width:30px;height:30px;flex:none;border-radius:50%;background:linear-gradient(145deg,#98b1ff,#7f8fe0);display:flex;align-items:center;justify-content:center;font-size:15px">🧒</div>
+                      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:4px 15px 15px 15px;padding:12px 15px;font-size:14.5px;line-height:1.55">{{ m.text }}</div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+                    <div style="align-self:flex-end;max-width:88%;background:rgba(152,177,255,.14);border:1px solid rgba(152,177,255,.28);border-radius:15px 4px 15px 15px;padding:12px 15px;font-size:14.5px;line-height:1.55">{{ m.text }}</div>
+                  </sc-if>
+                </sc-for>
+                <sc-if value="{{ tbBusy }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13px"><span style="width:14px;height:14px;border:2px solid var(--bd2);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>רון חושב…</div>
+                </sc-if>
+              </div>
+              <sc-if value="{{ tbDone }}" hint-placeholder-val="{{ false }}">
+                <div style="background:linear-gradient(160deg,rgba(147,224,177,.16),var(--panel));border:1px solid rgba(147,224,177,.32);border-radius:15px;padding:20px;text-align:center;animation:cbup .3s ease">
+                  <div style="font-size:30px;margin-bottom:6px">🎉</div>
+                  <div style="font-size:17px;font-weight:800;margin-bottom:5px">רון הבין! ואם הצלחת להסביר לילד — סימן שאתה באמת מבין.</div>
+                  <div style="font-size:13px;color:var(--tx2);margin-bottom:16px">זה בדיוק המבחן האמיתי של הבנה.</div>
+                  <button onClick="{{ onTbReset }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:12px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster)">מושג נוסף →</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ tbInputVisible }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:10px;align-items:flex-end;background:var(--panel);border:1px solid var(--bd2);border-radius:14px;padding:10px">
+                  <textarea value="{{ tbInput }}" onInput="{{ onTbInput }}" onKeyDown="{{ onTbKey }}" rows="2" placeholder="הסבר/י לרון במילים פשוטות…" style="flex:1;resize:none;background:none;border:none;outline:none;font-family:inherit;font-size:14.5px;line-height:1.5;color:var(--tx);padding:4px 6px"></textarea>
+                  <button onClick="{{ onTbSend }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:10px 18px;border-radius:10px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);flex:none">שלח</button>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ tbPickVisible }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">הסבר/י מושג מהשיעור בעברית פשוטה — ורון, ילד סקרן בן 10, ישאל שאלות עד שההסבר באמת מתיישב. אם הצלחת להסביר לילד, אתה באמת מבין.</div>
+              <sc-if value="{{ comprehensionNoLLM }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--tx2);margin-bottom:16px">כדי שרון יגיב צריך מפתח API — אפשר להוסיף מפתח חינמי במסך „שאל את הקורס”.</div>
+              </sc-if>
+              <div style="font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:11px">בחר/י מושג מהשיעור להסביר לרון</div>
+              <div style="display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto">
+                <sc-for list="{{ lessonPickList }}" as="c" hint-placeholder-count="5">
+                  <button onClick="{{ c.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px 15px">
+                    <div style="font-weight:700;font-size:14px">{{ c.term }}</div>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- APPLY (אתה היועץ) -->
+          <sc-if value="{{ ltApply }}" hint-placeholder-val="{{ false }}">
+          <div style="max-width:680px">
+            <sc-if value="{{ apHasConcept }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px">
+                <div style="font-size:14px;font-weight:700">{{ apConceptName }}</div>
+                <button onClick="{{ onApReset }}" style="font-family:inherit;font-size:12.5px;color:var(--tx3);background:none;border:none;cursor:pointer">מושג אחר</button>
+              </div>
+              <sc-if value="{{ apBusy }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13.5px;padding:20px 0"><span style="width:16px;height:16px;border:2px solid var(--bd2);border-top-color:var(--master);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>בונה תרחיש מהשטח…</div>
+              </sc-if>
+              <sc-if value="{{ apHasError }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:16px;font-size:13.5px;color:var(--tx2)">{{ apError }} <button onClick="{{ onApRetry }}" style="font-family:inherit;font-weight:700;color:var(--accent);background:none;border:none;cursor:pointer">נסה שוב</button></div>
+              </sc-if>
+              <sc-if value="{{ apHasCard }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:20px;margin-bottom:16px">
+                  <div style="font-size:11px;color:var(--tx3);letter-spacing:.4px;margin-bottom:9px">התרחיש</div>
+                  <div style="font-size:15.5px;line-height:1.6;color:var(--tx);margin-bottom:16px">{{ apCard.scenario }}</div>
+                  <div style="font-size:15px;font-weight:700;line-height:1.5">{{ apCard.question }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:16px">
+                  <sc-for list="{{ apOptions }}" as="o" hint-placeholder-count="3">
+                    <button onClick="{{ o.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;padding:14px 15px;border-radius:13px;border:1.5px solid {{ o.bd }};background:{{ o.bg }};color:var(--tx);opacity:{{ o.op }};display:flex;align-items:center;gap:11px;font-size:14.5px;line-height:1.45">
+                      <span style="flex:1">{{ o.text }}</span>
+                      <span style="font-size:15px;font-weight:800;width:16px;text-align:center;flex:none">{{ o.mark }}</span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{ apAnswered }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:16px;animation:cbup .25s ease">
+                    <div style="font-size:12px;font-weight:700;color:var(--master);letter-spacing:.3px;margin-bottom:7px">למה</div>
+                    <div style="font-size:14px;line-height:1.6;color:var(--tx);margin-bottom:15px">{{ apCard.explain }}</div>
+                    <div style="display:flex;gap:9px;flex-wrap:wrap">
+                      <button onClick="{{ onApRetry }}" style="font-family:inherit;font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:11px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster)">תרחיש נוסף</button>
+                      <button onClick="{{ onApReset }}" style="font-family:inherit;font-weight:600;font-size:13.5px;padding:10px 18px;border-radius:11px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel);color:var(--tx)">מושג אחר</button>
+                    </div>
+                  </div>
+                </sc-if>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ apPickVisible }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:13.5px;color:var(--tx2);line-height:1.6;margin-bottom:14px">תרחיש אמיתי מהשטח על מושג מהשיעור — אתה מקבל החלטה, ומגלה למה היא הנכונה. ככה מושג הופך למיומנות.</div>
+              <sc-if value="{{ comprehensionNoLLM }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;font-size:13px;color:var(--tx2);margin-bottom:16px">כדי לייצר תרחישים צריך מפתח API — אפשר להוסיף מפתח חינמי במסך „שאל את הקורס”.</div>
+              </sc-if>
+              <sc-if value="{{ applyLoading }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:10px;align-items:center;color:var(--tx3);font-size:13.5px;padding:16px 0"><span style="width:15px;height:15px;border:2px solid var(--bd2);border-top-color:var(--master);border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span>בורר מושגים מהשיעור שמתאימים לתרגול יישום…</div>
+              </sc-if>
+              <sc-if value="{{ applyPickReady }}" hint-placeholder-val="{{ true }}">
+                <div style="font-size:13px;font-weight:700;color:var(--tx3);margin-bottom:11px">על איזה מושג מהשיעור להתאמן?</div>
+                <div style="display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto">
+                  <sc-for list="{{ applyPickList }}" as="c" hint-placeholder-count="5">
+                    <button onClick="{{ c.onPick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:13px 15px">
+                      <div style="font-weight:700;font-size:14px;margin-bottom:2px">{{ c.term }}</div>
+                      <div style="font-size:12px;color:var(--tx3);line-height:1.4">{{ c.eli5 }}</div>
+                    </button>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- MATCH -->
+          <sc-if value="{{ ltMatch }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div class="cheat-noprint" style="display:flex;justify-content:flex-end;margin-bottom:12px"><button onClick="{{ onMatchReshuffle }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer">סבב חדש</button></div>
+            <sc-if value="{{ matchEmpty }}" hint-placeholder-val="{{ false }}"><div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:15px;padding:30px 24px;text-align:center;color:var(--tx3);font-size:14px">אין מספיק מושגים בשיעור הזה למשחק.</div></sc-if>
+            <sc-if value="{{ matchActive }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+                <div style="flex:1;height:7px;border-radius:5px;background:var(--panel2);overflow:hidden"><div style="height:100%;width:{{ matchPct }}%;background:var(--master);transition:width .3s"></div></div>
+                <span style="font-size:13px;font-weight:700;color:var(--tx2);font-variant-numeric:tabular-nums">{{ matchDoneCount }} / {{ matchTotal }}</span>
+              </div>
+              <sc-if value="{{ matchWin }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(134,214,164,.13);border:1px solid var(--master);color:var(--master);border-radius:13px;padding:12px 16px;font-weight:700;font-size:15px;margin-bottom:14px;text-align:center">כל הכבוד! כל ההתאמות נכונות 🎉</div></sc-if>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px 14px;align-items:stretch">
+                <div style="font-size:12px;font-weight:700;color:var(--tx3)">מושגים</div>
+                <div style="font-size:12px;font-weight:700;color:var(--tx3)">הגדרות</div>
+                <sc-for list="{{ matchRows }}" as="r" hint-placeholder-count="5"><button onClick="{{ r.t.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.t.cursor }};background:{{ r.t.bg }};border:1.5px solid {{ r.t.border }};color:{{ r.t.color }};font-weight:700;font-size:14px;padding:12px 14px;border-radius:12px;transition:.12s">{{ r.t.term }}</button><button onClick="{{ r.d.onClick }}" style="height:100%;text-align:right;font-family:inherit;cursor:{{ r.d.cursor }};background:{{ r.d.bg }};border:1.5px solid {{ r.d.border }};color:{{ r.d.color }};font-size:13px;line-height:1.5;padding:12px 14px;border-radius:12px;transition:.12s;animation:{{ r.d.anim }}">{{ r.d.def }}</button></sc-for>
+              </div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:12px;text-align:center">בחר/י מושג ואז את ההגדרה המתאימה לו.</div>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- ANALOGY -->
+          <sc-if value="{{ ltAnalogy }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:15px;padding:18px;margin-bottom:18px;max-width:640px">
+              <div style="display:flex;gap:9px;align-items:flex-start;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-bottom:15px">
+                <span style="flex:none;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--tx3);color:var(--tx3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800">i</span>
+                <div style="font-size:12.5px;color:var(--tx3);line-height:1.55">הכלי משתמש במפתח ה-API האישי — אותו מפתח שמזינים ב”שאל את הקורס”. ללא מפתח לא ניתן לייצר אנלוגיות.</div>
+              </div>
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">מושג מהשיעור</div>
+              <select value="{{ anConcept }}" onChange="{{ onAnConcept }}" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;cursor:pointer;margin-bottom:14px">
+                <option value="">— בחר/י מושג —</option>
+                <sc-for list="{{ conceptOpts }}" as="c" hint-placeholder-count="4"><option value="{{ c.idx }}">{{ c.label }}</option></sc-for>
+              </select>
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:7px">או נושא חופשי</div>
+              <input value="{{ anCustom }}" onInput="{{ onAnCustom }}" placeholder="למשל: ההבדל בין Instructions ל-Prompt" style="width:100%;background:var(--panel2);border:1px solid var(--bd);color:var(--tx);font-family:inherit;font-size:14px;padding:10px 12px;border-radius:11px;margin-bottom:14px">
+              <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:8px">קהל יעד</div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:17px">
+                <sc-for list="{{ audienceOpts }}" as="a" hint-placeholder-count="3"><button onClick="{{ a.onClick }}" style="cursor:pointer;font-family:inherit;background:{{ a.bg }};border:1.5px solid {{ a.border }};color:{{ a.color }};font-weight:600;font-size:13px;padding:8px 14px;border-radius:10px">{{ a.label }}</button></sc-for>
+              </div>
+              <button onClick="{{ onAnRun }}" style="cursor:{{ anBtnCursor }};font-family:inherit;background:var(--review);border:none;color:var(--onreview);font-weight:800;font-size:14.5px;padding:11px 22px;border-radius:11px;display:inline-flex;align-items:center;gap:9px">
+                <sc-if value="{{ anLoading }}" hint-placeholder-val="{{ false }}"><span style="width:15px;height:15px;border:2.4px solid rgba(0,0,0,.25);border-top-color:currentColor;border-radius:50%;display:inline-block;animation:cbspin .7s linear infinite"></span></sc-if>
+                {{ anBtnLabel }}
+              </button>
+              <sc-if value="{{ anNoLLM }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:var(--review);margin-top:11px;line-height:1.6">לא נמצא מפתח API. הוסיפו מפתח (חינמי מ-Google AI Studio) במסך <button onClick="{{ onGoAsk }}" style="background:none;border:none;padding:0;font-family:inherit;font-weight:700;font-size:12.5px;color:var(--accent);cursor:pointer;text-decoration:underline">שאל את הקורס ›</button></div></sc-if>
+            </div>
+            <sc-if value="{{ anError }}" hint-placeholder-val="{{ false }}"><div style="background:rgba(240,163,163,.1);border:1px solid #e6928f;color:#e6928f;border-radius:12px;padding:12px 15px;font-size:13.5px;margin-bottom:14px;max-width:640px">{{ anError }}</div></sc-if>
+            <sc-if value="{{ anHasResults }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;max-width:720px">
+              <sc-for list="{{ anResults }}" as="r" hint-placeholder-count="2">
+                <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:16px 17px">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+                    <div style="font-weight:800;font-size:15.5px;color:var(--review)">{{ r.title }}</div>
+                    <button onClick="{{ r.onCopy }}" style="background:var(--panel2);border:1px solid var(--bd);color:var(--tx3);font-family:inherit;font-weight:600;font-size:12px;padding:5px 11px;border-radius:9px;cursor:pointer">{{ r.copyLabel }}</button>
+                  </div>
+                  <div style="font-size:14.5px;line-height:1.75;color:var(--tx)">{{ r.text }}</div>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- CHEAT -->
+          <sc-if value="{{ ltCheat }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div class="cheat-noprint" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px">
+              <div style="font-size:13px;color:var(--tx3)">דף סיכום לשיעור זה · {{ cheatConceptCount }} מושגים</div>
+              <button onClick="{{ onCheatPrint }}" style="cursor:pointer;font-family:inherit;background:#9678e6;border:none;color:#fff;font-weight:800;font-size:13.5px;padding:9px 16px;border-radius:10px">הדפסה / PDF</button>
+            </div>
+            <sc-if value="{{ cheatHas }}" hint-placeholder-val="{{ true }}">
+            <div class="cheat-print" style="background:#fbfbfa;color:#111;border:1px solid var(--bd);border-radius:14px;padding:26px 28px">
+              <div style="border-bottom:2px solid #111;padding-bottom:10px;margin-bottom:16px;font-weight:800;font-size:20px">{{ cheatTitle }}</div>
+              <sc-for list="{{ cheatBlocks }}" as="b" hint-placeholder-count="1">
+                <div style="columns:2;column-gap:30px">
+                  <sc-for list="{{ b.concepts }}" as="c" hint-placeholder-count="6"><div style="break-inside:avoid;font-size:12.5px;line-height:1.55;margin-bottom:7px"><span style="font-weight:700;color:#111">{{ c.term }}</span><span style="color:#444"> — {{ c.line }}</span></div></sc-for>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          </div>
+          </sc-if>
+        </div>
+        </sc-if>
         </div>
         </sc-if>
 
@@ -1864,6 +1882,332 @@
             </sc-for>
           </div>
         </div>
+        </sc-if>
+
+      </div>
+      </sc-if>
+
+      <!-- ===================== GAMES ===================== -->
+      <sc-if value="{{ showGames }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="games" style="max-width:1000px;margin:0 auto;padding:30px 26px 56px;animation:cbup .3s ease">
+
+        <!-- ---------- HUB ---------- -->
+        <sc-if value="{{ gHub }}" hint-placeholder-val="{{ true }}">
+        <div>
+          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:5px">
+            <span style="font-size:12px;color:var(--tx3);letter-spacing:.4px">ארבעה חדרי תרגול · מקרים אמיתיים מתוך הקורס</span>
+            <span style="font-size:10.5px;font-weight:700;color:var(--accent);background:rgba(152,177,255,.13);border:1px solid rgba(152,177,255,.3);border-radius:20px;padding:2px 9px">גלוי למנהל בלבד</span>
+          </div>
+          <h1 style="margin:0 0 8px;font-size:27px;font-weight:800;letter-spacing:-.4px">משחקים</h1>
+          <p style="margin:0 0 22px;font-size:15px;line-height:1.65;color:var(--tx2);max-width:620px">לא שאלות ידע — תרגול שיפוט. כל חדר מעמיד אותך מול מקרה שהקורס עסק בו, ומאמן החלטה אחת: לאבחן, לכוון מודל, להכריע, לתעדף.</p>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:22px">
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">נקודות משחקים</div>
+              <div style="font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)">{{ gTotalPts }}</div>
+            </div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">סטריק יומי</div>
+              <div style="font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--review)">{{ gStreak }}</div>
+            </div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">סבבים שהושלמו</div>
+              <div style="font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--master)">{{ gWins }}</div>
+            </div>
+            <div style="background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:14px 16px">
+              <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">תגים</div>
+              <div style="font-size:24px;font-weight:800;font-variant-numeric:tabular-nums">{{ gBadgeEarned }}<span style="font-size:14px;color:var(--tx3);font-weight:700"> / {{ gBadgeTotal }}</span></div>
+            </div>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:9px">על איזה חומר לשחק?</div>
+          <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px">
+            <sc-for list="{{ gLessonChips }}" as="c" hint-placeholder-count="8"><button onClick="{{ c.onClick }}" style="font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:7px 13px;border-radius:20px;background:{{ c.bg }};border:1px solid {{ c.bd }};color:{{ c.color }}">{{ c.label }}</button></sc-for>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(258px,1fr));gap:12px;margin-bottom:28px">
+            <sc-for list="{{ gGameCards }}" as="g" hint-placeholder-count="4"><button onClick="{{ g.onClick }}" style="position:relative;overflow:hidden;text-align:start;font-family:inherit;cursor:pointer;background:linear-gradient(160deg,{{ g.tint }},{{ g.tint2 }} 62%,var(--panel) 100%);border:1px solid {{ g.ring }};border-radius:19px;padding:18px;display:flex;flex-direction:column;gap:11px;transition:.16s" style-hover="border-color:{{ g.color }};transform:translateY(-3px)">
+              <span style="position:absolute;top:-34px;inset-inline-start:-24px;width:96px;height:96px;border-radius:50%;background:{{ g.tint }};opacity:.5;pointer-events:none"></span>
+              <span style="position:relative;display:flex;align-items:center;gap:11px">
+                <span style="width:44px;height:44px;flex:none;border-radius:13px;background:{{ g.tint }};border:1px solid {{ g.ring }};display:flex;align-items:center;justify-content:center;color:{{ g.color }};box-shadow:0 3px 0 {{ g.ring }}">
+                  <sc-if value="{{ g.isDx }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="10.5" cy="10.5" r="6"></circle><line x1="15" y1="15" x2="20" y2="20"></line><line x1="10.5" y1="7.5" x2="10.5" y2="13.5"></line><line x1="7.5" y1="10.5" x2="13.5" y2="10.5"></line></svg></sc-if>
+                  <sc-if value="{{ g.isPl }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M9 5H6.5A1.5 1.5 0 0 0 5 6.5v11A1.5 1.5 0 0 0 6.5 19H9"></path><path d="M15 5h2.5A1.5 1.5 0 0 1 19 6.5v11A1.5 1.5 0 0 1 17.5 19H15"></path><line x1="9.5" y1="12" x2="14.5" y2="12"></line></svg></sc-if>
+                  <sc-if value="{{ g.isDc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><line x1="12" y1="4" x2="12" y2="20"></line><line x1="5" y1="8" x2="19" y2="8"></line><path d="M5 8 2.5 13.5h5z"></path><path d="M19 8l-2.5 5.5h5z"></path></svg></sc-if>
+                  <sc-if value="{{ g.isMw }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><line x1="4" y1="6.5" x2="20" y2="6.5"></line><line x1="4" y1="11.5" x2="16" y2="11.5"></line><line x1="4" y1="16.5" x2="11" y2="16.5"></line><line x1="4" y1="21" x2="7" y2="21"></line></svg></sc-if>
+                </span>
+                <span style="display:flex;flex-direction:column;gap:2px">
+                  <span style="font-size:16px;font-weight:800;color:var(--tx)">{{ g.name }}</span>
+                  <span style="font-size:10.5px;font-weight:700;color:{{ g.color }};letter-spacing:.3px">{{ g.tag }}</span>
+                </span>
+              </span>
+              <span style="position:relative;font-size:13px;line-height:1.55;color:var(--tx2)">{{ g.desc }}</span>
+              <span style="position:relative;font-size:11.5px;line-height:1.5;color:var(--tx3);border-top:1px solid var(--bd);padding-top:9px">מאמן: {{ g.skill }}</span>
+              <span style="position:relative;align-self:flex-start;font-size:11px;font-weight:800;color:{{ g.bestColor }};font-variant-numeric:tabular-nums;background:var(--panel);border:1px solid var(--bd);border-radius:20px;padding:4px 10px">{{ g.bestLabel }}</span>
+            </button></sc-for>
+          </div>
+
+          <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:9px">תגים</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:9px">
+            <sc-for list="{{ gBadges }}" as="b" hint-placeholder-count="6"><div style="display:flex;gap:11px;align-items:flex-start;background:{{ b.bg }};border:1px solid {{ b.bd }};border-radius:14px;padding:13px 14px;opacity:{{ b.op }}">
+              <span style="flex:none;width:30px;height:30px;border-radius:50%;border:2px solid {{ b.color }};color:{{ b.color }};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">◆</span>
+              <span style="display:block">
+                <span style="display:block;font-size:13.5px;font-weight:800;color:{{ b.color }};margin-bottom:3px">{{ b.label }}</span>
+                <span style="display:block;font-size:11.5px;color:var(--tx3);line-height:1.45">{{ b.desc }}</span>
+              </span>
+            </div></sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- ---------- ACTIVE ---------- -->
+        <sc-if value="{{ gPlaying }}" hint-placeholder-val="{{ false }}">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px">
+            <button onClick="{{ onGameExit }}" style="font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;padding:8px 14px;border-radius:20px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2)">← כל החדרים</button>
+            <div style="flex:1;min-width:130px">
+              <div style="font-size:18px;font-weight:800;color:{{ gColor }};line-height:1.2">{{ gTitle }}</div>
+              <div style="font-size:11.5px;color:var(--tx3);margin-top:2px">{{ gSkill }} · {{ gCaseLesson }}</div>
+            </div>
+            <span style="font-size:12.5px;font-weight:700;color:var(--tx3);background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:6px 12px;font-variant-numeric:tabular-nums;white-space:nowrap">מקרה {{ gRoundLabel }}</span>
+            <span style="font-size:13px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:6px 12px">{{ gScore }} נק׳</span>
+          </div>
+
+          <!-- ===== 1. DIAGNOSIS ===== -->
+          <sc-if value="{{ gIsDx }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="position:relative;background:linear-gradient(170deg,var(--raise),var(--panel));border:1px solid var(--bd2);border-radius:18px;padding:20px 22px;margin-bottom:16px;box-shadow:0 6px 18px rgba(0,0,0,.12)">
+              <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.5px;margin-bottom:7px">תיק מקרה</div>
+              <div style="font-size:17px;font-weight:800;color:var(--tx);margin-bottom:7px">{{ dxTitle }}</div>
+              <div style="font-size:14.5px;line-height:1.7;color:var(--tx2);text-wrap:pretty">{{ dxBrief }}</div>
+            </div>
+
+            <sc-if value="{{ dxIsClassify }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                <span style="font-size:12.5px;font-weight:700;color:var(--tx2)">משפט {{ dxStN }} מתוך {{ dxStTotal }} — מה זה?</span>
+              </div>
+              <div style="background:var(--panel);border:1.5px solid var(--bd2);border-radius:16px;padding:24px 20px;font-size:17px;line-height:1.7;font-weight:600;color:var(--tx);min-height:92px;text-wrap:pretty;animation:gdrop .3s ease">{{ dxStText }}</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px">
+                <sc-for list="{{ dxKinds }}" as="k" hint-placeholder-count="3"><button onClick="{{ k.onClick }}" style="font-family:inherit;cursor:pointer;background:{{ k.bg }};border:1.5px solid {{ k.bd }};color:{{ k.color }};border-radius:14px;padding:16px 12px;display:flex;flex-direction:column;gap:4px;align-items:center;transition:.15s" style-hover="transform:translateY(-2px)">
+                  <span style="font-size:14.5px;font-weight:800">{{ k.label }}</span>
+                  <span style="font-size:11px;color:var(--tx3)">{{ k.hint }}</span>
+                </button></sc-for>
+              </div>
+              <sc-if value="{{ dxFbShow }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:14px;background:{{ dxFbBg }};border:1px solid {{ dxFbColor }};border-radius:14px;padding:15px 17px;animation:gsnap .3s ease">
+                <div style="font-size:13.5px;font-weight:800;color:{{ dxFbColor }};margin-bottom:6px">{{ dxFbHead }}</div>
+                <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);margin-bottom:13px;text-wrap:pretty">{{ dxFbWhy }}</div>
+                <button onClick="{{ onDxNext }}" style="font-family:inherit;font-weight:800;font-size:13px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:11px;padding:10px 18px">הבא →</button>
+              </div>
+              </sc-if>
+            </div>
+            </sc-if>
+
+            <sc-if value="{{ dxIsRoot }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="font-size:15px;font-weight:800;color:var(--tx);margin-bottom:12px">אחרי המיון — מה השורש שעליו כדאי לבנות פתרון?</div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <sc-for list="{{ dxRoots }}" as="r" hint-placeholder-count="3"><button onClick="{{ r.onClick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:{{ r.bg }};border:1.5px solid {{ r.bd }};border-radius:14px;padding:16px 17px;font-size:14.5px;font-weight:700;line-height:1.6;color:var(--tx);transition:.14s;text-wrap:pretty" style-hover="border-color:var(--accent)">{{ r.text }}</button></sc-for>
+              </div>
+            </div>
+            </sc-if>
+
+            <sc-if value="{{ dxIsDebrief }}" hint-placeholder-val="{{ false }}">
+            <div>
+              <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+                <sc-for list="{{ dxRoots }}" as="r" hint-placeholder-count="3"><div style="background:{{ r.bg }};border:1.5px solid {{ r.bd }};border-radius:14px;padding:15px 17px">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px">
+                    <span style="font-size:14px;font-weight:800;color:var(--tx);line-height:1.5;text-wrap:pretty">{{ r.text }}</span>
+                    <span style="font-size:10.5px;font-weight:800;color:{{ r.tagColor }};white-space:nowrap">{{ r.tag }}</span>
+                  </div>
+                  <div style="font-size:13px;line-height:1.6;color:var(--tx2)">{{ r.why }}</div>
+                </div></sc-for>
+              </div>
+              <div style="background:rgba(127,212,207,.1);border:1px solid rgba(127,212,207,.35);border-radius:14px;padding:16px 18px;margin-bottom:16px">
+                <div style="font-size:11px;font-weight:800;color:#7fd4cf;letter-spacing:.4px;margin-bottom:6px">העיקרון</div>
+                <div style="font-size:14.5px;line-height:1.65;color:var(--tx);font-weight:600;text-wrap:pretty">{{ dxPrinciple }}</div>
+              </div>
+              <button onClick="{{ onDxDone }}" style="font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:12px;padding:12px 20px">המשך →</button>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- ===== 2. PROMPT LAB ===== -->
+          <sc-if value="{{ gIsPl }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:16px;padding:18px 20px;margin-bottom:16px">
+              <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.5px;margin-bottom:7px">המשימה</div>
+              <div style="font-size:15.5px;line-height:1.7;color:var(--tx);font-weight:600;text-wrap:pretty">{{ plGoal }}</div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px;align-items:start">
+              <div>
+                <div style="font-size:11.5px;font-weight:800;color:var(--tx3);letter-spacing:.3px;margin-bottom:9px">בלוקים זמינים · גרור/י או לחץ/י</div>
+                <div data-drop="palette" style="display:flex;flex-direction:column;gap:9px;border:2px dashed var(--bd);border-radius:16px;padding:12px;min-height:90px">
+                  <sc-for list="{{ plPalette }}" as="b" hint-placeholder-count="6"><div onPointerDown="{{ b.onDown }}" onClick="{{ b.onClick }}" style="touch-action:none;user-select:none;cursor:grab;background:var(--panel);border:1px solid var(--bd2);border-radius:12px;padding:11px 13px;transition:.14s" style-hover="border-color:var(--accent);transform:translateY(-2px)">
+                    <div style="font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.3px;margin-bottom:4px">{{ b.label }}</div>
+                    <div style="font-size:12.5px;line-height:1.55;color:var(--tx2);text-wrap:pretty">{{ b.text }}</div>
+                  </div></sc-for>
+                </div>
+              </div>
+
+              <div>
+                <div style="font-size:11.5px;font-weight:800;color:var(--tx3);letter-spacing:.3px;margin-bottom:9px">הפרומפט שלך</div>
+                <div data-drop="canvas" style="background:var(--panel2);border:2px dashed var(--bd2);border-radius:16px;padding:14px;min-height:190px;display:flex;flex-direction:column;gap:8px">
+                  <sc-if value="{{ plCanvasEmpty }}" hint-placeholder-val="{{ true }}"><div style="margin:auto;text-align:center;font-size:12.5px;color:var(--tx3);line-height:1.6;max-width:220px">גרור/י לכאן בלוקים. הפרומפט נבנה שורה־שורה — וכל שורה משנה את מה שיחזור.</div></sc-if>
+                  <sc-for list="{{ plCanvas }}" as="c" hint-placeholder-count="0"><div onPointerDown="{{ c.onDown }}" onClick="{{ c.onClick }}" style="touch-action:none;user-select:none;cursor:grab;background:{{ c.bg }};border:1.5px solid {{ c.bd }};border-radius:12px;padding:11px 13px;animation:gsnap .28s ease">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+                      <span style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.3px">{{ c.label }}</span>
+                      <span style="font-size:10.5px;font-weight:800;color:{{ c.markColor }}">{{ c.mark }}</span>
+                    </div>
+                    <div style="font-size:12.5px;line-height:1.6;color:var(--tx);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;text-wrap:pretty">{{ c.text }}</div>
+                    <sc-if value="{{ c.showWhy }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px;line-height:1.55;color:var(--tx3);margin-top:7px;border-top:1px solid var(--bd);padding-top:7px">{{ c.why }}</div></sc-if>
+                  </div></sc-for>
+                </div>
+                <sc-if value="{{ plCanRun }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ onPlRun }}" style="margin-top:12px;width:100%;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:13px;padding:14px">הרץ את הפרומפט</button>
+                </sc-if>
+              </div>
+            </div>
+
+            <sc-if value="{{ plRan }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:18px;display:flex;flex-direction:column;gap:12px;animation:gsnap .3s ease">
+              <div style="font-size:13px;font-weight:800;color:var(--tx2)">{{ plCountLabel }}</div>
+              <sc-if value="{{ plHasMissing }}" hint-placeholder-val="{{ false }}">
+              <div style="background:rgba(238,195,138,.1);border:1px solid rgba(238,195,138,.35);border-radius:14px;padding:15px 17px">
+                <div style="font-size:11.5px;font-weight:800;color:var(--review);letter-spacing:.3px;margin-bottom:8px">מה שהשמטת — יושלם מהניחוש</div>
+                <div style="display:flex;flex-direction:column;gap:7px">
+                  <sc-for list="{{ plMissing }}" as="m" hint-placeholder-count="2"><div style="font-size:13px;line-height:1.6;color:var(--tx2)"><b style="color:var(--tx)">{{ m.label }}</b> — {{ m.why }}</div></sc-for>
+                </div>
+              </div>
+              </sc-if>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px">
+                <div style="background:rgba(240,163,163,.09);border:1px solid rgba(240,163,163,.32);border-radius:14px;padding:15px 17px">
+                  <div style="font-size:11.5px;font-weight:800;color:#f0a3a3;margin-bottom:7px">מה היה חוזר בפרומפט חלש</div>
+                  <div style="font-size:13px;line-height:1.65;color:var(--tx2);text-wrap:pretty">{{ plWeak }}</div>
+                </div>
+                <div style="background:rgba(134,214,164,.09);border:1px solid rgba(134,214,164,.32);border-radius:14px;padding:15px 17px">
+                  <div style="font-size:11.5px;font-weight:800;color:var(--master);margin-bottom:7px">מה חוזר כשהפרומפט מכוון</div>
+                  <div style="font-size:13px;line-height:1.65;color:var(--tx2);text-wrap:pretty">{{ plStrong }}</div>
+                </div>
+              </div>
+              <button onClick="{{ onPlDone }}" style="align-self:flex-start;font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:12px;padding:12px 20px">סיום הסבב →</button>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- ===== 3. DECISIONS ===== -->
+          <sc-if value="{{ gIsDc }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="position:relative;background:linear-gradient(170deg,var(--raise),var(--panel));border:1px solid var(--bd2);border-radius:18px;padding:22px;margin-bottom:16px;box-shadow:0 6px 18px rgba(0,0,0,.12)">
+              <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.5px;margin-bottom:7px">על השולחן</div>
+              <div style="font-size:17px;font-weight:800;color:var(--tx);margin-bottom:7px">{{ dcTitle }}</div>
+              <div style="font-size:14.5px;line-height:1.7;color:var(--tx2);text-wrap:pretty">{{ dcBrief }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ dcOptions }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.onClick }}" style="text-align:start;font-family:inherit;cursor:pointer;background:{{ o.bg }};border:1.5px solid {{ o.bd }};border-radius:15px;padding:16px 18px;transition:.14s;display:flex;flex-direction:column;gap:7px" style-hover="border-color:var(--accent)">
+                <span style="display:flex;align-items:center;gap:9px;flex-wrap:wrap">
+                  <span style="font-size:14.5px;font-weight:700;line-height:1.6;color:var(--tx);text-wrap:pretty">{{ o.text }}</span>
+                </span>
+                <sc-if value="{{ o.showWhy }}" hint-placeholder-val="{{ false }}"><span style="display:block">
+                  <span style="display:inline-flex;gap:8px;align-items:center;margin-bottom:6px">
+                    <span style="font-size:10.5px;font-weight:800;color:{{ o.tagColor }};border:1px solid {{ o.tagColor }};border-radius:20px;padding:2px 9px">{{ o.tag }}</span>
+                    <span style="font-size:10.5px;font-weight:700;color:var(--tx3)">{{ o.mineLabel }}</span>
+                  </span>
+                  <span style="display:block;font-size:13px;line-height:1.65;color:var(--tx2);text-wrap:pretty">{{ o.why }}</span>
+                </span></sc-if>
+              </button></sc-for>
+            </div>
+            <sc-if value="{{ dcRevealed }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:16px;animation:gsnap .3s ease">
+              <div style="background:rgba(127,212,207,.1);border:1px solid rgba(127,212,207,.35);border-radius:14px;padding:16px 18px;margin-bottom:14px">
+                <div style="font-size:11px;font-weight:800;color:#7fd4cf;letter-spacing:.4px;margin-bottom:6px">העיקרון</div>
+                <div style="font-size:14.5px;line-height:1.65;color:var(--tx);font-weight:600;text-wrap:pretty">{{ dcPrinciple }}</div>
+              </div>
+              <button onClick="{{ onDcNext }}" style="font-family:inherit;font-weight:800;font-size:13.5px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:12px;padding:12px 20px">התרחיש הבא →</button>
+            </div>
+            </sc-if>
+          </div>
+          </sc-if>
+
+          <!-- ===== 4. MoSCoW ===== -->
+          <sc-if value="{{ gIsMw }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:16px;padding:18px 20px;margin-bottom:14px">
+              <div style="font-size:11px;font-weight:800;color:var(--tx3);letter-spacing:.5px;margin-bottom:7px">הבקלוג</div>
+              <div style="font-size:16px;font-weight:800;color:var(--tx);margin-bottom:6px">{{ mwProduct }}</div>
+              <div style="font-size:13px;line-height:1.6;color:var(--tx2)">{{ mwNote }}</div>
+            </div>
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <span style="font-size:12px;color:var(--tx3)">{{ mwHint }}</span>
+              <span style="font-size:12px;font-weight:800;color:var(--tx2);font-variant-numeric:tabular-nums">שובצו {{ mwPlacedLabel }}</span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-bottom:14px">
+              <sc-for list="{{ mwLanes }}" as="l" hint-placeholder-count="4"><div data-drop="{{ l.zone }}" onClick="{{ l.onClick }}" style="background:{{ l.tint }};border:2px solid {{ l.bd }};border-radius:16px;padding:12px;min-height:150px;display:flex;flex-direction:column;gap:8px;cursor:pointer;transition:.15s">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="font-size:13.5px;font-weight:800;color:{{ l.color }}">{{ l.label }}</span>
+                  <span style="font-size:11px;font-weight:800;color:{{ l.color }};font-variant-numeric:tabular-nums;background:var(--panel);border:1px solid var(--bd);border-radius:20px;padding:2px 8px">{{ l.capLabel }}</span>
+                </div>
+                <div style="font-size:10.5px;color:var(--tx3);margin-top:-4px">{{ l.sub }}</div>
+                <sc-if value="{{ l.warn }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;font-weight:700;color:#f0a3a3">חרגת מהקיבולת — Must הוא רק מה שבלעדיו אין מוצר</div></sc-if>
+                <sc-for list="{{ l.items }}" as="it" hint-placeholder-count="0"><div onPointerDown="{{ it.onDown }}" onClick="{{ it.onClick }}" style="touch-action:none;user-select:none;cursor:grab;background:{{ it.bg }};border:1.5px solid {{ it.bd }};border-radius:11px;padding:10px 11px;animation:gsnap .28s ease">
+                  <div style="font-size:12px;font-weight:700;line-height:1.5;color:var(--tx);text-wrap:pretty">{{ it.text }}</div>
+                  <sc-if value="{{ it.showWhy }}" hint-placeholder-val="{{ false }}"><div style="margin-top:6px;border-top:1px solid var(--bd);padding-top:6px">
+                    <div style="font-size:10.5px;font-weight:800;color:#f0a3a3;margin-bottom:3px">{{ it.correctLabel }}</div>
+                    <div style="font-size:11px;line-height:1.5;color:var(--tx3)">{{ it.why }}</div>
+                  </div></sc-if>
+                </div></sc-for>
+              </div></sc-for>
+            </div>
+
+            <div data-drop="backlog" style="border:2px dashed {{ mwBacklogBd }};border-radius:16px;padding:12px;min-height:76px;display:flex;flex-wrap:wrap;gap:9px;transition:.15s">
+              <sc-if value="{{ mwBacklogEmpty }}" hint-placeholder-val="{{ false }}"><div style="margin:auto;font-size:12.5px;color:var(--tx3)">הבקלוג ריק — הכול שובץ</div></sc-if>
+              <sc-for list="{{ mwBacklog }}" as="it" hint-placeholder-count="6"><div onPointerDown="{{ it.onDown }}" onClick="{{ it.onClick }}" style="touch-action:none;user-select:none;cursor:grab;flex:0 1 auto;max-width:290px;background:{{ it.bg }};border:1.5px solid {{ it.bd }};border-radius:12px;padding:11px 13px;font-size:12.5px;font-weight:700;line-height:1.55;color:var(--tx);transition:.14s;text-wrap:pretty" style-hover="transform:translateY(-2px)">{{ it.text }}</div></sc-for>
+            </div>
+
+            <sc-if value="{{ mwCanCheck }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onMwCheck }}" style="margin-top:14px;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:13px;padding:13px 22px">בדוק את התעדוף</button>
+            </sc-if>
+            <sc-if value="{{ mwChecked }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onMwDone }}" style="margin-top:14px;font-family:inherit;font-weight:800;font-size:14px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);border-radius:13px;padding:13px 22px">סיום הסבב →</button>
+            </sc-if>
+          </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- ---------- EMPTY ---------- -->
+        <sc-if value="{{ gEmptyState }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;padding:20px 0">
+          <div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:17px;padding:34px 24px;color:var(--tx3);font-size:14px;line-height:1.6;max-width:460px;margin:0 auto 16px">אין עוד מקרים לחדר הזה בשיעור שנבחר. נסה/י ״כל הקורס״.</div>
+          <button onClick="{{ onGameExit }}" style="font-family:inherit;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:12px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">חזרה לחדרים</button>
+        </div>
+        </sc-if>
+
+        <!-- ---------- DONE ---------- -->
+        <sc-if value="{{ gDoneState }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center;padding:14px 0">
+          <div style="position:relative;overflow:hidden;background:linear-gradient(170deg,rgba(134,214,164,.12),var(--panel) 70%);border:1.5px solid var(--master);border-radius:22px;padding:34px 26px;max-width:480px;margin:0 auto;animation:gsnap .35s ease">
+            <span style="position:absolute;top:-46px;inset-inline-start:50%;transform:translateX(-50%);width:180px;height:180px;border-radius:50%;background:rgba(134,214,164,.1);pointer-events:none"></span>
+            <div style="position:relative;font-size:12px;font-weight:700;color:var(--tx3);letter-spacing:.4px;margin-bottom:8px">{{ gTitle }} · {{ gScopeLabel }}</div>
+            <div style="position:relative;font-size:24px;font-weight:800;color:var(--master);margin-bottom:6px">סבב הושלם</div>
+            <div style="position:relative;font-size:38px;font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums;line-height:1.1">+{{ gLastPts }}</div>
+            <div style="position:relative;font-size:12.5px;color:var(--tx3);margin-bottom:6px">נקודות</div>
+            <sc-if value="{{ gPerfect }}" hint-placeholder-val="{{ false }}"><div style="position:relative;font-size:13px;font-weight:700;color:var(--review)">בלי טעות אחת</div></sc-if>
+            <div style="position:relative;display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:18px">
+              <button onClick="{{ onGameAgain }}" style="font-family:inherit;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:12px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">סבב נוסף</button>
+              <button onClick="{{ onGameExit }}" style="font-family:inherit;font-weight:700;font-size:13.5px;padding:11px 20px;border-radius:12px;cursor:pointer;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2)">כל החדרים</button>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ dragOn }}" hint-placeholder-val="{{ false }}">
+        <div style="position:fixed;left:{{ dragLeft }};top:{{ dragTop }};width:{{ dragW }};max-width:300px;z-index:9000;pointer-events:none;background:var(--raise);border:1.5px solid var(--accent);border-radius:12px;padding:11px 13px;font-size:12.5px;font-weight:700;line-height:1.5;color:var(--tx);box-shadow:0 14px 30px rgba(0,0,0,.35);transform:rotate(-2deg) scale(1.03)">{{ dragText }}</div>
         </sc-if>
 
       </div>
@@ -2175,6 +2519,7 @@
           <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
           <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
           <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
+          <sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
           <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
           <sc-if value="{{ item.isRet }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M12 3 4.5 6v5.5c0 4.3 3.1 7.4 7.5 9 4.4-1.6 7.5-4.7 7.5-9V6z"></path><path d="M9 12l2.2 2.2L15.5 10"></path></svg></sc-if>
           <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
@@ -2345,6 +2690,14 @@ class Component extends DCLogic {
     procOpen: 's0',
     procCopied: null,
     insightCat: 'all',
+    toolLesson: null,
+    gameKey: null, gLesson: null, gEmpty: false, gDone: false, gScore: 0, gErrors: 0, gLastPts: 0,
+    gQueue: [], gIdx: 0,
+    dxPhase: 'classify', dxIdx: 0, dxFb: null, dxRoot: null,
+    plUsed: [], plRan: false,
+    dcPick: null,
+    mwLane: {}, mwSel: null, mwChecked: false,
+    drag: null, dropHover: null,
     insightQuery: '',
     pinned: [],
     favQuotes: [],
@@ -2477,7 +2830,344 @@ class Component extends DCLogic {
   }
   componentWillUnmount() { window.removeEventListener('resize', this._onResize); }
 
-  setView(v) { this.setState({ view: v, lessonNum: null, conceptMapOpen: false, tool: null, lessonTool: null }); }
+  setView(v) { this.setState({ view: v, lessonNum: null, conceptMapOpen: false, tool: null, lessonTool: null, gameKey: null }); }
+
+  // ================= GAMES — judgment drills built on real course cases =================
+  GAME_DEFS() {
+    return [
+      { k:'dx', name:'חדר האבחון',      tag:'אבחון',  color:'#98b1ff', desc:'תסמין, שורש או פתרון מוסווה — ואז: מה השורש האמיתי.', skill:'לא לפתור את הבעיה הלא נכונה' },
+      { k:'pl', name:'מעבדת הפרומפט',   tag:'בנייה',  color:'#93e0b1', desc:'הרכב פרומפט מבלוקים, הרץ — וראה מה היה חוזר.',        skill:'מה שנשמיט יושלם מהניחוש' },
+      { k:'dc', name:'שולחן ההכרעות',   tag:'שיפוט',  color:'#eec38a', desc:'תרחיש אמיתי, שלוש דרכים. מה אתה מכריע?',              skill:'המודל מציע, האדם מכריע' },
+      { k:'mw', name:'חדר התעדוף',      tag:'MoSCoW', color:'#b6a0f0', desc:'שבץ בקלוג לארבע קטגוריות — עם קיבולת ל-Must.',        skill:'Must = בלי זה אין מוצר' },
+    ];
+  }
+  G_PAL = ['#98b1ff','#93e0b1','#eec38a','#b6a0f0','#7fd4cf','#f0a3a3'];
+  gRgba(hex, a) {
+    const h = String(hex||'').replace('#','');
+    if (h.length < 6) return 'rgba(152,177,255,' + a + ')';
+    return 'rgba(' + parseInt(h.slice(0,2),16) + ',' + parseInt(h.slice(2,4),16) + ',' + parseInt(h.slice(4,6),16) + ',' + a + ')';
+  }
+  gShuffle(a) { const x = a.slice(); for (let i = x.length-1; i>0; i--) { const j = Math.floor(Math.random()*(i+1)); const t = x[i]; x[i] = x[j]; x[j] = t; } return x; }
+  gGames() { return (typeof window !== 'undefined' && window.CourseGames) ? window.CourseGames : { diagnosis:[], promptLab:[], decisions:[], moscow:[] }; }
+  gBank(k) {
+    const G = this.gGames();
+    const bank = k === 'dx' ? G.diagnosis : k === 'pl' ? G.promptLab : k === 'dc' ? G.decisions : G.moscow;
+    const list = Array.isArray(bank) ? bank : [];
+    const n = this.state.gLesson;
+    const scoped = n ? list.filter(x => x.lesson === n) : list;
+    return scoped.length ? scoped : list;
+  }
+  gRounds(k) { return k === 'dc' ? 4 : k === 'dx' ? 2 : 1; }
+
+  startGame(k) {
+    const bank = this.gBank(k);
+    if (!bank.length) { this.setState({ gameKey:k, gEmpty:true, gDone:false }); return; }
+    const queue = this.gShuffle(bank).slice(0, this.gRounds(k)).map(x => x.id);
+    this.setState({
+      gameKey:k, gEmpty:false, gDone:false, gScore:0, gErrors:0, gLastPts:0, gQueue:queue, gIdx:0,
+      dxPhase:'classify', dxIdx:0, dxFb:null, dxRoot:null,
+      plUsed:[], plRan:false,
+      dcPick:null,
+      mwLane:{}, mwSel:null, mwChecked:false,
+      drag:null, dropHover:null,
+    });
+  }
+  exitGame() { this.setState({ gameKey:null, gDone:false, gEmpty:false }); }
+  gCurItem() {
+    const st = this.state; if (!st.gameKey) return null;
+    const id = (st.gQueue||[])[st.gIdx];
+    const bank = this.gBank(st.gameKey);
+    return bank.find(x => x.id === id) || null;
+  }
+  gAdvance() {
+    const st = this.state;
+    if (st.gIdx + 1 >= (st.gQueue||[]).length) { this.finishGame(); return; }
+    this.setState({ gIdx:st.gIdx + 1, dxPhase:'classify', dxIdx:0, dxFb:null, dxRoot:null,
+      plUsed:[], plRan:false, dcPick:null, mwLane:{}, mwSel:null, mwChecked:false });
+  }
+
+  // ---- pointer drag controller (mouse + touch) ----
+  dragStart(payload, e) {
+    if (e.button !== undefined && e.button !== 0) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    this._dOff = { dx:e.clientX - r.left, dy:e.clientY - r.top, w:r.width };
+    this._onDMove = (ev) => this.dragMove(ev);
+    this._onDUp = () => this.dragEnd();
+    window.addEventListener('pointermove', this._onDMove, { passive:false });
+    window.addEventListener('pointerup', this._onDUp);
+    window.addEventListener('pointercancel', this._onDUp);
+    this.setState({ drag: Object.assign({}, payload, { x:e.clientX, y:e.clientY }), dropHover:null });
+    if (e.preventDefault) e.preventDefault();
+  }
+  dragMove(e) {
+    const d = this.state.drag; if (!d) return;
+    if (e.cancelable) e.preventDefault();
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const t = el && el.closest ? el.closest('[data-drop]') : null;
+    this.setState({ drag: Object.assign({}, d, { x:e.clientX, y:e.clientY }), dropHover: t ? t.getAttribute('data-drop') : null });
+  }
+  dragEnd() {
+    window.removeEventListener('pointermove', this._onDMove);
+    window.removeEventListener('pointerup', this._onDUp);
+    window.removeEventListener('pointercancel', this._onDUp);
+    const d = this.state.drag, zone = this.state.dropHover;
+    this.setState({ drag:null, dropHover:null }, () => { if (d && zone) this.handleDrop(zone, d); });
+  }
+  handleDrop(zone, d) {
+    if (zone === 'canvas' && d.kind === 'block') this.plAdd(d.id);
+    else if (zone === 'palette' && d.kind === 'used') this.plRemove(d.id);
+    else if (zone.indexOf('lane-') === 0 && d.kind === 'req') this.mwSet(d.id, zone.slice(5));
+    else if (zone === 'backlog' && d.kind === 'req') this.mwSet(d.id, null);
+  }
+
+  // ---- 1. diagnosis ----
+  DX_KINDS() { return [
+    { k:'symptom',  label:'תסמין',        hint:'מה שכואב ורואים', color:'#eec38a' },
+    { k:'cause',    label:'סיבה / שורש',  hint:'מה שמייצר את הכאב', color:'#93e0b1' },
+    { k:'solution', label:'פתרון מוסווה', hint:'פתרון שהתחפש לבעיה', color:'#f0a3a3' },
+  ]; }
+  dxClassify(kind) {
+    const st = this.state, c = this.gCurItem(); if (!c || st.dxFb) return;
+    const stx = c.statements[st.dxIdx]; if (!stx) return;
+    const ok = stx.kind === kind;
+    this.setState({ dxFb:{ ok, why:stx.why, correct:stx.kind },
+      gScore: ok ? st.gScore + 10 : Math.max(0, st.gScore - 4), gErrors: ok ? st.gErrors : st.gErrors + 1 });
+  }
+  dxNext() {
+    const st = this.state, c = this.gCurItem(); if (!c) return;
+    if (st.dxIdx + 1 < c.statements.length) this.setState({ dxIdx:st.dxIdx + 1, dxFb:null });
+    else this.setState({ dxPhase:'root', dxFb:null });
+  }
+  dxPickRoot(i) {
+    const st = this.state, c = this.gCurItem(); if (!c || st.dxRoot != null) return;
+    const ok = !!(c.roots[i] && c.roots[i].ok);
+    this.setState({ dxRoot:i, dxPhase:'debrief',
+      gScore: ok ? st.gScore + 30 : st.gScore, gErrors: ok ? st.gErrors : st.gErrors + 1 });
+  }
+
+  // ---- 2. prompt lab ----
+  plAdd(id) { const u = this.state.plUsed; if (u.indexOf(id) >= 0) return; this.setState({ plUsed:u.concat([id]), plRan:false }); }
+  plRemove(id) { this.setState({ plUsed:this.state.plUsed.filter(x => x !== id), plRan:false }); }
+  plToggle(id) { if (this.state.plUsed.indexOf(id) >= 0) this.plRemove(id); else this.plAdd(id); }
+  plRun() {
+    const st = this.state, t = this.gCurItem(); if (!t || !st.plUsed.length) return;
+    const used = t.blocks.filter(b => st.plUsed.indexOf(b.id) >= 0);
+    const goodUsed = used.filter(b => b.good).length;
+    const traps = used.filter(b => !b.good).length;
+    const goodTotal = t.blocks.filter(b => b.good).length;
+    let sc = goodUsed * 14 - traps * 12;
+    if (traps === 0 && goodUsed === goodTotal) sc += 20;
+    this.setState({ plRan:true, gScore:Math.max(0, sc), gErrors:traps + (goodTotal - goodUsed) });
+  }
+
+  // ---- 3. decisions ----
+  dcChoose(i) {
+    const st = this.state, sc = this.gCurItem(); if (!sc || st.dcPick != null) return;
+    const v = (sc.options[i] || {}).verdict;
+    const add = v === 'best' ? 30 : (v === 'ok' ? 12 : 0);
+    this.setState({ dcPick:i, gScore:st.gScore + add, gErrors: v === 'best' ? st.gErrors : st.gErrors + 1 });
+  }
+
+  // ---- 4. MoSCoW ----
+  MW_LANES() { return [
+    { k:'must',   label:'Must',   sub:'בלי זה אין מוצר',   color:'#f0a3a3' },
+    { k:'should', label:'Should', sub:'חשוב, לא חוסם',      color:'#eec38a' },
+    { k:'could',  label:'Could',  sub:'אם יישאר זמן',       color:'#93e0b1' },
+    { k:'wont',   label:"Won't",  sub:'לא בגרסה הזאת',      color:'#8f9bb0' },
+  ]; }
+  mwSet(id, lane) {
+    if (this.state.mwChecked) return;
+    const m = Object.assign({}, this.state.mwLane);
+    if (lane) m[id] = lane; else delete m[id];
+    this.setState({ mwLane:m, mwSel:null });
+  }
+  mwSelect(id) { this.setState({ mwSel: this.state.mwSel === id ? null : id }); }
+  mwLaneTap(lane) { const sel = this.state.mwSel; if (sel) this.mwSet(sel, lane); }
+  mwCheck() {
+    const st = this.state, b = this.gCurItem(); if (!b || st.mwChecked) return;
+    let sc = 0, wrong = 0;
+    b.items.forEach(it => { const l = st.mwLane[it.id]; if (l === it.correct) sc += 12; else { sc -= 5; wrong++; } });
+    this.setState({ mwChecked:true, gScore:Math.max(0, sc), gErrors:wrong });
+  }
+
+  finishGame() {
+    const st = this.state;
+    const pts = Math.max(5, Math.round(st.gScore));
+    const ud = Object.assign({}, this.state.userData);
+    const g = Object.assign({ best:{}, plays:{}, wins:0, lastDay:'', streak:0, perfect:0, total:0 }, ud.games || {});
+    g.plays = Object.assign({}, g.plays, { [st.gameKey]: (g.plays[st.gameKey]||0) + 1 });
+    g.best = Object.assign({}, g.best, { [st.gameKey]: Math.max(g.best[st.gameKey]||0, pts) });
+    g.wins = (g.wins||0) + 1; g.total = (g.total||0) + pts;
+    if (st.gErrors === 0) g.perfect = (g.perfect||0) + 1;
+    const day = new Date().toISOString().slice(0,10);
+    if (g.lastDay !== day) {
+      const y = new Date(Date.now() - 864e5).toISOString().slice(0,10);
+      g.streak = g.lastDay === y ? (g.streak||0) + 1 : 1; g.lastDay = day;
+    }
+    ud.games = g; ud.bonusPoints = (ud.bonusPoints||0) + pts;
+    this.setState({ userData:ud, gDone:true, gLastPts:pts }, () => this.persist());
+  }
+  gameStats() { return Object.assign({ best:{}, plays:{}, wins:0, lastDay:'', streak:0, perfect:0, total:0 }, (this.state.userData||{}).games || {}); }
+  gameBadgeDefs() {
+    const g = this.gameStats();
+    const played = Object.keys(g.plays||{}).length;
+    return [
+      { id:'g1',  label:'סבב ראשון',      desc:'השלמת סבב אחד',            color:'#98b1ff', on:g.wins >= 1 },
+      { id:'g5',  label:'חמישה סבבים',    desc:'5 סבבים הושלמו',           color:'#93e0b1', on:g.wins >= 5 },
+      { id:'gp',  label:'בלי טעות אחת',   desc:'סבב מושלם, אפס שגיאות',    color:'#eec38a', on:(g.perfect||0) >= 1 },
+      { id:'ga',  label:'כל ארבעת החדרים', desc:'שיחקת בכל ארבעת המשחקים', color:'#b6a0f0', on:played >= 4 },
+      { id:'gdx', label:'מאבחן',          desc:'סבב אבחון עם 100 נק׳+',    color:'#7fd4cf', on:(g.best||{}).dx >= 100 },
+      { id:'gs',  label:'שלושה ימים',     desc:'רצף משחק של 3 ימים',       color:'#f0a3a3', on:(g.streak||0) >= 3 },
+    ];
+  }
+
+  gamesVals() {
+    const st = this.state, D = this.data, g = this.gameStats();
+    const playing = !!st.gameKey && !st.gEmpty && !st.gDone;
+    const def = this.GAME_DEFS().find(d => d.k === st.gameKey) || null;
+    const dg = st.drag, off = this._dOff || { dx:0, dy:0, w:220 };
+    const cur = st.gameKey ? this.gCurItem() : null;
+
+    const cards = this.GAME_DEFS().map(d => ({
+      name:d.name, tag:d.tag, desc:d.desc, color:d.color, skill:d.skill,
+      tint:this.gRgba(d.color,.13), tint2:this.gRgba(d.color,.04), ring:this.gRgba(d.color,.32),
+      isDx:d.k==='dx', isPl:d.k==='pl', isDc:d.k==='dc', isMw:d.k==='mw',
+      bestLabel:(g.best||{})[d.k] ? ('שיא: ' + g.best[d.k]) : 'טרם שוחק',
+      bestColor:(g.best||{})[d.k] ? d.color : 'var(--tx3)',
+      onClick:() => this.startGame(d.k),
+    }));
+    const lessonChips = [{ num:null, label:'כל הקורס' }].concat(D.lessons.map(l => ({ num:l.num, label:'שיעור ' + l.num })))
+      .map(c => { const on = st.gLesson === c.num; return { label:c.label, onClick:() => this.setState({ gLesson:c.num }),
+        bg:on ? 'var(--accent)' : 'var(--panel)', bd:on ? 'var(--accent)' : 'var(--bd)', color:on ? 'var(--onaccent)' : 'var(--tx2)' }; });
+    const badges = this.gameBadgeDefs().map(b => ({ label:b.label, desc:b.desc,
+      color:b.on ? b.color : 'var(--tx3)', bg:b.on ? 'var(--panel2)' : 'transparent', bd:b.on ? b.color : 'var(--bd)', op:b.on ? '1' : '.5' }));
+
+    // ---- diagnosis vals ----
+    const dxStmt = (st.gameKey==='dx' && cur) ? cur.statements[st.dxIdx] : null;
+    const fb = st.dxFb;
+    const kindLabel = (k) => { const m = this.DX_KINDS().find(x => x.k === k); return m ? m.label : ''; };
+    const dxKinds = this.DX_KINDS().map(k => {
+      const picked = !!fb && fb.correct === k.k;
+      return { label:k.label, hint:k.hint, onClick:() => this.dxClassify(k.k),
+        bg:picked ? this.gRgba(k.color,.15) : 'var(--panel)',
+        bd:picked ? k.color : 'var(--bd2)', color:picked ? k.color : 'var(--tx2)' };
+    });
+    const dxRoots = (st.gameKey==='dx' && cur) ? cur.roots.map((r,i) => {
+      const shown = st.dxRoot != null;
+      const isPick = st.dxRoot === i;
+      return { text:r.text, why:r.why, showWhy:shown, onClick:() => this.dxPickRoot(i),
+        bg:shown ? (r.ok ? 'rgba(134,214,164,.12)' : (isPick ? 'rgba(240,163,163,.12)' : 'var(--panel)')) : 'var(--panel)',
+        bd:shown ? (r.ok ? 'var(--master)' : (isPick ? '#f0a3a3' : 'var(--bd2)')) : 'var(--bd2)',
+        tag:shown ? (r.ok ? 'השורש' : (isPick ? 'הבחירה שלך' : '')) : '',
+        tagColor:r.ok ? 'var(--master)' : '#f0a3a3' };
+    }) : [];
+
+    // ---- prompt lab vals ----
+    const plTask = st.gameKey==='pl' ? cur : null;
+    const plPalette = plTask ? plTask.blocks.filter(b => st.plUsed.indexOf(b.id) < 0).map(b => ({
+      id:b.id, label:b.label, text:b.text, onClick:() => this.plAdd(b.id),
+      onDown:(e) => this.dragStart({ kind:'block', id:b.id, text:b.label }, e) })) : [];
+    const plCanvas = plTask ? st.plUsed.map(id => {
+      const b = plTask.blocks.find(x => x.id === id) || { label:'', text:'' };
+      const v = st.plRan ? (b.good ? 'good' : 'trap') : null;
+      return { id, label:b.label, text:b.text, why:b.why, showWhy:!!st.plRan,
+        onClick:() => this.plRemove(id),
+        onDown:(e) => this.dragStart({ kind:'used', id, text:b.label }, e),
+        bd:v === 'good' ? 'var(--master)' : (v === 'trap' ? '#f0a3a3' : 'var(--bd2)'),
+        bg:v === 'good' ? 'rgba(134,214,164,.1)' : (v === 'trap' ? 'rgba(240,163,163,.1)' : 'var(--panel2)'),
+        mark:v === 'good' ? 'עובד' : (v === 'trap' ? 'מלכודת' : ''),
+        markColor:v === 'good' ? 'var(--master)' : '#f0a3a3' };
+    }) : [];
+    const plGoodUsed = plTask ? plTask.blocks.filter(b => b.good && st.plUsed.indexOf(b.id) >= 0).length : 0;
+    const plGoodTotal = plTask ? plTask.blocks.filter(b => b.good).length : 0;
+    const plMissing = plTask && st.plRan ? plTask.blocks.filter(b => b.good && st.plUsed.indexOf(b.id) < 0).map(b => ({ label:b.label, why:b.why })) : [];
+
+    // ---- decisions vals ----
+    const dcSc = st.gameKey==='dc' ? cur : null;
+    const vMeta = { best:{ label:'ההכרעה הנכונה', c:'var(--master)', bg:'rgba(134,214,164,.12)' },
+                    ok:{ label:'עובד, עם מחיר', c:'var(--review)', bg:'rgba(238,195,138,.12)' },
+                    bad:{ label:'מלכודת', c:'#f0a3a3', bg:'rgba(240,163,163,.12)' } };
+    const dcOptions = dcSc ? dcSc.options.map((o,i) => {
+      const shown = st.dcPick != null; const m = vMeta[o.verdict] || vMeta.ok;
+      return { text:o.text, why:o.why, showWhy:shown, onClick:() => this.dcChoose(i),
+        bg:shown ? m.bg : 'var(--panel)', bd:shown ? m.c : 'var(--bd2)',
+        tag:shown ? m.label : '', tagColor:m.c, mine:st.dcPick === i, mineLabel:st.dcPick === i ? 'הבחירה שלך' : '' };
+    }) : [];
+
+    // ---- moscow vals ----
+    const mwB = st.gameKey==='mw' ? cur : null;
+    const mkReq = (it) => {
+      const res = st.mwChecked ? (st.mwLane[it.id] === it.correct) : null;
+      return { id:it.id, text:it.text, why:it.why, showWhy:!!st.mwChecked,
+        correctLabel:st.mwChecked && res === false ? ('נכון: ' + it.correct) : '',
+        onClick:() => this.mwSelect(it.id),
+        onDown:(e) => this.dragStart({ kind:'req', id:it.id, text:it.text }, e),
+        bd:res === true ? 'var(--master)' : (res === false ? '#f0a3a3' : (st.mwSel === it.id ? 'var(--accent)' : 'var(--bd2)')),
+        bg:res === true ? 'rgba(134,214,164,.1)' : (res === false ? 'rgba(240,163,163,.1)' : (st.mwSel === it.id ? 'rgba(152,177,255,.1)' : 'var(--panel)')) };
+    };
+    const mwBacklog = mwB ? mwB.items.filter(it => !st.mwLane[it.id]).map(mkReq) : [];
+    const mwLanes = mwB ? this.MW_LANES().map(l => {
+      const items = mwB.items.filter(it => st.mwLane[it.id] === l.k).map(mkReq);
+      const over = l.k === 'must' && items.length > (mwB.mustCap || 3);
+      return { key:l.k, label:l.label, sub:l.sub, items, count:items.length, zone:'lane-' + l.k,
+        onClick:() => this.mwLaneTap(l.k),
+        capLabel:l.k === 'must' ? (items.length + '/' + (mwB.mustCap || 3)) : String(items.length),
+        color:over ? '#f0a3a3' : l.color, tint:this.gRgba(over ? '#f0a3a3' : l.color, .1),
+        bd:st.dropHover === 'lane-' + l.k ? 'var(--accent)' : (over ? '#f0a3a3' : this.gRgba(l.color,.4)),
+        warn:over, empty:items.length === 0 };
+    }) : [];
+    const mwOver = mwLanes.some(l => l.warn);
+    const mwPlaced = mwB ? mwB.items.filter(it => !!st.mwLane[it.id]).length : 0;
+    const mwTotal = mwB ? mwB.items.length : 0;
+
+    return {
+      gHub: !st.gameKey, gPlaying: playing, gEmptyState: !!st.gameKey && st.gEmpty, gDoneState: !!st.gameKey && st.gDone,
+      gGameCards: cards, gLessonChips: lessonChips, gBadges: badges,
+      gTotalPts: g.total || 0, gStreak: g.streak || 0, gWins: g.wins || 0,
+      gBadgeEarned: this.gameBadgeDefs().filter(b => b.on).length, gBadgeTotal: this.gameBadgeDefs().length,
+      gTitle: def ? def.name : '', gColor: def ? def.color : 'var(--accent)', gSkill: def ? def.skill : '',
+      gScopeLabel: st.gLesson ? ('שיעור ' + st.gLesson) : 'כל הקורס',
+      gScore: st.gScore, gLastPts: st.gLastPts, gPerfect: st.gErrors === 0,
+      gRoundLabel: (st.gIdx + 1) + ' / ' + ((st.gQueue||[]).length || 1),
+      gCaseLesson: cur ? ('שיעור ' + cur.lesson) : '',
+      onGameExit:() => this.exitGame(), onGameAgain:() => this.startGame(st.gameKey),
+
+      gIsDx: st.gameKey === 'dx', gIsPl: st.gameKey === 'pl', gIsDc: st.gameKey === 'dc', gIsMw: st.gameKey === 'mw',
+
+      dxTitle: cur && st.gameKey==='dx' ? cur.title : '', dxBrief: cur && st.gameKey==='dx' ? cur.brief : '',
+      dxIsClassify: st.dxPhase === 'classify', dxIsRoot: st.dxPhase === 'root', dxIsDebrief: st.dxPhase === 'debrief',
+      dxStText: dxStmt ? dxStmt.text : '', dxStN: st.dxIdx + 1, dxStTotal: (cur && cur.statements) ? cur.statements.length : 0,
+      dxKinds, dxFbShow: !!fb, dxFbOk: !!(fb && fb.ok),
+      dxFbHead: fb ? (fb.ok ? 'נכון' : 'לא — זה ' + kindLabel(fb.correct)) : '',
+      dxFbColor: fb ? (fb.ok ? 'var(--master)' : '#f0a3a3') : 'var(--tx2)',
+      dxFbBg: fb ? (fb.ok ? 'rgba(134,214,164,.1)' : 'rgba(240,163,163,.1)') : 'transparent',
+      dxFbWhy: fb ? fb.why : '', onDxNext:() => this.dxNext(),
+      dxRoots, dxPrinciple: cur && st.gameKey==='dx' ? cur.principle : '',
+      onDxDone:() => this.gAdvance(),
+
+      plGoal: plTask ? plTask.goal : '', plPalette, plCanvas, plCanvasEmpty: plCanvas.length === 0,
+      plRan: st.plRan, plCanRun: plCanvas.length > 0 && !st.plRan,
+      onPlRun:() => this.plRun(), onPlDone:() => this.gAdvance(),
+      plCountLabel: plGoodUsed + ' מתוך ' + plGoodTotal + ' רכיבים שעובדים',
+      plMissing, plHasMissing: plMissing.length > 0,
+      plWeak: plTask ? plTask.weak : '', plStrong: plTask ? plTask.strong : '',
+
+      dcTitle: dcSc ? dcSc.title : '', dcBrief: dcSc ? dcSc.brief : '', dcOptions,
+      dcRevealed: st.dcPick != null, dcPrinciple: dcSc ? dcSc.principle : '',
+      onDcNext:() => this.gAdvance(),
+
+      mwProduct: mwB ? mwB.product : '', mwNote: mwB ? mwB.note : '',
+      mwBacklog, mwLanes, mwBacklogEmpty: mwBacklog.length === 0,
+      mwPlacedLabel: mwPlaced + ' / ' + mwTotal,
+      mwCanCheck: mwPlaced === mwTotal && !mwOver && !st.mwChecked,
+      mwChecked: st.mwChecked, mwOver, onMwCheck:() => this.mwCheck(), onMwDone:() => this.gAdvance(),
+      mwBacklogBd: st.dropHover === 'backlog' ? 'var(--accent)' : 'var(--bd2)',
+      mwHint: st.mwSel ? 'עכשיו לחץ/י על הקטגוריה' : 'גרור/י פריט לקטגוריה — או לחץ/י עליו ואז על הקטגוריה',
+
+      dragOn: !!dg, dragText: dg ? dg.text : '',
+      dragLeft: dg ? (dg.x - off.dx) + 'px' : '0px', dragTop: dg ? (dg.y - off.dy) + 'px' : '0px', dragW: off.w + 'px',
+    };
+  }
   toggleDeckCard(i) { const o = Object.assign({}, this.state.openDeckCards); o[i] = !o[i]; this.setState({ openDeckCards: o }); }
   toggleRecurring(theme) { const o = Object.assign({}, this.state.openThemes); o[theme] = !o[theme]; this.setState({ openThemes: o }); }
   setJourneyMode(m) { this.setState({ journeyMode: m }); }
@@ -2595,6 +3285,8 @@ class Component extends DCLogic {
   _tFirst(s){ s=String(s||'').trim(); const m=s.split(/(?<=[.!?])\s| \u2014 |: /)[0]||s; return this._tTrunc(m,120); }
   _tParse(t){ const p=String(t||'').split(':').map(Number); if(p.some(isNaN)) return null; return p.reduce((a,b)=>a*60+b,0); }
   _tLesson(num){ return this.data.lessons.find(x=>String(x.num)===String(num)); }
+  // The practice-tools section lives in the review view; inside a lesson page it follows that lesson.
+  toolNum(){ const st=this.state; return st.view==='review' ? st.toolLesson : st.lessonNum; }
 
   openTool(t){ this.setState({ tool:t }); }
   backTool(){ this.setState({ tool:null }); }
@@ -2637,7 +3329,7 @@ class Component extends DCLogic {
     if(this.state.anLoading) return;
     let concept='',eli5='';
     if((this.state.anCustom||'').trim()){ concept=this.state.anCustom.trim(); }
-    else if(this.state.anConcept!==''){ const l=this._tLesson(this.state.lessonNum); const c=l&&(l.concepts||[]).filter(x=>x.term)[Number(this.state.anConcept)]; if(c){ concept=c.term; eli5=c.eli5||''; } }
+    else if(this.state.anConcept!==''){ const l=this._tLesson(this.toolNum()); const c=l&&(l.concepts||[]).filter(x=>x.term)[Number(this.state.anConcept)]; if(c){ concept=c.term; eli5=c.eli5||''; } }
     if(!concept){ this.setState({anError:'\u05d1\u05d7\u05e8/\u05d9 \u05de\u05d5\u05e9\u05d2 \u05d0\u05d5 \u05db\u05ea\u05d5\u05d1/\u05d9 \u05e0\u05d5\u05e9\u05d0 \u05d7\u05d5\u05e4\u05e9\u05d9.'}); return; }
     if(!this.llmAvailable()){ this.setState({anError:'\u05d0\u05d9\u05df \u05d7\u05d9\u05d1\u05d5\u05e8 \u05dc\u05de\u05d5\u05d3\u05dc \u05e9\u05e4\u05d4 \u05db\u05e8\u05d2\u05e2.'}); return; }
     const audMap={beginner:'\u05de\u05ea\u05d7\u05d9\u05dc\u05d9\u05dd \u05dc\u05dc\u05d0 \u05e8\u05e7\u05e2 \u05d8\u05db\u05e0\u05d9',tech:'\u05dc\u05d5\u05de\u05d3\u05d9\u05dd \u05e2\u05dd \u05e8\u05e7\u05e2 \u05d8\u05db\u05e0\u05d9',managers:'\u05de\u05e0\u05d4\u05dc\u05d9\u05dd \u05d5\u05d0\u05e0\u05e9\u05d9 \u05de\u05d5\u05e6\u05e8'};
@@ -2685,9 +3377,12 @@ class Component extends DCLogic {
   toolVals(){
     const st=this.state;
     const lessons=this.data.lessons;
-    const cur=this._tLesson(st.lessonNum);
-    const inLesson=!!cur && st.view==='library';
+    const cur=this._tLesson(this.toolNum());
+    const inLesson=!!cur && st.view==='review';
     const isAdmin=this.isAdminUser();
+    const toolLessonChips = lessons.map(l=>{ const on=st.toolLesson===l.num;
+      return { label:'שיעור '+l.num, onClick:()=>this.setState({ toolLesson:l.num, lessonTool:null }),
+        bg:on?'var(--accent)':'var(--panel)', bd:on?'var(--accent)':'var(--bd)', color:on?'var(--onaccent)':'var(--tx2)' }; });
     const lessonOpts=lessons.map(l=>({num:l.num,label:'\u05e9\u05d9\u05e2\u05d5\u05e8 '+l.num+' \u00b7 '+this._tTrunc(l.title,32)}));
 
     // match
@@ -2761,7 +3456,8 @@ class Component extends DCLogic {
     }) : [];
 
     return {
-      lessonToolsAdmin: inLesson,
+      toolsSection: isAdmin && st.view==='review' && !st.reviewActive,
+      toolsHasLesson: !!cur, toolsNoLesson: !cur, toolLessonChips,
       lessonToolTabs,
       ltNone: !st.lessonTool, ltMatch: st.lessonTool==='match', ltAnalogy: st.lessonTool==='analogy', ltCheat: st.lessonTool==='cheat',
       ltTeach: st.lessonTool==='teach', ltApply: st.lessonTool==='apply',
@@ -2786,11 +3482,11 @@ class Component extends DCLogic {
       onApReset:()=>this.setState({ apConcept:null, apCard:null, apChoice:null, apError:'' }),
       onApRetry:()=>this.startApply(st.apConcept),
       applyPickList, applyLoading, applyPickReady: !applyLoading,
-      onMatchReshuffle:()=>this.startMatch(st.lessonNum),
+      onMatchReshuffle:()=>this.startMatch(this.toolNum()),
       matchRows: matchTerms.map((t,i)=>({t, d: matchDefs[i]})).filter(r=>r.d),
       matchActive: total>0, matchEmpty: total===0, matchTerms, matchDefs,
       matchDoneCount:doneCount, matchTotal:total, matchPct: total?Math.round(doneCount/total*100):0, matchWin: total>0&&doneCount===total,
-      onTlReshuffle:()=>this.startTimeline(st.lessonNum),
+      onTlReshuffle:()=>this.startTimeline(this.toolNum()),
       tlActive: tlN>0, tlEmpty: tlN===0, tlRows, tlChecked: st.tlChecked, onTlCheck:()=>this.tlCheck(), tlScoreLabel, tlScoreColor,
       conceptOpts, audienceOpts, anConcept: st.anConcept, anCustom: st.anCustom,
       onAnConcept:(e)=>this.setState({anConcept:e.target.value}), onAnCustom:(e)=>this.setState({anCustom:e.target.value}),
@@ -2803,7 +3499,7 @@ class Component extends DCLogic {
   }
 
   openLessonTool(t){
-    const num=this.state.lessonNum;
+    const num=this.toolNum();
     if(t==='match') this.startMatch(num);
     else if(t==='analogy') this.setState({anConcept:'',anCustom:'',anResults:[],anError:''});
     else if(t==='teach') this.setState({tbConcept:null,tbChat:[],tbDone:false,tbUnderstood:0,tbFullOpen:false});
@@ -3905,17 +4601,19 @@ class Component extends DCLogic {
       {key:'insights', label:'תובנות מרילי', short:'תובנות'},
       {key:'ask', label:'שאל את הקורס', short:'שאל'},
       {key:'review', label:'חזרה ותרגול', short:'חזרה'},
+      {key:'games', label:'משחקים', short:'משחקים'},
       {key:'retention', label:'הוכחת שימור', short:'שימור'},
     ].filter(n => {
       if (n.key === 'process') return PROCESS_LIVE && !isMobile;
       if (n.key === 'retention') return RETENTION_LIVE && !isMobile;
+      if (n.key === 'games') return this.isAdminUser();
       return true;
     });
     const nav = navDef.map(n => {
       const active = st.view === n.key;
       return {
         label:n.label, shortLabel:n.short,
-        isHome:n.key==='home', isLib:n.key==='library', isJourney:n.key==='journey', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools',
+        isHome:n.key==='home', isLib:n.key==='library', isJourney:n.key==='journey', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools', isGames:n.key==='games',
         onClick:() => this.setView(n.key),
         weight: active ? 700 : 500,
         color: active ? 'var(--tx)' : (isMobile ? 'var(--tx3)' : 'var(--tx2)'),
@@ -4421,6 +5119,8 @@ class Component extends DCLogic {
 
       showProcess: PROCESS_LIVE && st.view === 'process',
       showRetention: RETENTION_LIVE && st.view === 'retention',
+      showGames: st.view === 'games' && this.isAdminUser(),
+      ...this.gamesVals(),
       ...this.retentionVals(),
       ...this.toolVals(),
       showJourney: st.view === 'journey',
