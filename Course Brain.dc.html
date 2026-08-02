@@ -4588,8 +4588,8 @@ class Component extends DCLogic {
     const inMap = st.conceptMapOpen;
 
     // Feature flag: מסלול העבודה ("process guide").
-    // Currently rolled out to the admin user only. Set to `true` to make it live for everyone.
-    const PROCESS_LIVE = this.isAdminUser();
+    // Live for all students.
+    const PROCESS_LIVE = true;
     // Feature flag: מסך „הוכחת שימור". Admin-only for now (early feature).
     const RETENTION_LIVE = this.isAdminUser();
 

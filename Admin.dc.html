@@ -108,6 +108,30 @@
     </div>
     </sc-if>
 
+    <!-- REJECTED accounts -->
+    <sc-if value="{{ hasRejected }}" hint-placeholder-val="{{ false }}">
+    <div style="margin-bottom:26px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+        <span style="width:8px;height:8px;border-radius:50%;background:#f09a9a"></span>
+        <div style="font-weight:700;font-size:16px">חשבונות שנדחו</div>
+      </div>
+      <div style="font-size:12.5px;color:#8791a1;margin-bottom:12px">התלמיד/ה רואה "החשבון נדחה" ולא יכול/ה להיכנס. אפשר לאשר בחזרה.</div>
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <sc-for list="{{ rejected }}" as="u" hint-placeholder-count="1">
+          <div style="display:flex;align-items:center;gap:13px;background:#252d39;border:1px solid rgba(240,154,154,.28);border-radius:14px;padding:12px 15px">
+            <div style="width:38px;height:38px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#141a24;background:{{ u.color }}">{{ u.initial }}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:700;font-size:15px">{{ u.displayName }}</div>
+              <div style="font-size:12.5px;color:#8791a1" dir="ltr">@{{ u.username }}</div>
+            </div>
+            <button onClick="{{ u.onApprove }}" style="background:rgba(147,224,177,.14);border:1px solid rgba(147,224,177,.4);color:#93e0b1;font-weight:700;font-size:13.5px;padding:8px 15px;border-radius:10px;cursor:pointer">אישור</button>
+            <button onClick="{{ u.onDelete }}" style="background:transparent;border:1px solid #3f4956;color:#a4afc0;font-weight:600;font-size:13.5px;padding:8px 13px;border-radius:10px;cursor:pointer">מחיקה</button>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+    </sc-if>
+
     <!-- ENGAGEMENT leaderboard -->
     <sc-if value="{{ hasLeaderboard }}" hint-placeholder-val="{{ false }}">
     <div style="margin-bottom:26px">
@@ -331,6 +355,14 @@ class Component extends DCLogic {
       onReject: () => this.reject(u.id),
     }));
 
+    const rejectedRaw = all.filter(u => u.status === 'rejected');
+    const rejected = rejectedRaw.map(u => ({
+      displayName: u.displayName, username: u.username,
+      color: this.color(u.avatar), initial: this.initial(u.displayName),
+      onApprove: () => this.approve(u.id),
+      onDelete: () => this.del(u.id, u.displayName),
+    }));
+
     const STATUS_META = {
       'new':      { label: 'מושג חדש', color: '#98b1ff' },
       'review':   { label: 'לחזרה',    color: '#eec38a' },
@@ -422,6 +454,7 @@ class Component extends DCLogic {
       ready: !st.loading && !st.denied,
       pending, students,
       hasPending: pending.length > 0,
+      rejected, hasRejected: rejected.length > 0,
       leaderboard, hasLeaderboard,
       stats: {
         active: activeRaw.length,
