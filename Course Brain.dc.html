@@ -1724,8 +1724,8 @@
         <!-- ---------- EMPTY ---------- -->
         <sc-if value="{{ gEmptyState }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:16px;padding:40px 24px;text-align:center">
-          <div style="font-size:17px;font-weight:700;margin-bottom:6px">אין עדיין מקרים בחדר הזה</div>
-          <div style="font-size:14px;color:var(--tx2);margin-bottom:20px">נסה/י היקף אחר, או חזור/חזרי לרשימת החדרים.</div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:6px">{{ gEmptyTitle }}</div>
+          <div style="font-size:14px;color:var(--tx2);line-height:1.6;max-width:420px;margin:0 auto 20px">{{ gEmptyBody }}</div>
           <button onClick="{{ onGameExit }}" style="font-family:inherit;font-weight:700;font-size:14px;padding:11px 22px;border-radius:12px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent)">חזרה לחדרים</button>
         </div>
         </sc-if>
@@ -3250,6 +3250,8 @@ class Component extends DCLogic {
 
     return {
       gHub: !st.gameKey, gPlaying: playing, gEmptyState: !!st.gameKey && st.gEmpty, gDoneState: !!st.gameKey && st.gDone,
+      gEmptyTitle: (typeof window !== 'undefined' && window.CourseGames) ? 'אין עדיין מקרים בחדר הזה' : 'תוכן המשחקים לא נטען',
+      gEmptyBody: (typeof window !== 'undefined' && window.CourseGames) ? 'נסה/י היקף אחר, או חזור/חזרי לרשימת החדרים.' : 'הקובץ games-data.js לא נמצא לצד האפליקציה. אם זו גרסה מותקנת — צריך לפרוס אותו יחד עם שאר הקבצים.',
       gGameCards: cards, gLessonChips: lessonChips, gBadges: badges,
       gTotalPts: g.total || 0, gStreak: g.streak || 0, gWins: g.wins || 0,
       gBadgeEarned: this.gameBadgeDefs().filter(b => b.on).length, gBadgeTotal: this.gameBadgeDefs().length,
