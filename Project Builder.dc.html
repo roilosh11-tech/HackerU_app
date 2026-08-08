@@ -647,39 +647,31 @@
       </div>
       <div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-bottom:13px">{{ st.gateNote }}</div>
 
-      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:13px 15px;margin-bottom:14px">
-        <div style="font-size:11.5px;color:var(--tx3);margin-bottom:8px">רגע — מה אני בעצם מאשר כאן?</div>
-        <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);margin-bottom:11px;text-wrap:pretty">לא שהכול נכון. חלק מהדברים כאן הם עדיין השערות, וזה בסדר גמור. אתה מאשר שלושה דברים בלבד:</div>
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <div style="display:flex;gap:9px;align-items:flex-start">
-            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">1</span>
-            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שזו התמונה שלך היום.</span> זה מה שאתה יודע ומה שאתה מאמין ברגע זה.</div>
-          </div>
-          <div style="display:flex;gap:9px;align-items:flex-start">
-            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">2</span>
-            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שהתוויות הוגנות.</span> שמה שסומן ״מאומת״ באמת מבוסס, ושמה שהוא בעצם אמונה שלך מסומן ״מסתבר״ ולא מתחזה לעובדה.</div>
-          </div>
-          <div style="display:flex;gap:9px;align-items:flex-start">
-            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">3</span>
-            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שאלה הדברים שכדאי ללכת לבדוק.</span> הם ייצאו איתך כרשימה, ותוכל לסמן אותם כמאומתים בהמשך.</div>
-          </div>
-        </div>
-        <div style="font-size:12.5px;line-height:1.65;color:var(--tx3);margin-top:11px;text-wrap:pretty">למה זה חשוב: בעוד חודשיים, כשתחליט אם לבנות משהו, תוכל לראות שההחלטה נשענה על השערה שאיש לא בדק — במקום שהיא תהפוך בשקט ל״עובדה״.</div>
-        <sc-if value="{{ hasOpenChecks }}" hint-placeholder-val="{{ false }}">
-          <div style="font-size:13px;line-height:1.6;color:var(--review);margin-top:9px;font-weight:600">{{ openChecksLabel }}</div>
-        </sc-if>
-      </div>
-
-      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:14px 15px;margin-bottom:16px">
-        <div style="font-size:11.5px;color:var(--tx3);margin-bottom:9px">מה קורה כשתאשר</div>
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ gateEffects }}" as="e" hint-placeholder-count="3">
-            <div style="display:flex;gap:9px;align-items:flex-start">
-              <span style="flex:none;width:17px;height:17px;border-radius:5px;background:{{ e.bg }};color:{{ e.fg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">{{ e.icon }}</span>
-              <div style="font-size:13.5px;line-height:1.55;color:var(--tx2)">{{ e.text }}</div>
+      <sc-if value="{{ hasGateSummary }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:9px;margin-bottom:14px;max-height:270px;overflow-y:auto">
+        <sc-for list="{{ gateSummary }}" as="r" hint-placeholder-count="4">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span style="flex:none;width:18px;height:18px;border-radius:6px;background:{{ r.bg }};color:{{ r.fg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">{{ r.icon }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;line-height:1.5;color:{{ r.tfg }};text-decoration:{{ r.deco }}">{{ r.title }}</div>
+              <div style="font-size:11.5px;color:var(--tx3);margin-top:1px">{{ r.tag }}</div>
             </div>
-          </sc-for>
-        </div>
+          </div>
+        </sc-for>
+      </div>
+      </sc-if>
+
+      <div style="border-top:1px solid var(--bd);padding-top:13px;margin-bottom:16px">
+        <div style="font-size:12.5px;color:var(--tx3);line-height:1.7">{{ gateEffectsLine }}</div>
+        <sc-if value="{{ hasOpenChecks }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:var(--review);margin-top:6px;line-height:1.6">{{ openChecksLabel }}</div>
+        </sc-if>
+        <button onClick="{{ onToggleGateWhy }}" style="cursor:pointer;background:none;border:none;padding:0;margin-top:9px;font-size:12.5px;font-weight:700;color:var(--accent);border-bottom:1px dotted var(--accent)">{{ gateWhyLabel }}</button>
+        <sc-if value="{{ gateWhyOpen }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:13px;padding:13px 15px;margin-top:11px;animation:pbup .2s ease">
+            <div style="font-size:13px;line-height:1.7;color:var(--tx2);text-wrap:pretty">לא שהכול נכון — חלק מהדברים כאן עדיין השערות, וזה בסדר. אתה מאשר שלושה דברים: <b style="color:var(--tx)">שזו התמונה שלך היום</b>, <b style="color:var(--tx)">שהתוויות הוגנות</b> (מה שמסומן ״מסתבר״ הוא אמונה ולא עובדה), ו<b style="color:var(--tx)">שאלה הדברים שכדאי ללכת לבדוק</b>. בעוד חודשיים תוכל לראות שההחלטה נשענה על השערה שאיש לא בדק, במקום שהיא תהפוך בשקט ל״עובדה״.</div>
+          </div>
+        </sc-if>
       </div>
 
       <div style="display:flex;flex-direction:column;gap:9px">
@@ -699,6 +691,26 @@
       </div>
       <div style="font-size:21px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">{{ doneTitle }}</div>
       <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:18px">{{ doneSub }}</div>
+
+      <sc-if value="{{ doneHasSummary }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:15px;padding:14px 16px;margin-bottom:14px;text-align:start">
+          <div style="font-size:11.5px;color:var(--tx3);margin-bottom:10px">מה סימנת בתחנה הזו</div>
+          <div style="display:flex;flex-direction:column;gap:8px;max-height:210px;overflow-y:auto">
+            <sc-for list="{{ doneSummary }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;gap:9px;align-items:flex-start">
+                <span style="flex:none;width:17px;height:17px;border-radius:5px;background:{{ r.bg }};color:{{ r.fg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">{{ r.icon }}</span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:13.5px;line-height:1.5;color:{{ r.tfg }};text-decoration:{{ r.deco }}">{{ r.title }}</div>
+                  <div style="font-size:11.5px;color:var(--tx3);margin-top:1px">{{ r.tag }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ doneHasUntouched }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12px;color:var(--tx3);margin-top:10px;padding-top:9px;border-top:1px dashed var(--bd2);line-height:1.55">{{ doneUntouched }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
 
       <sc-if value="{{ doneHasInsight }}" hint-placeholder-val="{{ false }}">
         <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:15px;padding:15px 17px;margin-bottom:16px;text-align:start">
@@ -1156,6 +1168,26 @@ class Component extends DCLogic {
 
   buildFileFor(st) { return this.buildFile(st); }
 
+  /* what the user actually decided in this station */
+  stationSummary(st0) {
+    const st = this.contentFor(st0);
+    const rows = [];
+    (st.items || []).forEach(i => {
+      const s = this.itemStatus(i.id);
+      if (s === 'pending') return;
+      const ev = this.evOf ? this.evOf(i) : i.ev;
+      rows.push({
+        kind: s === 'out' ? 'out' : 'ok',
+        title: i.title,
+        tag: s === 'out' ? 'הוצאת' : (ev ? this.evMeta(ev).label : 'נכנס')
+      });
+    });
+    const ans = this.state.answers[st0.id];
+    if (ans && st.ask) rows.push({ kind: 'pick', title: st.ask.q, tag: ans });
+    const untouched = (st.items || []).filter(i => this.itemStatus(i.id) === 'pending').length;
+    return { rows, untouched };
+  }
+
   /* One assembled PRD, in canonical section order — the file you hand to a build tool. */
   buildPRD() {
     const s = this.state, D = this.D;
@@ -1276,7 +1308,7 @@ class Component extends DCLogic {
         approved: Object.assign({}, s.approved, { [st.id]: true }),
         unlocked: Math.max(s.unlocked, last ? s.unlocked : Math.min(s.si + 1, this.D.stations.length - 1)),
         gateOpen: false,
-        doneCard: { num: st.num, short: st.short, insight: ins, prd: (st.gate.prd || []), phase: PHEND[st.num] || null, last }
+        doneCard: { num: st.num, short: st.short, insight: ins, prd: (st.gate.prd || []), phase: PHEND[st.num] || null, last, summary: this.stationSummary(st) }
       };
     });
   };
@@ -1531,6 +1563,7 @@ class Component extends DCLogic {
     const decided = (st.items || []).filter(i => this.itemStatus(i.id) !== 'pending').length + ((gen && st.ask && s.answers[st.id]) ? 1 : 0);
     const okCount = (st.items || []).filter(i => this.itemStatus(i.id) === 'ok').length;
     const outCount = (st.items || []).filter(i => this.itemStatus(i.id) === 'out').length;
+    const gateSum = this.stationSummary(this.station);
     const gateEffects = []
       .concat((st.gate && st.gate.creates ? st.gate.creates : []).map(f => ({ icon: '+', text: 'נוצר הקובץ ' + f + ' — תוכל לערוך אותו בכל רגע', bg: 'rgba(152,177,255,.15)', fg: 'var(--accent)' })))
       .concat((st.gate && st.gate.prd ? st.gate.prd : []).map(p => ({ icon: '✓', text: 'סעיף ״' + p + '״ ב־PRD מתמלא', bg: 'rgba(147,224,177,.15)', fg: '#93e0b1' })))
@@ -1559,9 +1592,10 @@ class Component extends DCLogic {
       railStyle: this.props.embedded
         ? 'max-width:1080px;width:100%;margin:0 auto;padding:0 26px 18px;overflow-x:auto'
         : 'background:var(--panel);border-bottom:1px solid var(--bd);padding:14px 20px 16px;overflow-x:auto',
-      pageStyle: this.props.embedded
+      pageWrap: narrow ? 'flex-wrap:wrap;' : '',
+      pageStyle: (narrow ? 'flex-wrap:wrap;' : '') + (this.props.embedded
         ? 'flex:1;display:flex;gap:22px;align-items:flex-start;max-width:1080px;width:100%;margin:0 auto;padding:4px 26px 48px'
-        : 'flex:1;display:flex;gap:22px;align-items:flex-start;max-width:1240px;width:100%;margin:0 auto;padding:24px 20px 60px',
+        : 'flex:1;display:flex;gap:22px;align-items:flex-start;max-width:1240px;width:100%;margin:0 auto;padding:24px 20px 60px'),
       themeIcon: this.isLight() ? '☾' : '☀',
       onToggleTheme: () => this.setState(x => ({ theme: x.theme === 'light' ? 'dark' : 'light' })),
       projectName: s.phase === 'start' ? 'פרויקט חדש' : (s.isDemo ? (D.project.name + ' · ' + D.project.domain) : (s.f1 || 'הפרויקט שלי').slice(0, 60)),
@@ -1646,6 +1680,21 @@ class Component extends DCLogic {
       onOpenGate: () => this.setState({ gateOpen: true }),
       onCloseGate: () => this.setState({ gateOpen: false }),
       gateOpen: s.gateOpen, gateEffects,
+      hasGateSummary: gateSum.rows.length > 0,
+      gateSummary: gateSum.rows.map(r => ({
+        title: r.title, tag: r.tag,
+        icon: r.kind === 'out' ? '✕' : (r.kind === 'pick' ? '◆' : '✓'),
+        bg: r.kind === 'out' ? 'rgba(230,146,143,.15)' : (r.kind === 'pick' ? 'rgba(152,177,255,.15)' : 'rgba(147,224,177,.15)'),
+        fg: r.kind === 'out' ? '#e6928f' : (r.kind === 'pick' ? 'var(--accent)' : '#93e0b1'),
+        tfg: r.kind === 'out' ? 'var(--tx3)' : 'var(--tx)',
+        deco: r.kind === 'out' ? 'line-through' : 'none'
+      })),
+      gateEffectsLine: gateEffects.map(e => e.text.replace(' — תוכל לערוך אותו בכל רגע', '').replace(' ב־PRD מתמלא', '')).join(' · '),
+      gateWhyOpen: !!s.gateWhy,
+      gateWhyLabel: s.gateWhy ? 'סגור' : 'רגע, מה בעצם מאשרים כאן?',
+      onToggleGateWhy: () => this.setState(v => ({ gateWhy: !v.gateWhy })),
+      hasGateUntouched: gateSum.untouched > 0,
+      gateUntouched: gateSum.untouched + ' פריטים שלא נגעת בהם נכנסו כמו שהם',
       hasOpenChecks: openChecks > 0,
       openChecksLabel: openChecks + ' פריטים עדיין לא מאומתים — הם ייצאו איתך כרשימת בדיקה, ולא ישמשו בסיס להחלטה',
       approveLabel: s.si === D.stations.length - 1 ? 'אשר וסגור גרסה' : 'אשר והמשך לתחנה הבאה',
@@ -1658,7 +1707,7 @@ class Component extends DCLogic {
 
       showWhyPanel: !narrow || s.whyOpen,
       whyStyle: narrow
-        ? 'position:fixed;inset-inline:16px;bottom:16px;z-index:60;max-height:60vh;overflow-y:auto'
+        ? 'width:100%;flex:none;order:-1;margin-bottom:6px'
         : 'width:308px;flex:none;position:sticky;top:96px',
       onToggleWhy: () => this.setState(x => ({ whyOpen: !x.whyOpen })),
 
@@ -1712,6 +1761,17 @@ class Component extends DCLogic {
       doneOpen: !!s.doneCard,
       doneTitle: s.doneCard ? (s.doneCard.last ? 'המסמך שלך מוכן' : (s.doneCard.phase ? 'סיימת את שלב ״' + s.doneCard.phase + '״' : 'תחנה ' + s.doneCard.num + ' סגורה')) : '',
       doneSub: s.doneCard ? (s.doneCard.last ? 'אפשר לייצא אותו ולהתחיל לבנות' : (s.doneCard.prd.length ? 'נוספו למסמך: ' + s.doneCard.prd.join(' · ') : 'ממשיכים הלאה')) : '',
+      doneHasSummary: !!(s.doneCard && s.doneCard.summary && s.doneCard.summary.rows.length),
+      doneSummary: (s.doneCard && s.doneCard.summary ? s.doneCard.summary.rows : []).map(r => ({
+        title: r.title, tag: r.tag,
+        icon: r.kind === 'out' ? '✕' : (r.kind === 'pick' ? '◆' : '✓'),
+        bg: r.kind === 'out' ? 'rgba(230,146,143,.15)' : (r.kind === 'pick' ? 'rgba(152,177,255,.15)' : 'rgba(147,224,177,.15)'),
+        fg: r.kind === 'out' ? '#e6928f' : (r.kind === 'pick' ? 'var(--accent)' : '#93e0b1'),
+        tfg: r.kind === 'out' ? 'var(--tx3)' : 'var(--tx)',
+        deco: r.kind === 'out' ? 'line-through' : 'none'
+      })),
+      doneHasUntouched: !!(s.doneCard && s.doneCard.summary && s.doneCard.summary.untouched),
+      doneUntouched: (s.doneCard && s.doneCard.summary ? s.doneCard.summary.untouched : 0) + ' פריטים שלא נגעת בהם נכנסו כמו שהם',
       doneHasInsight: !!(s.doneCard && s.doneCard.insight),
       doneInsight: s.doneCard ? s.doneCard.insight : '',
       doneBtn: s.doneCard ? (s.doneCard.last ? 'קחו אותי למסמך' : 'לתחנה הבאה: ' + ((D.stations[s.si + 1] || {}).short || '')) : '',
