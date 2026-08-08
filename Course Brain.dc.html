@@ -93,7 +93,7 @@
             <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
             <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
             <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
-            <sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
+            <sc-if value="{{ item.isBuilder }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 16 9 5 9-5"></path><path d="m3 12 9 5 9-5"></path></svg></sc-if><sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
             <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
             <sc-if value="{{ item.isRet }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><path d="M12 3 4.5 6v5.5c0 4.3 3.1 7.4 7.5 9 4.4-1.6 7.5-4.7 7.5-9V6z"></path><path d="M9 12l2.2 2.2L15.5 10"></path></svg></sc-if>
             <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="19" height="19"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
@@ -254,6 +254,17 @@
           <span style="flex:1;min-width:0">
             <span style="display:block;font-size:15px;font-weight:700">מסלול העבודה</span>
             <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">התהליך של רילי, שלב-שלב · מאיפה מתחילים</span>
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
+        </button>
+        </sc-if>
+
+        <sc-if value="{{ showBuilderCard }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onOpenBuilder }}" style="width:100%;text-align:start;font-family:inherit;cursor:pointer;margin-top:10px;background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:13px">
+          <span style="width:40px;height:40px;flex:none;border-radius:12px;background:var(--panel2);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 16 9 5 9-5"></path><path d="m3 12 9 5 9-5"></path></svg></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:15px;font-weight:700">בונה הפרויקטים</span>
+            <span style="display:block;font-size:12.5px;color:var(--tx3);margin-top:2px">מרעיון ל־PRD מקצועי, תחנה אחרי תחנה</span>
           </span>
           <svg viewBox="0 0 24 24" fill="none" stroke="var(--tx3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><path d="m15 18-6-6 6-6"></path></svg>
         </button>
@@ -1659,6 +1670,13 @@
 
       </sc-if>
 
+      <!-- ===================== BUILDER ===================== -->
+      <sc-if value="{{ isBuilder }}" hint-placeholder-val="{{ false }}">
+      <div data-screen-label="builder" style="animation:cbup .3s ease;padding-bottom:20px">
+        <dc-import name="Project Builder" embedded="{{ true }}" theme="{{ builderTheme }}" hint-size="100%,900px"></dc-import>
+      </div>
+      </sc-if>
+
       <!-- ===================== GAMES ===================== -->
       <sc-if value="{{ isGames }}" hint-placeholder-val="{{ false }}">
       <div data-screen-label="games" style="max-width:1080px;margin:0 auto;padding:30px 26px 48px;animation:cbup .3s ease">
@@ -2515,7 +2533,7 @@
           <sc-if value="{{ item.isIns }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="12" cy="9.5" r="5"></circle><line x1="9.5" y1="18" x2="14.5" y2="18"></line><line x1="10.5" y1="20.5" x2="13.5" y2="20.5"></line></svg></sc-if>
           <sc-if value="{{ item.isAsk }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3" y="4.5" width="18" height="13" rx="3.5"></rect><path d="M8 17.5 L8 20.5 L11.5 17.5"></path></svg></sc-if>
           <sc-if value="{{ item.isRev }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="7" y="3.5" width="11" height="15" rx="2" transform="rotate(-8 12 11)"></rect><rect x="5" y="6" width="11" height="15" rx="2"></rect></svg></sc-if>
-          <sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
+          <sc-if value="{{ item.isBuilder }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M12 3 3 8l9 5 9-5-9-5Z"></path><path d="m3 16 9 5 9-5"></path><path d="m3 12 9 5 9-5"></path></svg></sc-if><sc-if value="{{ item.isGames }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="17" height="17" rx="4"></rect><circle cx="8.5" cy="8.5" r="1.3"></circle><circle cx="15.5" cy="15.5" r="1.3"></circle><circle cx="12" cy="12" r="1.3"></circle></svg></sc-if>
           <sc-if value="{{ item.isProc }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><circle cx="6" cy="18.5" r="2.4"></circle><circle cx="18" cy="5.5" r="2.4"></circle><path d="M8.4 18.5H14a3.2 3.2 0 0 0 3.2-3.2V8"></path></svg></sc-if>
           <sc-if value="{{ item.isRet }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><path d="M12 3 4.5 6v5.5c0 4.3 3.1 7.4 7.5 9 4.4-1.6 7.5-4.7 7.5-9V6z"></path><path d="M9 12l2.2 2.2L15.5 10"></path></svg></sc-if>
           <sc-if value="{{ item.isTools }}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="21" height="21"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg></sc-if>
@@ -4757,17 +4775,19 @@ class Component extends DCLogic {
       {key:'insights', label:'תובנות מרילי', short:'תובנות'},
       {key:'ask', label:'שאל את הקורס', short:'שאל'},
       {key:'review', label:'חזרה ותרגול', short:'חזרה'},
+      {key:'builder', label:'בונה הפרויקטים', short:'בונה'},
       {key:'games', label:'חדר המשחקים', short:'משחקים'},
     ].filter(n => {
       if (n.key === 'process') return PROCESS_LIVE && !isMobile;
       if (n.key === 'games') return this.isAdminUser() && !isMobile;
+      if (n.key === 'builder') return this.isAdminUser() && !isMobile;
       return true;
     });
     const nav = navDef.map(n => {
       const active = st.view === n.key;
       return {
         label:n.label, shortLabel:n.short,
-        isHome:n.key==='home', isLib:n.key==='library', isJourney:n.key==='journey', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools', isGames:n.key==='games',
+        isHome:n.key==='home', isLib:n.key==='library', isJourney:n.key==='journey', isIns:n.key==='insights', isAsk:n.key==='ask', isRev:n.key==='review', isProc:n.key==='process', isRet:n.key==='retention', isTools:n.key==='tools', isGames:n.key==='games', isBuilder:n.key==='builder',
         onClick:() => this.setView(n.key),
         weight: active ? 700 : 500,
         color: active ? 'var(--tx)' : (isMobile ? 'var(--tx3)' : 'var(--tx2)'),
@@ -5329,6 +5349,10 @@ class Component extends DCLogic {
       onChatKey:(e) => { if (e.key === 'Enter') { e.preventDefault(); this.ask(st.chatInput); } },
       onSend:() => this.ask(st.chatInput),
 
+      isBuilder: st.view === 'builder' && this.isAdminUser(),
+      builderTheme: st.theme === 'light' ? 'light' : 'dark',
+      onOpenBuilder:() => this.setView('builder'),
+      showBuilderCard: isMobile && this.isAdminUser(),
       isGames: st.view === 'games' && this.isAdminUser(),
       showGamesCard: isMobile && this.isAdminUser(),
       onOpenGames:() => this.setView('games'),

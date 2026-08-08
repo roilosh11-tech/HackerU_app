@@ -1,0 +1,1815 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta charset="utf-8">
+<title>בונה הפרויקטים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Assistant:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="builder-data.js"></script>
+<script src="builder-prompts.js"></script>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Assistant',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  button{color:inherit;font-family:inherit}
+  textarea,input{font-family:inherit}
+  a{color:#98b1ff;text-decoration:none}
+  a:hover{text-decoration:underline}
+  @keyframes pbup{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  @keyframes pbin{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+  @keyframes pbspin{to{transform:rotate(360deg)}}
+  @keyframes itemOk{0%{transform:scale(1)}40%{transform:scale(1.015)}100%{transform:scale(1)}}
+  @keyframes itemOut{0%{transform:translateX(0)}30%{transform:translateX(-7px)}60%{transform:translateX(3px)}100%{transform:translateX(0)}}
+  @keyframes tickPop{0%{transform:scale(.4);opacity:0}60%{transform:scale(1.18);opacity:1}100%{transform:scale(1);opacity:1}}
+  @keyframes barPulse{0%{box-shadow:0 0 0 0 rgba(147,224,177,.5)}100%{box-shadow:0 0 0 7px rgba(147,224,177,0)}}
+  ::-webkit-scrollbar{width:9px;height:9px}
+  ::-webkit-scrollbar-thumb{background:#4a5566;border-radius:9px}
+</style>
+</helmet>
+
+<div dir="rtl" style="{{ rootStyle }}">
+
+  <sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+  <header style="position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--bd);padding:11px 16px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow-x:auto">
+    <div style="display:flex;align-items:center;gap:10px;flex:none">
+      <div style="width:32px;height:32px;border-radius:10px;background:linear-gradient(145deg,#2b3550,#1a2030);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center">
+        <div style="width:13px;height:13px;border-radius:3px;border:2px solid var(--accent);transform:rotate(45deg)"></div>
+      </div>
+      <div>
+        <div style="font-weight:800;font-size:15.5px;letter-spacing:-.2px;line-height:1.15">בונה הפרויקטים</div>
+        <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:11px;color:var(--tx3)">{{ projectName }}</div>
+        </sc-if>
+      </div>
+    </div>
+    <sc-if value="{{ showRun }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onOpenProjects }}" style="display:flex;align-items:center;gap:7px;cursor:pointer;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:7px 12px;font-size:13px;font-weight:700;max-width:230px;flex:none;white-space:nowrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="flex:none"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+        <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ activeName }}</span>
+        </sc-if>
+        <span style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums">{{ projectsCount }}</span>
+      </button>
+    </sc-if>
+    <div style="flex:1"></div>
+    <sc-if value="{{ showRun }}" hint-placeholder-val="{{ false }}">
+    <button onClick="{{ onOpenPrd }}" style="display:flex;align-items:center;gap:8px;cursor:pointer;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:7px 12px;font-size:13px;font-weight:700;flex:none;white-space:nowrap">
+      <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
+        <span style="width:34px;height:5px;border-radius:3px;background:var(--raise);overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:{{ prdPct }}%;background:var(--accent)"></span></span>
+        <span>מסמך הפרויקט</span>
+      </sc-if>
+      <sc-if value="{{ compact }}" hint-placeholder-val="{{ false }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path><path d="M14 2v6h6"></path><path d="M9 15h6"></path></svg>
+      </sc-if>
+      <span style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums">{{ prdDone }}/{{ prdTotal }}</span>
+    </button>
+    <button onClick="{{ onOpenFiles }}" style="display:flex;align-items:center;gap:7px;cursor:pointer;background:var(--panel2);border:1px solid var(--bd);border-radius:11px;padding:7px 12px;font-size:13px;font-weight:700;flex:none;white-space:nowrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path></svg>
+      <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}"><span>הקבצים</span></sc-if>
+      <span style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums">{{ filesCount }}</span>
+    </button>
+    </sc-if>
+
+  </header>
+  </sc-if>
+
+  <sc-if value="{{ embedded }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ headStyle }}">
+    <div style="flex:1;min-width:150px">
+      <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:4px">מוח הקורס · כלי עבודה</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;line-height:1.15">בונה הפרויקטים</div>
+      <div style="font-size:12.5px;color:var(--tx3);margin-top:3px">{{ projectName }}</div>
+    </div>
+    <sc-if value="{{ showRun }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ onOpenProjects }}" style="flex:none;white-space:nowrap;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--tx2)">הפרויקטים</button>
+      <button onClick="{{ onOpenPrd }}" style="flex:none;white-space:nowrap;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--tx2);display:flex;align-items:center;gap:8px">
+        <span style="width:30px;height:5px;border-radius:3px;background:var(--raise);overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:{{ prdPct }}%;background:var(--accent)"></span></span>
+        המסמך <span style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums">{{ prdDone }}/{{ prdTotal }}</span>
+      </button>
+      <button onClick="{{ onOpenFiles }}" style="flex:none;white-space:nowrap;cursor:pointer;background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:8px 14px;font-size:13px;font-weight:700;color:var(--tx2)">הקבצים <span style="font-size:11.5px;color:var(--tx3)">{{ filesCount }}</span></button>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ START SCREEN ============ -->
+  <sc-if value="{{ showStart }}" hint-placeholder-val="{{ true }}">
+  <div style="flex:1;display:flex;align-items:flex-start;justify-content:center;padding:46px 20px 70px">
+    <div style="width:100%;max-width:660px;animation:pbup .3s ease">
+      <div style="font-size:12.5px;color:var(--tx3);letter-spacing:.4px;margin-bottom:6px">לפני שמתחילים</div>
+      <h1 style="margin:0 0 10px;font-size:30px;font-weight:800;letter-spacing:-.6px;line-height:1.15">מה אתה רוצה לבנות?</h1>
+      <p style="margin:0 0 28px;font-size:16.5px;line-height:1.7;color:var(--tx2);max-width:56ch;text-wrap:pretty">אין צורך בתשובות מדויקות. כתוב במילים שלך, כמו שהיית מספר לחבר. משם נצא יחד, תחנה אחרי תחנה, ונהפוך את זה למשהו שאפשר לבנות.</p>
+
+      <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:26px">
+        <div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:3px">מה אתה רוצה לבנות?</div>
+          <div style="font-size:12.5px;color:var(--tx3);margin-bottom:9px">משפט אחד. אפליקציה, מערכת, כלי — מה שזה לא יהיה.</div>
+          <textarea value="{{ f1 }}" onInput="{{ onF1 }}" rows="2" placeholder="למשל: משהו שיעזור למרפאה שלי שמטופלים לא יעלמו מהתורים" style="width:100%;background:var(--panel);color:var(--tx);border:1px solid var(--bd2);border-radius:13px;padding:13px 15px;font-size:15px;line-height:1.6;resize:vertical;outline:none"></textarea>
+        </div>
+        <div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:3px">מה מעצבן אותך היום?</div>
+          <div style="font-size:12.5px;color:var(--tx3);margin-bottom:9px">הבעיה עצמה, לא הפתרון. מה קורה עכשיו שלא בסדר?</div>
+          <textarea value="{{ f2 }}" onInput="{{ onF2 }}" rows="3" placeholder="למשל: כל יום יש שניים־שלושה תורים ריקים, אף אחד לא מודיע מראש, והפקידה מבזבזת חצי יום בטלפונים" style="width:100%;background:var(--panel);color:var(--tx);border:1px solid var(--bd2);border-radius:13px;padding:13px 15px;font-size:15px;line-height:1.6;resize:vertical;outline:none"></textarea>
+        </div>
+        <div>
+          <div style="font-size:14.5px;font-weight:700;margin-bottom:3px">מי חי עם זה?</div>
+          <div style="font-size:12.5px;color:var(--tx3);margin-bottom:9px">האנשים שהבעיה נוגעת בהם בפועל. אפשר כמה.</div>
+          <input value="{{ f3 }}" onInput="{{ onF3 }}" placeholder="למשל: הפקידה, שני רופאים, המטופלים" style="width:100%;background:var(--panel);color:var(--tx);border:1px solid var(--bd2);border-radius:13px;padding:13px 15px;font-size:15px;outline:none">
+        </div>
+      </div>
+
+      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:15px;padding:15px 17px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
+        <span style="flex:none;width:22px;height:22px;border-radius:7px;background:rgba(127,212,207,.14);color:#7fd4cf;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">?</span>
+        <div>
+          <div style="font-size:13.5px;font-weight:700;margin-bottom:3px">למה שואלים על הבעיה ולא על הפיצ׳רים</div>
+          <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);text-wrap:pretty">כי היום קל מאוד לבנות — ולכן קל מאוד לבנות מהר את הדבר הלא נכון. התחנות הבאות דואגות שמה שתבנה יהיה מה שבאמת חסר.</div>
+        </div>
+      </div>
+
+      <div style="border:1px solid var(--bd);border-radius:15px;overflow:hidden;margin-bottom:22px;background:var(--panel)">
+        <button onClick="{{ onToggleWhyBother }}" style="width:100%;display:flex;align-items:center;gap:11px;cursor:pointer;background:none;border:none;padding:14px 17px;text-align:start">
+          <span style="flex:1;font-size:14px;font-weight:700">״אני כבר בונה אפליקציות עם AI וזה יוצא מעולה — למה שאעבור את כל זה?״</span>
+          <span style="flex:none;color:var(--tx3);font-size:13px">{{ whyBotherIcon }}</span>
+        </button>
+        <sc-if value="{{ whyBotherOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:0 17px 17px;display:flex;flex-direction:column;gap:15px">
+          <div style="font-size:14px;line-height:1.7;color:var(--tx2);text-wrap:pretty">תשובה כנה: לפעמים באמת לא כדאי. אם אתה בונה משהו קטן לעצמך, שאתה גם המשתמש היחיד שלו, ואתה יודע בדיוק מה אתה רוצה — פשוט תבנה. תסגור את החלון הזה.</div>
+          <div style="font-size:14px;line-height:1.7;color:var(--tx2);text-wrap:pretty">ההבדל מתחיל ברגע שיש עוד מישהו בתמונה. כלי בנייה בונה בדיוק את מה שביקשת — והוא לא יגיד לך שביקשת את הדבר הלא נכון. שתי סיבות שזה משנה:</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;gap:11px;align-items:flex-start">
+              <span style="flex:none;width:20px;height:20px;border-radius:6px;background:rgba(147,224,177,.15);color:var(--master);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:2px">1</span>
+              <div><span style="font-weight:700">אתה מגלה שהבעיה אחרת ממה שחשבת.</span><span style="color:var(--tx2)"> זה קורה בערך בתחנה 3, וזה השווי האמיתי כאן. אפליקציה מושלמת לבעיה הלא נכונה היא עדיין בזבוז.</span></div>
+            </div>
+            <div style="display:flex;gap:11px;align-items:flex-start">
+              <span style="flex:none;width:20px;height:20px;border-radius:6px;background:rgba(147,224,177,.15);color:var(--master);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:2px">2</span>
+              <div><span style="font-weight:700">הגרסה הבאה יוצאת טובה יותר.</span><span style="color:var(--tx2)"> בעוד שלושה חודשים הצ׳אט שבו בנית כבר לא קיים. המסמך כן — והוא זוכר גם למה החלטת מה שהחלטת.</span></div>
+            </div>
+          </div>
+          <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:13px 15px;font-size:13.5px;line-height:1.7;color:var(--tx2);text-wrap:pretty"><span style="font-weight:700;color:var(--tx)">ומעשית: </span>ה-AI שבונה עובד הרבה יותר טוב כשנותנים לו את החשיבה ולא רק את המשאלה. חצי שעה עד שעתיים כאן, ואפשר לעצור ולחזור.</div>
+        </div>
+        </sc-if>
+      </div>
+
+      <div style="margin-bottom:24px">
+        <div style="font-size:14.5px;font-weight:700;margin-bottom:3px">כמה שאלות תרצה שאשאל אותך?</div>
+        <div style="font-size:12.5px;color:var(--tx3);margin-bottom:10px">ככל שאשאל יותר, המסמך יהיה מדויק יותר — וייקח יותר זמן. אפשר לשנות בכל רגע בהגדרות.</div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <sc-for list="{{ pushOpts }}" as="o" hint-placeholder-count="3">
+            <button onClick="{{ o.onClick }}" style="flex:1;min-width:150px;cursor:pointer;text-align:start;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }};border-radius:13px;padding:11px 14px">
+              <span style="display:block;font-size:14px;font-weight:800">{{ o.label }}</span>
+              <span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px">{{ o.sub }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+
+      <sc-if value="{{ needKey }}" hint-placeholder-val="{{ false }}">
+      <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:15px;padding:16px 17px;margin-bottom:22px">
+        <div style="font-size:14px;font-weight:700;margin-bottom:4px">כדי שה־AI יעבוד על הפרויקט שלך צריך מפתח</div>
+        <div style="font-size:13px;line-height:1.6;color:var(--tx2);margin-bottom:11px">מפתח חינמי מ־<a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer">Google AI Studio</a>. הוא נשמר רק בדפדפן שלך ולא נשלח לשום מקום אחר. בלי מפתח עדיין אפשר להיכנס ולראות איך הכול עובד על דוגמה.</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input value="{{ keyInput }}" onInput="{{ onKeyInput }}" placeholder="הדבק כאן את המפתח" style="flex:1;min-width:200px;background:var(--panel2);color:var(--tx);border:1px solid var(--bd2);border-radius:11px;padding:10px 13px;font-size:13.5px;outline:none">
+          <button onClick="{{ onSaveKey }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:13.5px;padding:10px 18px;border-radius:11px">שמור</button>
+        </div>
+        <sc-if value="{{ hasKeyErr }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:#e6928f;margin-top:9px;line-height:1.5">{{ keyErr }}</div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <div style="display:flex;gap:11px;flex-wrap:wrap;align-items:center">
+        <button onClick="{{ onStart }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:15px;padding:13px 26px;border-radius:13px">קדימה, נתחיל</button>
+        <button onClick="{{ onDemo }}" style="cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx2);font-weight:600;font-size:13.5px;padding:13px 18px;border-radius:13px">הראה לי דוגמה מוכנה</button>
+        <div style="font-size:12px;color:var(--tx3)">{{ startHint }}</div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ STATION RAIL ============ -->
+  <sc-if value="{{ showRun }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ railStyle }}">
+    <sc-if value="{{ isDemo }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px">
+        <span style="font-size:11px;font-weight:800;color:var(--review);background:rgba(238,195,138,.13);border:1px solid rgba(238,195,138,.3);border-radius:20px;padding:3px 10px">מצב הדגמה</span>
+        <span style="font-size:12.5px;color:var(--tx3)">כל התחנות פתוחות ומלאות בתוכן לדוגמה — אפשר לנווט חופשי</span>
+        <button onClick="{{ onFillAll }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd2);color:var(--tx2);font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:10px">{{ fillLabel }}</button>
+      </div>
+    </sc-if>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <sc-for list="{{ phases }}" as="ph" hint-placeholder-count="3">
+        <button onClick="{{ ph.onClick }}" style="flex:1;min-width:150px;cursor:pointer;display:flex;align-items:center;gap:9px;text-align:start;background:{{ ph.bg }};border:1px solid {{ ph.bd }};border-radius:12px;padding:9px 13px;color:{{ ph.fg }}">
+          <span style="width:8px;height:8px;border-radius:50%;background:{{ ph.dotBg }};flex:none"></span>
+          <span style="flex:1;min-width:0">
+            <span style="display:block;font-size:13.5px;font-weight:800">{{ ph.name }}</span>
+            <span style="display:block;font-size:11.5px;color:var(--tx3);margin-top:1px">{{ ph.sub }}</span>
+          </span>
+          <span style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums;flex:none">{{ ph.count }}</span>
+        </button>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;gap:11px;margin-bottom:12px">
+      <div style="flex:1;height:6px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ journeyPct }}%;background:linear-gradient(90deg,var(--accent),#7fd4cf);transition:width .6s ease"></div></div>
+      <div style="font-size:11.5px;color:var(--tx3);font-variant-numeric:tabular-nums;white-space:nowrap">{{ journeyLabel }}</div>
+    </div>
+    <div style="display:flex;align-items:flex-start;gap:0;min-width:min-content">
+      <sc-for list="{{ rail }}" as="r" hint-placeholder-count="4">
+        <div style="display:flex;align-items:flex-start;flex:none">
+          <button onClick="{{ r.onClick }}" style="background:none;border:none;cursor:{{ r.cursor }};display:flex;flex-direction:column;align-items:center;gap:7px;width:96px;padding:0;opacity:{{ r.op }}">
+            <span style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:{{ r.dotBg }};color:{{ r.dotFg }};border:2px solid {{ r.dotBd }};font-variant-numeric:tabular-nums">{{ r.mark }}</span>
+            <span style="font-size:12px;font-weight:{{ r.fw }};color:{{ r.fg }};text-align:center;line-height:1.25">{{ r.short }}</span>
+          </button>
+          <span style="width:26px;height:2px;background:{{ r.lineBg }};margin-top:15px;flex:none;display:{{ r.lineDisp }}"></span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ showRun }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ pageStyle }}">
+
+    <!-- ============ MAIN COLUMN ============ -->
+    <main style="flex:1;min-width:0;animation:pbup .28s ease">
+
+      <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:5px">{{ st.kicker }}</div>
+      <h1 style="margin:0 0 10px;font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1.2">{{ st.title }}</h1>
+      <p style="margin:0 0 14px;font-size:16px;line-height:1.65;color:var(--tx2);max-width:64ch;text-wrap:pretty">{{ st.introWhat }}</p>
+
+      <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px;align-items:center">
+        <sc-if value="{{ hasTerms }}" hint-placeholder-val="{{ true }}">
+          <span style="font-size:11.5px;color:var(--tx3)">מילים שנשתמש בהן:</span>
+          <sc-for list="{{ st.termChips }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.onClick }}" style="cursor:pointer;background:none;border:none;padding:0;font-size:13px;font-weight:700;color:var(--accent);border-bottom:1.5px dotted var(--accent)">{{ t.name }}</button>
+          </sc-for>
+        </sc-if>
+        <button onClick="{{ onShowIntro }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:3px 11px;font-size:11.5px;color:var(--tx3)">הסבר על התחנה</button>
+        <sc-if value="{{ isNarrow }}" hint-placeholder-val="{{ false }}">
+          <button onClick="{{ onToggleWhy }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd);border-radius:20px;padding:3px 11px;font-size:11.5px;color:var(--tx3)">למה עושים את זה</button>
+        </sc-if>
+      </div>
+
+      <!-- generate row -->
+      <sc-if value="{{ showGenerate }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--panel);border:1px dashed var(--bd2);border-radius:18px;padding:28px 24px;text-align:center">
+          <div style="font-size:15px;color:var(--tx2);line-height:1.6;max-width:46ch;margin:0 auto 16px">{{ st.introGet }}</div>
+          <button onClick="{{ onGenerate }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:14.5px;padding:12px 24px;border-radius:12px">{{ st.genLabel }}</button>
+          <div style="font-size:11.5px;color:var(--tx3);margin-top:12px">אתה תמיד מאשר לפני שממשיכים הלאה</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ hasGenErr }}" hint-placeholder-val="{{ false }}">
+        <div style="background:rgba(230,146,143,.1);border:1px solid #e6928f;color:#e6928f;border-radius:14px;padding:14px 16px;font-size:13.5px;line-height:1.6;margin-bottom:14px">
+          {{ genErr }}
+          <button onClick="{{ onGenerate }}" style="cursor:pointer;background:none;border:none;color:inherit;font-weight:800;text-decoration:underline;margin-inline-start:8px">נסה שוב</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ busy }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:40px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px">
+          <span style="width:22px;height:22px;border:2.5px solid var(--bd2);border-top-color:var(--accent);border-radius:50%;animation:pbspin .8s linear infinite;display:inline-block"></span>
+          <div style="font-size:15px;font-weight:700;color:var(--tx2)">{{ busyLine }}</div>
+          <div style="font-size:13px;color:var(--tx3)">{{ busySub }}</div>
+        </div>
+      </sc-if>
+
+      <!-- ============ GENERATED CONTENT ============ -->
+      <sc-if value="{{ hasContent }}" hint-placeholder-val="{{ false }}">
+      <div style="animation:pbup .3s ease">
+
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:14px;background:var(--panel);border:1px solid var(--bd);border-radius:14px;padding:11px 14px">
+          <div style="flex:1">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <div style="font-size:12.5px;font-weight:700;color:{{ stationBarFg }}">{{ stationBarLabel }}</div>
+              <sc-if value="{{ stationAllDone }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12px;color:var(--master);font-weight:700">כל הכבוד — אפשר לסגור את התחנה</div>
+              </sc-if>
+            </div>
+            <div style="height:6px;border-radius:4px;background:var(--raise);overflow:hidden;animation:{{ stationBarPulse }}"><div style="height:100%;width:{{ stationBarPct }}%;background:{{ stationBarBg }};transition:width .45s cubic-bezier(.4,1.3,.5,1)"></div></div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:14px">
+          <span style="font-size:11px;font-weight:800;color:var(--onaccent);background:var(--accent);border-radius:20px;padding:3px 10px">{{ draftBadge }}</span>
+          <span style="font-size:12.5px;color:var(--tx3)">עבור עליה. מה שנכון — אשר. מה שלא — ערוך או הוצא.</span>
+          <button onClick="{{ onOpenGate }}" style="cursor:pointer;background:none;border:none;padding:0;font-size:12.5px;font-weight:700;color:var(--accent);border-bottom:1px dotted var(--accent)">מה בעצם מאשרים כאן?</button>
+          <div style="flex:1"></div>
+          <sc-if value="{{ canRegen }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onRegen }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd2);color:var(--tx3);font-size:12px;font-weight:700;padding:5px 12px;border-radius:9px">נסה טיוטה אחרת</button>
+          </sc-if>
+        </div>
+
+        <!-- fishbone head -->
+        <sc-if value="{{ st.isFishbone }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--panel2);border:1px solid var(--bd2);border-radius:14px;padding:14px 17px;margin-bottom:16px">
+            <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">ראש הדג — הבעיה במשפט אחד</div>
+            <div style="font-size:15.5px;font-weight:700;line-height:1.5">{{ st.head }}</div>
+          </div>
+        </sc-if>
+
+        <!-- item groups (list / cases / fishbone / reqs / twocol) -->
+        <sc-for list="{{ groups }}" as="g" hint-placeholder-count="1">
+          <div style="margin-bottom:22px">
+            <sc-if value="{{ g.hasTitle }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:9px;margin-bottom:11px">
+                <span style="width:5px;height:18px;border-radius:3px;background:{{ g.color }};display:inline-block"></span>
+                <div style="font-size:15.5px;font-weight:800">{{ g.title }}</div>
+                <div style="font-size:12px;color:var(--tx3)">{{ g.sub }}</div>
+              </div>
+            </sc-if>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+                <div style="background:var(--panel);border:1px solid {{ it.bd }};border-radius:15px;padding:14px 16px;opacity:{{ it.op }};animation:{{ it.anim }};transition:border-color .3s ease,opacity .3s ease">
+                  <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
+                    <div style="flex:1;min-width:180px">
+                      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+                        <div style="font-size:15px;font-weight:700;line-height:1.35">{{ it.title }}</div>
+                        <sc-if value="{{ it.hasEv }}" hint-placeholder-val="{{ false }}">
+                          <button onClick="{{ it.onEv }}" style="cursor:pointer;font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;border:1px solid {{ it.evBd }};background:{{ it.evBg }};color:{{ it.evFg }}">{{ it.evLabel }}</button>
+                        </sc-if>
+                        <sc-if value="{{ it.hasTag }}" hint-placeholder-val="{{ false }}">
+                          <span style="font-size:11px;font-weight:700;border-radius:20px;padding:2px 9px;background:var(--panel2);border:1px solid var(--bd);color:var(--tx3)">{{ it.tag }}</span>
+                        </sc-if>
+                      </div>
+                      <sc-if value="{{ it.editing }}" hint-placeholder-val="{{ false }}">
+                        <textarea value="{{ it.editText }}" onInput="{{ it.onEditInput }}" rows="3" style="width:100%;background:var(--panel2);color:var(--tx);border:1px solid var(--accent);border-radius:10px;padding:10px;font-size:14px;line-height:1.6;resize:vertical;outline:none"></textarea>
+                        <div style="display:flex;gap:8px;margin-top:8px">
+                          <button onClick="{{ it.onSave }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:700;font-size:13px;padding:7px 15px;border-radius:9px">שמור</button>
+                          <button onClick="{{ it.onCancel }}" style="cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx2);font-weight:600;font-size:13px;padding:7px 15px;border-radius:9px">בטל</button>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ it.showBody }}" hint-placeholder-val="{{ true }}">
+                        <div style="font-size:14px;line-height:1.65;color:var(--tx2);max-width:62ch;text-wrap:pretty">{{ it.text }}</div>
+                        <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px">
+                          <sc-for list="{{ it.lines }}" as="ln" hint-placeholder-count="0">
+                            <div style="font-size:13px;line-height:1.55;color:var(--tx2)">
+                              <span style="color:var(--tx3);font-weight:700">{{ ln.label }} </span>{{ ln.val }}
+                              <sc-if value="{{ ln.isLink }}" hint-placeholder-val="{{ false }}">
+                                <a href="{{ ln.url }}" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:4px;margin-inline-start:7px;font-size:12.5px;font-weight:700;color:var(--accent)">
+                                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12" style="flex:none"><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path></svg>
+                                  {{ ln.urlLabel }}
+                                </a>
+                              </sc-if>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <div style="display:flex;gap:6px;flex:none">
+                      <button onClick="{{ it.onOk }}" title="אשר" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid {{ it.okBd }};background:{{ it.okBg }};color:{{ it.okFg }};display:flex;align-items:center;justify-content:center;transition:background .25s ease,border-color .25s ease"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="animation:{{ it.tickAnim }}"><path d="M20 6 9 17l-5-5"></path></svg></button>
+                      <button onClick="{{ it.onEdit }}" title="ערוך" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
+                      <button onClick="{{ it.onOut }}" title="הוצא" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid {{ it.outBd }};background:{{ it.outBg }};color:{{ it.outFg }};display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
+                    </div>
+                  </div>
+                  <sc-if value="{{ it.showMove }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
+                      <sc-for list="{{ it.moves }}" as="mv" hint-placeholder-count="2">
+                        <button onClick="{{ mv.onClick }}" style="cursor:pointer;font-size:12px;font-weight:700;padding:5px 11px;border-radius:9px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2)">{{ mv.label }}</button>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+
+        <!-- vectors -->
+        <sc-if value="{{ st.isVectors }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:{{ vecCols }};gap:14px;margin-bottom:18px">
+            <sc-for list="{{ vectors }}" as="v" hint-placeholder-count="2">
+              <div style="background:var(--panel);border:1px solid var(--bd);border-radius:16px;padding:16px 17px">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:13px">
+                  <span style="width:5px;height:18px;border-radius:3px;background:{{ v.color }};display:inline-block"></span>
+                  <div style="font-size:15px;font-weight:800">{{ v.title }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0">
+                  <sc-for list="{{ v.steps }}" as="s" hint-placeholder-count="5">
+                    <div style="display:flex;gap:11px;align-items:flex-start">
+                      <div style="display:flex;flex-direction:column;align-items:center;flex:none">
+                        <span style="width:22px;height:22px;border-radius:50%;background:{{ s.dotBg }};color:{{ s.dotFg }};border:1px solid {{ s.dotBd }};font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center">{{ s.n }}</span>
+                        <span style="width:2px;flex:1;background:var(--bd);min-height:{{ s.lineH }}"></span>
+                      </div>
+                      <div style="padding-bottom:12px;flex:1">
+                        <div style="font-size:13.8px;line-height:1.6;color:var(--tx)">{{ s.text }}</div>
+                        <div style="font-size:11px;color:var(--tx3);margin-top:3px">{{ s.status }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="background:var(--panel2);border:1px solid var(--bd2);border-radius:12px;padding:12px 14px;margin-top:4px">
+                  <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">השורש שהתגלה</div>
+                  <div style="font-size:14px;line-height:1.6;font-weight:600">{{ v.root }}</div>
+                  <div style="font-size:12.5px;color:{{ v.color }};margin-top:8px;font-weight:700">נקודת התערבות: {{ v.intervention }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:linear-gradient(180deg,rgba(152,177,255,.09),transparent);border:1px solid rgba(152,177,255,.28);border-radius:16px;padding:17px 19px;margin-bottom:20px">
+            <div style="font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.3px;margin-bottom:6px">נקודת המפגש — כאן זה מתחבר</div>
+            <div style="font-size:15px;line-height:1.7;max-width:70ch;text-wrap:pretty">{{ st.meeting }}</div>
+            <div style="font-size:12px;color:var(--tx3);margin-top:9px"><span style="font-weight:700">מקור: </span>{{ st.meetingSrc }}</div>
+          </div>
+        </sc-if>
+
+        <!-- fishbone root -->
+        <sc-if value="{{ st.isFishbone }}" hint-placeholder-val="{{ false }}">
+          <div style="background:linear-gradient(180deg,rgba(152,177,255,.09),transparent);border:1px solid rgba(152,177,255,.28);border-radius:16px;padding:17px 19px;margin-bottom:20px">
+            <div style="font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.3px;margin-bottom:6px">שורש הבעיה — נבנה מהמאומת בלבד</div>
+            <div style="font-size:15px;line-height:1.7;max-width:70ch;text-wrap:pretty">{{ st.root }}</div>
+            <div style="font-size:12px;color:var(--tx3);margin-top:9px"><span style="font-weight:700">מקור: </span>{{ st.rootSrc }}</div>
+          </div>
+        </sc-if>
+
+        <!-- MLP line -->
+        <sc-if value="{{ st.isTwocol }}" hint-placeholder-val="{{ false }}">
+          <div style="background:linear-gradient(180deg,rgba(147,224,177,.09),transparent);border:1px solid rgba(147,224,177,.28);border-radius:16px;padding:17px 19px;margin-bottom:20px">
+            <div style="font-size:12px;font-weight:800;color:var(--master);letter-spacing:.3px;margin-bottom:6px">קו הגרסה הראשונה</div>
+            <div style="font-size:15px;line-height:1.7;max-width:70ch;text-wrap:pretty">{{ st.mlp }}</div>
+            <div style="font-size:12px;color:var(--tx3);margin-top:9px"><span style="font-weight:700">מקור: </span>{{ st.mlpSrc }}</div>
+          </div>
+        </sc-if>
+
+        <!-- story -->
+        <sc-if value="{{ st.isStory }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;overflow:hidden;margin-bottom:20px">
+            <div style="padding:15px 18px;border-bottom:1px solid var(--bd)">
+              <div style="font-size:16px;font-weight:800">{{ storyTitle }}</div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:4px"><span style="font-weight:700">מקור: </span>{{ storySrc }}</div>
+            </div>
+            <sc-for list="{{ storyParts }}" as="p" hint-placeholder-count="6">
+              <div style="padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap">
+                <div style="flex:none;width:118px">
+                  <div dir="ltr" style="font-size:11.5px;font-weight:800;color:var(--accent);letter-spacing:.4px;text-align:right">{{ p.k }}</div>
+                  <div style="font-size:12.5px;color:var(--tx3)">{{ p.he }}</div>
+                </div>
+                <div style="flex:1;min-width:200px;font-size:14.5px;line-height:1.7;color:var(--tx2);text-wrap:pretty">{{ p.t }}</div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <!-- prd view -->
+        <sc-if value="{{ st.isPrd }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:6px 4px;margin-bottom:20px">
+            <sc-for list="{{ prdRows }}" as="s" hint-placeholder-count="14">
+              <div style="display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--bd)">
+                <span style="font-size:11.5px;color:var(--tx3);width:20px;flex:none;font-variant-numeric:tabular-nums">{{ s.n }}</span>
+                <span style="flex:1;font-size:14.5px;font-weight:600">{{ s.t }}</span>
+                <span style="font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 10px;background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }};white-space:nowrap">{{ s.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="font-size:12.5px;color:var(--tx3);line-height:1.6;margin-bottom:20px;max-width:64ch">בקורס המבנה המלא הוא 37 סעיפים. כאן מוצגים הסעיפים שהמסלול הזה ממלא. שדה בלי מקור נשאר <span dir="ltr" style="color:var(--tx2)">[טרם נקבע]</span> — לא ממציאים.</div>
+        </sc-if>
+
+        <!-- one strip: everything the AI wants from you -->
+        <sc-if value="{{ hasAsks }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--panel);border:1px solid var(--bd2);border-radius:16px;padding:17px 19px;margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:9px;margin-bottom:14px">
+            <span style="width:24px;height:24px;border-radius:8px;background:var(--panel2);border:1px solid var(--bd);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">?</span>
+            <div style="font-size:14.5px;font-weight:800">מה אני צריך ממך</div>
+            <div style="flex:1"></div>
+            <div style="font-size:11.5px;color:var(--tx3)">{{ asksSummary }}</div>
+          </div>
+
+        <sc-if value="{{ hasIdeas }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-bottom:16px">
+            <button onClick="{{ onToggleIdeaList }}" style="width:100%;display:flex;align-items:center;gap:8px;cursor:pointer;background:none;border:none;padding:0;text-align:start">
+              <span style="width:5px;height:15px;border-radius:3px;background:#b6a0f0;display:inline-block;flex:none"></span>
+              <span style="font-size:12.5px;font-weight:800;color:#b6a0f0">{{ ideaHeadline }}</span>
+              <span style="flex:1"></span>
+              <span style="font-size:11.5px;color:var(--tx3)">{{ ideaToggle }}</span>
+            </button>
+            <sc-if value="{{ ideaListOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:9px 0 11px">
+              <div style="font-size:12.5px;color:var(--tx3);line-height:1.6;flex:1;min-width:170px">הצעות שלי, לא ממצאים. מה שתוסיף ייכנס מסומן כ״טרם אומת״.</div>
+              <button onClick="{{ onToggleIdeas }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd2);color:var(--tx3);border-radius:9px;padding:5px 11px;font-size:11.5px;font-weight:700;white-space:nowrap">{{ ideasBtn }}</button>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ ideaList }}" as="i" hint-placeholder-count="2">
+                <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:13px;padding:13px 15px">
+                  <div style="font-size:14.5px;font-weight:700;line-height:1.4;margin-bottom:4px">{{ i.title }}</div>
+                  <div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-bottom:6px">{{ i.text }}</div>
+                  <div style="font-size:12.5px;line-height:1.55;color:var(--tx3)"><span style="font-weight:700">למה דווקא כאן: </span>{{ i.why }}</div>
+                  <div style="display:flex;gap:8px;margin-top:11px">
+                    <button onClick="{{ i.onAdd }}" style="cursor:pointer;border:none;background:#b6a0f0;color:#141a24;font-weight:800;font-size:13px;padding:8px 15px;border-radius:10px">הוסף לרשימה</button>
+                    <button onClick="{{ i.onSkip }}" style="cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx3);font-weight:600;font-size:13px;padding:8px 15px;border-radius:10px">לא מעניין</button>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasGaps }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px dashed var(--bd2);padding-top:15px;margin-bottom:16px">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="width:5px;height:15px;border-radius:3px;background:var(--review);display:inline-block"></span>
+              <div style="font-size:12.5px;font-weight:800;color:var(--review)">חסר לי מידע כדי לעשות עבודה טובה</div>
+              <div style="flex:1"></div>
+              <div style="font-size:11.5px;color:var(--tx3)">{{ gapsAnswered }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:15px">
+              <sc-for list="{{ gaps }}" as="g" hint-placeholder-count="1">
+                <div>
+                  <div style="font-size:15px;font-weight:700;line-height:1.5;margin-bottom:4px">{{ g.q }}</div>
+                  <div style="font-size:12.5px;color:var(--tx3);margin-bottom:10px">{{ g.why }}</div>
+                  <sc-if value="{{ g.tappable }}" hint-placeholder-val="{{ true }}">
+                    <div style="display:flex;gap:8px;flex-wrap:wrap">
+                      <button onClick="{{ g.onYes }}" style="cursor:pointer;border:1px solid {{ g.yesBd }};background:{{ g.yesBg }};color:{{ g.yesFg }};font-weight:700;font-size:13.5px;padding:9px 18px;border-radius:11px">{{ g.yesLabel }}</button>
+                      <button onClick="{{ g.onFix }}" style="cursor:pointer;border:1px solid var(--bd2);background:none;color:var(--tx2);font-weight:600;font-size:13.5px;padding:9px 16px;border-radius:11px">לא בדיוק, אתקן</button>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ g.fixing }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:10px">
+                      <textarea value="{{ g.val }}" onInput="{{ g.onInput }}" rows="2" placeholder="במילים שלך, קצר" style="width:100%;background:var(--panel2);color:var(--tx);border:1px solid var(--bd2);border-radius:11px;padding:10px 12px;font-size:14px;line-height:1.6;resize:vertical;outline:none"></textarea>
+                      <button onClick="{{ onApplyGaps }}" style="margin-top:9px;cursor:pointer;border:none;background:var(--review);color:var(--onreview);font-weight:800;font-size:13.5px;padding:9px 18px;border-radius:11px">עדכן את הטיוטה</button>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ hasAsk }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:1px dashed var(--bd2);padding-top:15px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px">
+              <span style="width:5px;height:15px;border-radius:3px;background:var(--accent);display:inline-block"></span>
+              <div style="font-size:12.5px;font-weight:800;color:var(--accent)">הכרעה שרק אתה יכול לעשות</div>
+            </div>
+            <div style="font-size:15px;font-weight:600;line-height:1.55;margin-bottom:11px">{{ askQ }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ askOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.onClick }}" style="cursor:pointer;text-align:start;font-size:14px;font-weight:600;padding:11px 14px;border-radius:11px;border:1px solid {{ o.bd }};background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        </div>
+        </sc-if>
+
+        <!-- footer bar -->
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--bd)">
+          <button onClick="{{ onOpenGate }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:15px;padding:13px 26px;border-radius:12px;margin-top:14px">{{ gateBtnLabel }}</button>
+          <div style="margin-top:14px;font-size:12.5px;color:var(--tx3);line-height:1.6">
+            אפשר פשוט להמשיך — כל מה שלא נגעת בו נכנס כמו שהוא.
+            <sc-if value="{{ hasOpenChecks }}" hint-placeholder-val="{{ false }}">
+              <span style="display:block;color:var(--review)">{{ openChecksLabel }}</span>
+            </sc-if>
+          </div>
+        </div>
+
+      </div>
+      </sc-if>
+    </main>
+
+    <!-- ============ WHY PANEL ============ -->
+    <sc-if value="{{ showWhyPanel }}" hint-placeholder-val="{{ true }}">
+    <aside style="{{ whyStyle }}">
+      <div style="background:var(--panel);border:1px solid var(--bd);border-radius:18px;padding:17px 18px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:13px">
+          <span style="width:22px;height:22px;border-radius:7px;background:rgba(127,212,207,.14);color:#7fd4cf;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M9 18h6"></path><path d="M10 22h4"></path><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z"></path></svg></span>
+          <div style="font-size:12.5px;font-weight:800;color:#7fd4cf;letter-spacing:.2px">למה עושים את זה</div>
+          <div style="flex:1"></div>
+          <sc-if value="{{ isNarrow }}" hint-placeholder-val="{{ false }}">
+            <button onClick="{{ onToggleWhy }}" style="cursor:pointer;background:none;border:none;color:var(--tx3);font-size:18px;line-height:1">×</button>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <sc-for list="{{ st.why }}" as="w" hint-placeholder-count="2">
+            <div>
+              <div style="font-size:13.5px;font-weight:700;margin-bottom:4px">{{ w.h }}</div>
+              <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);text-wrap:pretty">{{ w.t }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="border-top:1px dashed var(--bd2);margin-top:15px;padding-top:13px">
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:6px">מה יוצא מהתחנה הזו</div>
+          <div style="font-size:13px;line-height:1.6;color:var(--tx2)">{{ st.introGet }}</div>
+        </div>
+        <sc-if value="{{ hasMethod }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:1px dashed var(--bd2);margin-top:13px;padding-top:13px">
+          <div style="font-size:11px;color:var(--tx3);margin-bottom:4px">השם המקצועי, אם יעניין אותך</div>
+          <div style="font-size:13px;font-weight:700;margin-bottom:3px">{{ methodName }}</div>
+          <div style="font-size:12.5px;line-height:1.6;color:var(--tx3)">{{ methodNote }}</div>
+        </div>
+        </sc-if>
+      </div>
+    </aside>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <!-- ============ INTRO CARD ============ -->
+  <sc-if value="{{ introOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onSkipIntro }}" style="{{ themeVars }}position:fixed;inset:0;z-index:80;background:rgba(8,11,16,.7);display:flex;align-items:center;justify-content:center;padding:22px">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:470px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:26px 25px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .25s ease;color:var(--tx)">
+      <div style="font-size:12px;color:var(--tx3);letter-spacing:.4px;margin-bottom:4px">{{ st.kicker }}</div>
+      <div style="font-size:21px;font-weight:800;letter-spacing:-.4px;margin-bottom:18px">{{ st.title }}</div>
+      <div style="display:flex;flex-direction:column;gap:15px;margin-bottom:22px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="flex:none;width:26px;height:26px;border-radius:8px;background:var(--panel2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--tx3)">1</span>
+          <div><div style="font-size:12.5px;color:var(--tx3);margin-bottom:2px">מה עושים כאן</div><div style="font-size:14.5px;line-height:1.65">{{ st.introWhat }}</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="flex:none;width:26px;height:26px;border-radius:8px;background:var(--panel2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--tx3)">2</span>
+          <div><div style="font-size:12.5px;color:var(--tx3);margin-bottom:2px">למה זה חשוב</div><div style="font-size:14.5px;line-height:1.65">{{ st.introWhy }}</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <span style="flex:none;width:26px;height:26px;border-radius:8px;background:var(--panel2);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--tx3)">3</span>
+          <div><div style="font-size:12.5px;color:var(--tx3);margin-bottom:2px">מה תקבל בסוף</div><div style="font-size:14.5px;line-height:1.65">{{ st.introGet }}</div></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button onClick="{{ onSkipIntro }}" style="flex:1;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:14.5px;padding:12px;border-radius:12px">הבנתי, קדימה</button>
+        <button onClick="{{ onSkipAllIntros }}" style="cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx3);font-size:13px;font-weight:600;padding:12px 15px;border-radius:12px">אל תציג לי הסברים</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ APPROVAL GATE ============ -->
+  <sc-if value="{{ gateOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseGate }}" style="{{ themeVars }}position:fixed;inset:0;z-index:90;background:rgba(8,11,16,.72);display:flex;align-items:center;justify-content:center;padding:22px">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:460px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:25px 24px 21px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .22s ease;color:var(--tx)">
+      <div style="display:flex;align-items:center;gap:9px;margin-bottom:6px">
+        <span style="width:26px;height:26px;border-radius:8px;background:var(--master);color:var(--onmaster);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M20 6 9 17l-5-5"></path></svg></span>
+        <div style="font-size:19px;font-weight:800;letter-spacing:-.3px">{{ st.gateTitle }}</div>
+      </div>
+      <div style="font-size:13.5px;line-height:1.6;color:var(--tx2);margin-bottom:13px">{{ st.gateNote }}</div>
+
+      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:13px 15px;margin-bottom:14px">
+        <div style="font-size:11.5px;color:var(--tx3);margin-bottom:8px">רגע — מה אני בעצם מאשר כאן?</div>
+        <div style="font-size:13.5px;line-height:1.65;color:var(--tx2);margin-bottom:11px;text-wrap:pretty">לא שהכול נכון. חלק מהדברים כאן הם עדיין השערות, וזה בסדר גמור. אתה מאשר שלושה דברים בלבד:</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div style="display:flex;gap:9px;align-items:flex-start">
+            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">1</span>
+            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שזו התמונה שלך היום.</span> זה מה שאתה יודע ומה שאתה מאמין ברגע זה.</div>
+          </div>
+          <div style="display:flex;gap:9px;align-items:flex-start">
+            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">2</span>
+            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שהתוויות הוגנות.</span> שמה שסומן ״מאומת״ באמת מבוסס, ושמה שהוא בעצם אמונה שלך מסומן ״מסתבר״ ולא מתחזה לעובדה.</div>
+          </div>
+          <div style="display:flex;gap:9px;align-items:flex-start">
+            <span style="flex:none;width:17px;height:17px;border-radius:5px;background:var(--raise);color:var(--tx2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">3</span>
+            <div style="font-size:13.5px;line-height:1.6;color:var(--tx2)"><span style="font-weight:700;color:var(--tx)">שאלה הדברים שכדאי ללכת לבדוק.</span> הם ייצאו איתך כרשימה, ותוכל לסמן אותם כמאומתים בהמשך.</div>
+          </div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.65;color:var(--tx3);margin-top:11px;text-wrap:pretty">למה זה חשוב: בעוד חודשיים, כשתחליט אם לבנות משהו, תוכל לראות שההחלטה נשענה על השערה שאיש לא בדק — במקום שהיא תהפוך בשקט ל״עובדה״.</div>
+        <sc-if value="{{ hasOpenChecks }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;line-height:1.6;color:var(--review);margin-top:9px;font-weight:600">{{ openChecksLabel }}</div>
+        </sc-if>
+      </div>
+
+      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;padding:14px 15px;margin-bottom:16px">
+        <div style="font-size:11.5px;color:var(--tx3);margin-bottom:9px">מה קורה כשתאשר</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ gateEffects }}" as="e" hint-placeholder-count="3">
+            <div style="display:flex;gap:9px;align-items:flex-start">
+              <span style="flex:none;width:17px;height:17px;border-radius:5px;background:{{ e.bg }};color:{{ e.fg }};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;margin-top:2px">{{ e.icon }}</span>
+              <div style="font-size:13.5px;line-height:1.55;color:var(--tx2)">{{ e.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:9px">
+        <button onClick="{{ onApprove }}" style="cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:15px;padding:13px;border-radius:12px">{{ approveLabel }}</button>
+        <button onClick="{{ onCloseGate }}" style="cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx2);font-weight:600;font-size:13.5px;padding:11px;border-radius:12px">חזרה לעריכה</button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ STATION DONE ============ -->
+  <sc-if value="{{ doneOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="{{ themeVars }}position:fixed;inset:0;z-index:94;background:rgba(8,11,16,.75);display:flex;align-items:center;justify-content:center;padding:22px">
+    <div dir="rtl" style="width:100%;max-width:440px;background:var(--panel);border:1px solid var(--bd2);border-radius:24px;padding:28px 26px 22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .3s ease;color:var(--tx);text-align:center">
+      <div style="width:54px;height:54px;margin:0 auto 15px;border-radius:50%;background:{{ doneRingBg }};display:flex;align-items:center;justify-content:center;color:{{ doneRingFg }}">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" width="26" height="26"><path d="M20 6 9 17l-5-5"></path></svg>
+      </div>
+      <div style="font-size:21px;font-weight:800;letter-spacing:-.3px;margin-bottom:6px">{{ doneTitle }}</div>
+      <div style="font-size:14px;color:var(--tx2);line-height:1.6;margin-bottom:18px">{{ doneSub }}</div>
+
+      <sc-if value="{{ doneHasInsight }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:15px;padding:15px 17px;margin-bottom:16px;text-align:start">
+          <div style="font-size:11px;font-weight:800;color:#7fd4cf;letter-spacing:.3px;margin-bottom:5px">מה שתפס לי את העין</div>
+          <div style="font-size:14.5px;line-height:1.7;text-wrap:pretty">{{ doneInsight }}</div>
+        </div>
+      </sc-if>
+
+      <div style="display:flex;align-items:center;gap:11px;background:var(--panel2);border:1px solid var(--bd);border-radius:15px;padding:13px 15px;margin-bottom:18px">
+        <div style="flex:1;text-align:start">
+          <div style="font-size:12px;color:var(--tx3);margin-bottom:5px">המסמך שלך</div>
+          <div style="height:7px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ prdPct }}%;background:var(--accent);transition:width .6s ease"></div></div>
+        </div>
+        <div style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--accent)">{{ prdDone }}/{{ prdTotal }}</div>
+      </div>
+
+      <button onClick="{{ onNextStation }}" style="width:100%;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:15px;padding:14px;border-radius:13px">{{ doneBtn }}</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PROJECTS ============ -->
+  <sc-if value="{{ projectsOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseProjects }}" style="{{ themeVars }}position:fixed;inset:0;z-index:92;background:rgba(8,11,16,.7);display:flex;align-items:flex-start;justify-content:center;padding:70px 22px 22px">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:460px;background:var(--panel);border:1px solid var(--bd2);border-radius:22px;padding:22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .2s ease;color:var(--tx)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px">
+        <div style="flex:1">
+          <div style="font-size:18px;font-weight:800">הפרויקטים שלי</div>
+          <div style="font-size:12px;color:var(--tx3);margin-top:2px">כל אחד נשמר בנפרד. אפשר לעבור ביניהם מתי שרוצים</div>
+        </div>
+        <button onClick="{{ onCloseProjects }}" style="cursor:pointer;background:none;border:none;color:var(--tx3);font-size:22px;line-height:1">×</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:9px;max-height:46vh;overflow-y:auto">
+        <sc-for list="{{ projects }}" as="p" hint-placeholder-count="1">
+          <div style="display:flex;align-items:center;gap:10px;background:{{ p.bg }};border:1px solid {{ p.bd }};border-radius:13px;padding:12px 14px">
+            <button onClick="{{ p.onOpen }}" style="flex:1;min-width:0;cursor:pointer;background:none;border:none;text-align:start;padding:0">
+              <span style="display:block;font-size:14.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.name }}</span>
+              <span style="display:block;font-size:12px;color:var(--tx3);margin-top:2px">{{ p.sub }}</span>
+            </button>
+            <button onClick="{{ p.onDelete }}" title="מחק" style="flex:none;cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx3);border-radius:9px;width:30px;height:30px;display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M3 6h18"></path><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"></path><path d="M19 6v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V6"></path></svg></button>
+          </div>
+        </sc-for>
+        <sc-if value="{{ noProjects }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;color:var(--tx3);font-size:13px;padding:26px;border:1px dashed var(--bd2);border-radius:14px">עדיין אין פרויקטים שמורים</div>
+        </sc-if>
+      </div>
+      <button onClick="{{ onNewProject }}" style="width:100%;margin-top:14px;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:14px;padding:12px;border-radius:12px">פרויקט חדש</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ GLOSSARY POPOVER ============ -->
+  <sc-if value="{{ termOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseTerm }}" style="{{ themeVars }}position:fixed;inset:0;z-index:95;background:rgba(8,11,16,.6);display:flex;align-items:center;justify-content:center;padding:22px">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:380px;background:var(--panel);border:1px solid var(--bd2);border-radius:20px;padding:22px 22px 18px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .2s ease;color:var(--tx)">
+      <div style="display:flex;align-items:baseline;gap:9px;margin-bottom:11px">
+        <div style="font-size:19px;font-weight:800">{{ termName }}</div>
+        <div dir="ltr" style="font-size:12.5px;color:var(--tx3)">{{ termEn }}</div>
+      </div>
+      <div style="font-size:14.5px;line-height:1.75;color:var(--tx2);text-wrap:pretty">{{ termEli5 }}</div>
+      <button onClick="{{ onCloseTerm }}" style="width:100%;margin-top:17px;cursor:pointer;background:var(--panel2);border:1px solid var(--bd);color:var(--tx2);font-weight:700;font-size:13.5px;padding:10px;border-radius:11px">סגור</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ EVIDENCE POPOVER ============ -->
+  <sc-if value="{{ evOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseEv }}" style="{{ themeVars }}position:fixed;inset:0;z-index:95;background:rgba(8,11,16,.6);display:flex;align-items:center;justify-content:center;padding:22px">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:380px;background:var(--panel);border:1px solid var(--bd2);border-radius:20px;padding:22px;box-shadow:0 30px 70px -30px rgba(0,0,0,.85);animation:pbin .2s ease;color:var(--tx)">
+      <div style="font-size:11.5px;font-weight:800;border-radius:20px;padding:3px 10px;display:inline-block;background:{{ evPopBg }};color:{{ evPopFg }};border:1px solid {{ evPopBd }};margin-bottom:11px">{{ evPopLabel }}</div>
+      <div style="font-size:14.5px;line-height:1.7;color:var(--tx2);margin-bottom:12px">{{ evPopExplain }}</div>
+      <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:12px;padding:12px 14px">
+        <div style="font-size:11.5px;color:var(--tx3);margin-bottom:4px">המקור / מה יאמת את זה</div>
+        <div style="font-size:13.5px;line-height:1.6">{{ evPopSrc }}</div>
+      </div>
+      <sc-if value="{{ evCanVerify }}" hint-placeholder-val="{{ false }}">
+        <div style="border-top:1px dashed var(--bd2);margin-top:15px;padding-top:14px">
+          <div style="font-size:13.5px;font-weight:700;margin-bottom:3px">בדקת את זה בינתיים?</div>
+          <div style="font-size:12.5px;color:var(--tx3);line-height:1.55;margin-bottom:9px">כתוב מה מצאת ומאיפה — ואסמן את הפריט כמאומת</div>
+          <textarea value="{{ evVerifyVal }}" onInput="{{ onEvVerifyInput }}" rows="2" placeholder="למשל: דיברתי עם 6 אנשים בחדר כושר, 4 אמרו שהם מפסיקים אחרי חודש כי אין להם עם מי" style="width:100%;background:var(--panel2);color:var(--tx);border:1px solid var(--bd2);border-radius:11px;padding:10px 12px;font-size:13.5px;line-height:1.6;resize:vertical;outline:none"></textarea>
+          <button onClick="{{ onEvVerify }}" style="width:100%;margin-top:9px;cursor:pointer;border:none;background:var(--master);color:var(--onmaster);font-weight:800;font-size:13.5px;padding:10px;border-radius:11px">סמן כמאומת</button>
+        </div>
+      </sc-if>
+      <button onClick="{{ onCloseEv }}" style="width:100%;margin-top:11px;cursor:pointer;background:var(--panel2);border:1px solid var(--bd);color:var(--tx2);font-weight:700;font-size:13.5px;padding:10px;border-radius:11px">סגור</button>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ FILES DRAWER ============ -->
+  <sc-if value="{{ filesOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onCloseFiles }}" style="{{ themeVars }}position:fixed;inset:0;z-index:85;background:rgba(8,11,16,.6);display:flex;justify-content:flex-start">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:520px;height:100%;background:var(--panel);border-inline-end:1px solid var(--bd2);display:flex;flex-direction:column;color:var(--tx);animation:pbin .2s ease">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:800">הקבצים שלך</div>
+          <div style="font-size:12px;color:var(--tx3);margin-top:2px">נשמרים כאן. אפשר לערוך, ולייצא כשתחליט</div>
+        </div>
+        <button onClick="{{ onCloseFiles }}" style="cursor:pointer;background:none;border:none;color:var(--tx3);font-size:22px;line-height:1">×</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px 20px">
+        <sc-if value="{{ noFiles }}" hint-placeholder-val="{{ true }}">
+          <div style="text-align:center;color:var(--tx3);font-size:13.5px;padding:40px 20px;border:1px dashed var(--bd2);border-radius:16px;line-height:1.6">עדיין אין קבצים.<br>כל תחנה שתאשר תיצור כאן מסמך.</div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:11px">
+          <sc-for list="{{ files }}" as="f" hint-placeholder-count="0">
+            <div style="background:var(--panel2);border:1px solid var(--bd);border-radius:14px;overflow:hidden">
+              <div style="padding:13px 15px;display:flex;align-items:center;gap:10px">
+                <span style="width:30px;height:30px;flex:none;border-radius:9px;background:var(--panel);border:1px solid var(--bd2);display:flex;align-items:center;justify-content:center;color:var(--accent)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6"></path></svg></span>
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:700">{{ f.title }}</div>
+                  <div dir="ltr" style="font-size:11.5px;color:var(--tx3);text-align:right">{{ f.name }}</div>
+                </div>
+                <button onClick="{{ f.onToggle }}" style="cursor:pointer;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:9px;border:1px solid var(--bd2);background:var(--panel);color:var(--tx2)">{{ f.btn }}</button>
+              </div>
+              <sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:0 15px 14px">
+                  <textarea value="{{ f.body }}" onInput="{{ f.onInput }}" rows="14" style="width:100%;background:var(--bg);color:var(--tx);border:1px solid var(--bd2);border-radius:11px;padding:12px;font-size:13px;line-height:1.7;resize:vertical;outline:none"></textarea>
+                  <div style="font-size:11.5px;color:var(--tx3);margin-top:7px">השינויים נשמרים תוך כדי כתיבה</div>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="padding:14px 20px;border-top:1px solid var(--bd)">
+        <div style="font-size:12.5px;color:var(--tx3);line-height:1.55;margin-bottom:10px">מסמך אחד מורכב מכל התחנות, בסדר הנכון — זה מה שמדביקים לכלי בנייה כמו Claude.</div>
+        <div style="display:flex;gap:9px;margin-bottom:9px">
+          <button onClick="{{ onDownloadPrd }}" style="flex:1;cursor:pointer;border:none;background:var(--accent);color:var(--onaccent);font-weight:800;font-size:14px;padding:11px;border-radius:11px">הורד PRD אחד מלא</button>
+          <button onClick="{{ onCopyPrd }}" style="cursor:pointer;background:var(--panel2);border:1px solid var(--bd2);color:var(--tx2);font-weight:700;font-size:13.5px;padding:11px 16px;border-radius:11px">{{ copyLabel }}</button>
+        </div>
+        <button onClick="{{ onDownloadAll }}" style="width:100%;cursor:pointer;background:none;border:1px solid var(--bd2);color:var(--tx3);font-weight:600;font-size:12.5px;padding:9px;border-radius:11px">הורד גם את מסמכי העבודה בנפרד</button>
+
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PRD DRAWER ============ -->
+  <sc-if value="{{ prdOpen }}" hint-placeholder-val="{{ false }}">
+  <div onClick="{{ onClosePrd }}" style="{{ themeVars }}position:fixed;inset:0;z-index:85;background:rgba(8,11,16,.6);display:flex;justify-content:flex-start">
+    <div onClick="{{ stopEvt }}" dir="rtl" style="width:100%;max-width:470px;height:100%;background:var(--panel);border-inline-end:1px solid var(--bd2);display:flex;flex-direction:column;color:var(--tx);animation:pbin .2s ease">
+      <div style="padding:18px 20px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px">
+        <div style="flex:1">
+          <div style="font-size:17px;font-weight:800">מסמך הפרויקט</div>
+          <div style="font-size:12px;color:var(--tx3);margin-top:2px">מתמלא לבד בכל תחנה שאתה מאשר · בקורס: PRD</div>
+        </div>
+        <button onClick="{{ onClosePrd }}" style="cursor:pointer;background:none;border:none;color:var(--tx3);font-size:22px;line-height:1">×</button>
+      </div>
+      <div style="padding:14px 20px 4px">
+        <div style="height:7px;border-radius:4px;background:var(--raise);overflow:hidden"><div style="height:100%;width:{{ prdPct }}%;background:var(--accent);transition:width .4s"></div></div>
+        <div style="font-size:12px;color:var(--tx3);margin-top:7px">{{ prdDone }} מתוך {{ prdTotal }} סעיפים הוכרעו</div>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:10px 20px 20px">
+        <sc-for list="{{ prdRows }}" as="s" hint-placeholder-count="14">
+          <div style="display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--bd)">
+            <span style="font-size:11.5px;color:var(--tx3);width:20px;flex:none;font-variant-numeric:tabular-nums">{{ s.n }}</span>
+            <span style="flex:1;font-size:14px;font-weight:600">{{ s.t }}</span>
+            <span style="font-size:11.5px;font-weight:700;border-radius:20px;padding:3px 10px;background:{{ s.bg }};color:{{ s.fg }};border:1px solid {{ s.bd }};white-space:nowrap">{{ s.label }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860},&quot;embedded&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;שילוב&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dark&quot;,&quot;light&quot;],&quot;default&quot;:&quot;dark&quot;,&quot;tsType&quot;:&quot;'dark'|'light'&quot;,&quot;section&quot;:&quot;שילוב&quot;}}">
+class Component extends DCLogic {
+  state = {
+    theme: 'dark', si: 0, unlocked: 0, busy: false,
+    generated: {}, approved: {}, items: {}, answers: {},
+    introSeen: {}, introOpen: false, noIntros: false,
+    gateOpen: false, term: null, ev: null,
+    filesOpen: false, prdOpen: false, openFile: null, copied: false,
+    files: [], edits: {}, editing: null, editText: '',
+    whyOpen: false, w: 1400,
+    phase: 'start', f1: '', f2: '', f3: '', isDemo: false,
+    ai: {}, genErr: '', geminiKey: '', anthKey: '', keyInput: '', keyErr: '', keyPanel: false,
+    push: 'balanced', gapAns: {}, whyBother: false, ideas: true, added: {}, ideaOut: {}, doneCard: null,
+    projectId: null, projects: [], projectsOpen: false, settingsOpen: false, renameVal: ''
+  };
+  SAVE_KEY = 'pb_project_v1';
+  STORE = 'pb_projects_v1';
+
+  componentDidMount() {
+    this._r = () => this.setState({ w: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this.setState({ w: window.innerWidth });
+    this.loadKeys();
+    this.restore();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._r); }
+
+  /* ---------- multi-project storage ---------- */
+  readStore() {
+    try {
+      const raw = localStorage.getItem(this.STORE);
+      if (raw) return JSON.parse(raw);
+      const old = localStorage.getItem(this.SAVE_KEY);  // migrate the single-project save
+      if (old) {
+        const d = JSON.parse(old);
+        const id = 'p' + Date.now();
+        return { active: id, items: [{ id, name: (d.f1 || 'הפרויקט שלי').slice(0, 60), updated: Date.now(), state: d }] };
+      }
+    } catch (e) {}
+    return { active: null, items: [] };
+  }
+  writeStore(st) { try { localStorage.setItem(this.STORE, JSON.stringify(st)); } catch (e) {} }
+  listOf(st) { return (st.items || []).map(x => ({ id: x.id, name: x.name, updated: x.updated, done: Object.keys((x.state || {}).approved || {}).length })); }
+
+  restore() {
+    const st = this.readStore();
+    const rec = (st.items || []).find(x => x.id === st.active);
+    if (rec) this.setState(Object.assign({ introOpen: false, projectId: rec.id, projects: this.listOf(st) }, rec.state), () => this.autoStart());
+    else this.setState({ projects: this.listOf(st) });
+  }
+  persist() {
+    const s = this.state;
+    if (s.phase !== 'run' || s.isDemo || !s.projectId) return;
+    const keep = { phase: s.phase, si: s.si, unlocked: s.unlocked, f1: s.f1, f2: s.f2, f3: s.f3, isDemo: s.isDemo,
+      generated: s.generated, approved: s.approved, items: s.items, answers: s.answers, ai: s.ai, files: s.files,
+      push: s.push, gapAns: s.gapAns, ideas: s.ideas, added: s.added, ideaOut: s.ideaOut,
+      introSeen: s.introSeen, noIntros: s.noIntros, theme: s.theme };
+    const st = this.readStore();
+    st.items = st.items || [];
+    const i = st.items.findIndex(x => x.id === s.projectId);
+    const rec = { id: s.projectId, name: (s.f1 || 'הפרויקט שלי').slice(0, 60), updated: Date.now(), state: keep };
+    if (i >= 0) st.items[i] = rec; else st.items.push(rec);
+    st.active = s.projectId;
+    this.writeStore(st);
+    const list = this.listOf(st);
+    if (JSON.stringify(list) !== JSON.stringify(this.state.projects)) this.setState({ projects: list });
+  }
+  componentDidUpdate() { this.persist(); }
+
+  blank() {
+    return { si: 0, unlocked: 0, generated: {}, approved: {}, items: {}, answers: {}, ai: {}, files: [],
+      introSeen: {}, noIntros: false, isDemo: false, f1: '', f2: '', f3: '', genErr: '', gapAns: {}, added: {}, ideaOut: {},
+      filesOpen: false, prdOpen: false, projectsOpen: false, settingsOpen: false };
+  }
+  newProject = () => {
+    const st = this.readStore();
+    st.active = null;
+    this.writeStore(st);
+    this.setState(Object.assign(this.blank(), { phase: 'start', projectId: null, projects: this.listOf(st) }));
+  };
+  switchTo = (id) => {
+    this.persist();
+    const st = this.readStore();
+    const rec = (st.items || []).find(x => x.id === id);
+    if (!rec) return;
+    st.active = id; this.writeStore(st);
+    this.setState(Object.assign(this.blank(), rec.state, { projectId: id, introOpen: false, projects: this.listOf(st), projectsOpen: false }), () => this.autoStart());
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+  deleteProject = (id) => {
+    const st = this.readStore();
+    st.items = (st.items || []).filter(x => x.id !== id);
+    if (st.active === id) st.active = null;
+    this.writeStore(st);
+    if (this.state.projectId === id) this.setState(Object.assign(this.blank(), { phase: 'start', projectId: null, projects: this.listOf(st) }));
+    else this.setState({ projects: this.listOf(st) });
+  };
+
+  get D() { return (typeof window !== 'undefined' && window.BuilderData) ? window.BuilderData : { glossary:{}, stations:[], prdSections:[], project:{} }; }
+  get station() { return this.D.stations[this.state.si] || {}; }
+
+  /* ---------- content: AI output overrides the demo material ---------- */
+  contentFor(st) {
+    const ai = this.state.ai[st.id];
+    const added = this.state.added[st.id] || [];
+    if (!ai && !added.length) return st;
+    const m = Object.assign({}, st);
+    const cleanTag = (t) => {
+      const s = String(t == null ? '' : t).trim();
+      if (!s) return null;
+      if (/^[a-z0-9_\-.]+$/i.test(s)) return null;   // model returned an internal id, not a label
+      return s.length > 24 ? null : s;
+    };
+    if (ai && Array.isArray(ai.items)) m.items = ai.items.map((x, n) => Object.assign({ id: st.id + '_' + n }, x, { tagx: cleanTag(x.tag), cat: null, pri: null }));
+    if (added.length) m.items = (m.items || []).concat(added);
+    if (ai) {
+      ['head', 'root', 'rootSrc', 'mlp', 'mlpSrc', 'meeting', 'meetingSrc', 'vectors', 'story'].forEach(k => { if (ai[k]) m[k] = ai[k]; });
+      m.ask = ai.ask || null;
+    }
+    return m;
+  }
+  get content() { return this.contentFor(this.station); }
+
+  /* ---------- LLM ---------- */
+  hasLLM() {
+    return !!((typeof window !== 'undefined' && window.claude && window.claude.complete) || this.state.geminiKey || this.state.anthKey);
+  }
+  loadKeys() {
+    try {
+      const g = localStorage.getItem('cb_gemini_key'), a = localStorage.getItem('cb_anthropic_key');
+      const p = {};
+      if (g) p.geminiKey = g;
+      if (a) p.anthKey = a;
+      if (Object.keys(p).length) this.setState(p);
+    } catch (e) {}
+  }
+  saveKey() {
+    const k = (this.state.keyInput || '').trim();
+    if (!k) return;
+    try {
+      if (k.indexOf('sk-ant-') === 0) { localStorage.setItem('cb_anthropic_key', k); this.setState({ anthKey: k, keyInput: '', keyErr: '' }); }
+      else if (k.indexOf('AIza') === 0) { localStorage.setItem('cb_gemini_key', k); this.setState({ geminiKey: k, keyInput: '', keyErr: '' }); }
+      else this.setState({ keyErr: 'המפתח לא נראה תקין — מפתח של Google מתחיל ב-AIza, ושל Anthropic ב-sk-ant-' });
+    } catch (e) { this.setState({ keyErr: 'לא הצלחתי לשמור את המפתח בדפדפן' }); }
+  }
+  async callGemini(key, opts) {
+    const body = {
+      contents: (opts.messages || []).map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: String(m.content || '') }] })),
+      generationConfig: { maxOutputTokens: 8192, temperature: 0.6, responseMimeType: 'application/json', thinkingConfig: { thinkingBudget: 0 } }
+    };
+    if (opts.system) body.systemInstruction = { parts: [{ text: opts.system }] };
+    const url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=' + encodeURIComponent(key);
+    const post = (p) => fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(p) });
+    let res = await post(body);
+    if (res.status === 400 && body.generationConfig.thinkingConfig) { delete body.generationConfig.thinkingConfig; res = await post(body); }
+    if (!res.ok) { let d = ''; try { d = (await res.json()).error.message; } catch (e) {} throw new Error('Gemini ' + res.status + (d ? ': ' + d : '')); }
+    const data = await res.json();
+    const c = (data.candidates || [])[0];
+    const t = ((c && c.content && c.content.parts) || []).map(p => p.text || '').join('');
+    if (!t) throw new Error('המודל החזיר תשובה ריקה');
+    return t;
+  }
+  async callAnthropic(key, opts) {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: 4000, system: opts.system, messages: opts.messages })
+    });
+    if (!res.ok) { let d = ''; try { d = (await res.json()).error.message; } catch (e) {} throw new Error('Anthropic ' + res.status + (d ? ': ' + d : '')); }
+    const data = await res.json();
+    return (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+  }
+  async llm(opts) {
+    if (typeof window !== 'undefined' && window.claude && window.claude.complete) return await window.claude.complete(opts);
+    if (this.state.geminiKey) return await this.callGemini(this.state.geminiKey, opts);
+    if (this.state.anthKey) return await this.callAnthropic(this.state.anthKey, opts);
+    return null;
+  }
+  parseJSON(t) {
+    if (!t) return null;
+    let s = String(t).trim().replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();
+    const a = s.indexOf('{'), b = s.lastIndexOf('}');
+    if (a > 0 || b < s.length - 1) s = s.slice(a < 0 ? 0 : a, b < 0 ? s.length : b + 1);
+    try { return JSON.parse(s); } catch (e) { return null; }
+  }
+  briefText() {
+    const s = this.state;
+    return ['מה רוצים לבנות: ' + (s.f1 || '[לא נאמר]'),
+            'הבעיה: ' + (s.f2 || '[לא נאמר]'),
+            'מי חי עם זה: ' + (s.f3 || '[לא נאמר]')].join('\n');
+  }
+  priorText() {
+    const out = [];
+    this.D.stations.forEach((x, i) => {
+      if (i >= this.state.si || !this.state.approved[x.id]) return;
+      const f = this.state.files.find(y => y.name === (x.gate.creates || [])[0]);
+      if (f) out.push(f.body.slice(0, 1800));
+    });
+    return out.join('\n\n---\n\n') || '(עדיין אין תחנות מאושרות)';
+  }
+  isLight() { return (this.props.theme || this.state.theme) === 'light'; }
+
+  get theme() { return this.props.theme || this.state.theme; }
+  themeCSS() {
+    const dark = {bg:'#1b212b',panel:'#252d39',panel2:'#2e3743',raise:'#3a4451',bd:'#3f4956',bd2:'#505c6d',tx:'#f6f8fc',tx2:'#ccd4e1',tx3:'#a4afc0',review:'#eec38a',master:'#93e0b1',newc:'#95c8f0',accent:'#98b1ff',onaccent:'#141a24',onreview:'#20160a',onmaster:'#0d1a12'};
+    const light = {bg:'#eaecf1',panel:'#ffffff',panel2:'#f5f6f9',raise:'#e8ebf0',bd:'#e0e3ea',bd2:'#ced3dc',tx:'#141a24',tx2:'#525b6a',tx3:'#8791a1',review:'#a8721f',master:'#1f8f57',newc:'#2b6fc0',accent:'#4058cc',onaccent:'#ffffff',onreview:'#ffffff',onmaster:'#ffffff'};
+    const p = this.isLight() ? light : dark;
+    return Object.keys(p).map(k => '--' + k + ':' + p[k] + ';').join('');
+  }
+
+  evMeta(k) {
+    const m = {
+      verified: { label: 'מאומת', fg: '#93e0b1', bg: 'rgba(147,224,177,.13)', bd: 'rgba(147,224,177,.32)', ex: 'זה כתוב במפורש במקור שקראנו בפועל. מותר להחליט על סמך זה.' },
+      plausible: { label: 'מסתבר', fg: '#eec38a', bg: 'rgba(238,195,138,.13)', bd: 'rgba(238,195,138,.32)', ex: 'זו הערכה סבירה, אבל אף אחד עוד לא בדק אותה. אפשר לכוון לפיה בדיקה — לא להחליט לפיה.' },
+      unknown: { label: 'לא ידוע', fg: '#a4afc0', bg: 'rgba(164,175,192,.13)', bd: 'rgba(164,175,192,.30)', ex: 'אין לנו את זה. במקום להמציא, זה נשאר ריק ומקבל משימת בדיקה.' }
+    };
+    return m[k] || m.unknown;
+  }
+
+  itemStatus(id) { return (this.state.items[id] || {}).status || 'pending'; }
+  evOf(i) { const s = this.state.items[i.id] || {}; return s.ev || i.ev; }
+  itemText(id, fallback) { const s = this.state.items[id]; return (s && s.text != null) ? s.text : fallback; }
+  setItem(id, patch) {
+    this.setState(s => ({ items: Object.assign({}, s.items, { [id]: Object.assign({}, s.items[id], patch) }) }));
+  }
+
+  activeItems() {
+    const st = this.station;
+    return (st.items || []).filter(i => this.itemStatus(i.id) !== 'out');
+  }
+
+  buildFile(st0) {
+    const st = this.contentFor(st0);
+    const L = [];
+    L.push('# ' + (st.fileTitle || st.title));
+    L.push('');
+    if (this.state.isDemo) {
+      L.push('פרויקט: ' + this.D.project.name + ' · ' + this.D.project.oneLiner);
+    } else {
+      L.push('## מה שנאמר בהתחלה');
+      L.push('- מה בונים: ' + (this.state.f1 || '[טרם נקבע]'));
+      L.push('- הבעיה: ' + (this.state.f2 || '[טרם נקבע]'));
+      L.push('- מי חי עם זה: ' + (this.state.f3 || '[טרם נקבע]'));
+    }
+    L.push('');
+    if (st.head) { L.push('**הבעיה**: ' + st.head); L.push(''); }
+    (st.items || []).filter(i => this.itemStatus(i.id) !== 'out').forEach(i => {
+      L.push('## ' + i.title);
+      const t = this.itemText(i.id, i.text || i.finding || '');
+      if (t) L.push(t);
+      if (i.cause) L.push('- הסיבה: ' + i.cause);
+      if (i.link) L.push('- הקישור לפרויקט: ' + i.link);
+      const vs = (this.state.items[i.id] || {}).vsrc;
+      if (i.src || vs) L.push('- מקור: ' + (vs || i.src) + (i.url && !vs ? ' — ' + i.url : ''));
+      if (this.evOf(i)) L.push('- סיווג: ' + this.evMeta(this.evOf(i)).label);
+      if (i.pri) L.push('- תיעדוף: ' + i.pri + ' · משרת: ' + (i.serves || ''));
+      if (i.tagx) L.push('- סוג: ' + i.tagx);
+      (i.meta || []).forEach(m => L.push('- ' + m.label + ' ' + m.val));
+      L.push('');
+    });
+    if (st.vectors) st.vectors.forEach(v => {
+      L.push('## ' + v.title);
+      v.steps.forEach((s, n) => L.push((n + 1) + '. ' + s));
+      L.push('- השורש: ' + v.root);
+      L.push('- נקודת התערבות: ' + v.intervention);
+      L.push('');
+    });
+    if (st.meeting) { L.push('## נקודת המפגש'); L.push(st.meeting); L.push('- מקור: ' + (st.meetingSrc || '[טרם נקבע]')); L.push(''); }
+    if (st.root) { L.push('## שורש הבעיה'); L.push(st.root); L.push('- מקור: ' + (st.rootSrc || '[טרם נקבע]')); L.push(''); }
+    if (st.mlp) { L.push('## קו ה-MLP'); L.push(st.mlp); L.push('- מקור: ' + (st.mlpSrc || '[טרם נקבע]')); L.push(''); }
+    if (st.story) {
+      L.push('## ' + st.story.title);
+      L.push('- מקור: ' + (st.story.src || '[טרם נקבע]'));
+      st.story.parts.forEach(p => { L.push('### ' + p.k + ' — ' + p.he); L.push(p.t); L.push(''); });
+    }
+    const ans = st.ask ? this.state.answers[st.id] : null;
+    if (ans) { L.push('## הכרעת האדם'); L.push('- ' + st.ask.q); L.push('- ההכרעה: ' + ans); L.push(''); }
+    if (st.layout === 'prd') {
+      L.push('## סעיפי המסמך');
+      this.D.prdSections.forEach(s => {
+        const done = this.state.approved[(this.D.stations[s.st - 1] || {}).id];
+        L.push(s.n + '. ' + s.t + ' — ' + (done ? 'הוכרע' : '[טרם נקבע]'));
+      });
+    }
+    return L.join('\n');
+  }
+
+  buildFileFor(st) { return this.buildFile(st); }
+
+  /* One assembled PRD, in canonical section order — the file you hand to a build tool. */
+  buildPRD() {
+    const s = this.state, D = this.D;
+    const L = [];
+    const title = s.isDemo ? D.project.name : (s.f1 || 'הפרויקט שלי').slice(0, 70);
+    L.push('# PRD — ' + title);
+    L.push('');
+    L.push('> מסמך דרישות מוצר. נבנה בשלבים, כל סעיף אושר על ידי אדם.');
+    L.push('> כל טענה נושאת מקור. שדה ללא מקור מסומן [טרם נקבע] — ולא הומצא.');
+    L.push('');
+    L.push('## 0. הבריף המקורי');
+    L.push('- מה בונים: ' + (s.isDemo ? D.project.oneLiner : (s.f1 || '[טרם נקבע]')));
+    L.push('- הבעיה: ' + (s.isDemo ? 'מטופלים אינם מגיעים לתורים ואינם מבטלים מראש' : (s.f2 || '[טרם נקבע]')));
+    L.push('- מי חי עם זה: ' + (s.isDemo ? D.project.domain : (s.f3 || '[טרם נקבע]')));
+    L.push('');
+
+    const bySt = {};
+    D.prdSections.forEach(x => { (bySt[x.st] = bySt[x.st] || []).push(x); });
+
+    D.stations.forEach((st0, idx) => {
+      const secs = bySt[idx + 1];
+      if (!secs || !secs.length) return;
+      const st = this.contentFor(st0);
+      const done = !!s.approved[st0.id];
+      secs.forEach(sec => {
+        L.push('## ' + sec.n + '. ' + sec.t);
+        if (!done) { L.push('[טרם נקבע]'); L.push(''); return; }
+        const items = (st.items || []).filter(i => this.itemStatus(i.id) !== 'out');
+        if (sec.t === 'שורש הבעיה' && st.root) { L.push(st.root); L.push(''); L.push('_מקור: ' + (st.rootSrc || '[טרם נקבע]') + '_'); }
+        else if (sec.t === 'שאלת המחקר' && st.meeting) { L.push(st.meeting); L.push(''); L.push('_מקור: ' + (st.meetingSrc || '[טרם נקבע]') + '_'); }
+        else if (sec.t === 'נקודות ההתערבות' && st.vectors) { (st.vectors || []).forEach(v => L.push('- ' + v.intervention + ' _(' + v.title + ')_')); }
+        else if (sec.t === 'קו ה־MLP' && st.mlp) { L.push(st.mlp); L.push(''); L.push('_מקור: ' + (st.mlpSrc || '[טרם נקבע]') + '_'); }
+        else if (sec.t === 'סיפורי משתמש' && st.story) {
+          L.push('### ' + st.story.title);
+          (st.story.parts || []).forEach(p => { if (p.k !== 'AC') { L.push('**' + p.he + ' (' + p.k + ')**: ' + p.t); } });
+        }
+        else if (sec.t === 'קריטריוני קבלה' && st.story) {
+          const ac = (st.story.parts || []).find(p => p.k === 'AC');
+          L.push(ac ? ac.t : '[טרם נקבע]');
+        }
+        else if (sec.t === 'רשימת אימות פתוחה') {
+          const open = items.filter(i => i.ev && i.ev !== 'verified');
+          if (!open.length) L.push('אין פריטים פתוחים.');
+          open.forEach(i => L.push('- [ ] ' + i.title + ' — ' + (i.src || '[טרם נקבע]')));
+        }
+        else if (!items.length) L.push('[טרם נקבע]');
+        else items.forEach(i => {
+          const t = this.itemText(i.id, i.text || i.finding || '');
+          const tag = i.tagx || i.pri || i.cat || (i.side === 'need' ? 'צורך' : i.side === 'want' ? 'רצון' : '');
+          L.push('- **' + i.title + '**' + (tag ? ' _(' + tag + ')_' : '') + (t ? ' — ' + t : ''));
+          const meta = [];
+          if (i.serves) meta.push('משרת: ' + i.serves);
+          (i.meta || []).forEach(m => meta.push(m.label + ' ' + m.val));
+          if (i.src) meta.push('מקור: ' + i.src + (i.url ? ' (' + i.url + ')' : ''));
+          if (i.ev) meta.push('סיווג: ' + this.evMeta(i.ev).label);
+          meta.forEach(x => L.push('  - ' + x));
+        });
+        L.push('');
+      });
+      const ans = s.answers[st0.id];
+      if (done && ans && st.ask) { L.push('_הכרעת האדם: ' + st.ask.q + ' → ' + ans + '_'); L.push(''); }
+    });
+
+    const openQ = [];
+    D.stations.forEach(st0 => {
+      const st = this.contentFor(st0);
+      (st.items || []).forEach(i => { if (i.ev === 'unknown' && this.itemStatus(i.id) !== 'out') openQ.push(i.title + ' — ' + (i.src || '')); });
+    });
+    L.push('## שאלות פתוחות');
+    if (!openQ.length) L.push('אין.');
+    openQ.forEach(q => L.push('- [ ] ' + q));
+    L.push('');
+    L.push('## יומן החלטות');
+    D.stations.forEach(st0 => {
+      if (!s.approved[st0.id]) return;
+      const st = this.contentFor(st0);
+      L.push('- תחנה ' + st0.num + ' (' + st0.short + ') — אושרה' + (s.answers[st0.id] && st.ask ? ' · הכרעה: ' + s.answers[st0.id] : ''));
+    });
+    return L.join('\n');
+  }
+
+  downloadPRD = () => {
+    const b = new Blob([this.buildPRD()], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'PRD.md';
+    a.click();
+  };
+  copyPRD = () => {
+    if (navigator.clipboard) navigator.clipboard.writeText(this.buildPRD());
+    this.setState({ copied: true });
+    setTimeout(() => this.setState({ copied: false }), 1600);
+  };
+
+  /* start a station the moment you land on it — no "generate" step to press */
+  autoStart() {
+    const st = this.station;
+    if (!st || !st.id) return;
+    if (this.state.busy || this.state.generated[st.id] || this.state.phase !== 'run') return;
+    if (this.state.isDemo) return;
+    this.generate();
+  }
+
+  approve = () => {
+    const st = this.station;
+    const name = (st.gate.creates || [])[0] || (st.id + '.md');
+    const body = this.buildFile(st);
+    const last = this.state.si >= this.D.stations.length - 1;
+    const ins = (this.state.ai[st.id] || {}).insight || '';
+    const PHEND = { 4: 'להבין', 8: 'להחליט', 12: 'לבנות' };
+    this.setState(s => {
+      const files = s.files.slice();
+      const idx = files.findIndex(f => f.name === name);
+      const rec = { name, title: st.fileTitle || st.title, body };
+      if (idx >= 0) files[idx] = rec; else files.push(rec);
+      return {
+        files,
+        approved: Object.assign({}, s.approved, { [st.id]: true }),
+        unlocked: Math.max(s.unlocked, last ? s.unlocked : Math.min(s.si + 1, this.D.stations.length - 1)),
+        gateOpen: false,
+        doneCard: { num: st.num, short: st.short, insight: ins, prd: (st.gate.prd || []), phase: PHEND[st.num] || null, last }
+      };
+    });
+  };
+
+  nextStation = () => {
+    const s = this.state;
+    const next = Math.min(s.si + 1, this.D.stations.length - 1);
+    const last = s.si >= this.D.stations.length - 1;
+    this.setState({
+      doneCard: null,
+      unlocked: Math.max(s.unlocked, last ? s.unlocked : next),
+      si: last ? s.si : next, gapFix: null, ideaOpen: false,
+      whyOpen: false, phaseView: null,
+      introOpen: last ? false : (!s.noIntros && !s.introSeen[(this.D.stations[next] || {}).id])
+    }, () => { if (typeof window !== 'undefined') window.scrollTo(0, 0); this.autoStart(); });
+  };
+
+  begin = (demo) => {
+    const all = {}, seen = {};
+    if (demo) this.D.stations.forEach(x => { all[x.id] = true; seen[x.id] = true; });
+    const newId = this.state.projectId || ('p' + Date.now() + Math.random().toString(36).slice(2, 6));
+    this.setState(s => ({
+      phase: 'run', isDemo: !!demo,
+      projectId: demo ? null : newId,
+      introOpen: !demo,
+      generated: demo ? all : s.generated,
+      introSeen: demo ? seen : s.introSeen,
+      unlocked: demo ? this.D.stations.length - 1 : s.unlocked,
+      f1: demo ? this.D.project.oneLiner : s.f1
+    }), () => this.autoStart());
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  fillAll = () => {
+    const files = [];
+    const approved = {};
+    const items = Object.assign({}, this.state.items);
+    this.D.stations.forEach(x0 => { const x = this.contentFor(x0); (x.items || []).forEach(i => { if (!items[i.id]) items[i.id] = { status: 'ok' }; }); });
+    const answers = Object.assign({}, this.state.answers);
+    this.D.stations.forEach(x0 => { const x = this.contentFor(x0); if (x.ask && !answers[x0.id]) answers[x0.id] = x.ask.opts[0]; });
+    this.setState({ items, answers }, () => {
+      this.D.stations.forEach(x => {
+        approved[x.id] = true;
+        files.push({ name: (x.gate.creates || [])[0] || (x.id + '.md'), title: x.fileTitle || x.title, body: this.buildFileFor(x) });
+      });
+      this.setState({ approved, files });
+    });
+  };
+
+  goto = (i) => {
+    if (i > this.state.unlocked) return;
+    this.setState(s => ({ si: i, gateOpen: false, whyOpen: false, phaseView: null, introOpen: !s.noIntros && !s.introSeen[(this.D.stations[i] || {}).id] }), () => this.autoStart());
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  generate = async () => {
+    const st = this.station, id = st.id;
+    this.setState({ busy: true, genErr: '' });
+    if (this.state.isDemo || !this.hasLLM()) {
+      setTimeout(() => this.setState(s => ({ busy: false, generated: Object.assign({}, s.generated, { [id]: true }) })), 900);
+      return;
+    }
+    const P = window.BuilderPrompts;
+    const ansMap = this.state.gapAns[id] || {};
+    const answered = Object.keys(ansMap).filter(q => (ansMap[q] || '').trim() && ansMap[q] !== '__yes__');
+    const user = ['הפרויקט של המשתמש:', this.briefText(), '',
+      'מה כבר הוכרע בתחנות הקודמות:', this.priorText(), '',
+      P.pushback[this.state.push] || P.pushback.balanced, '',
+      this.state.ideas ? P.ideasOn : P.ideasOff, '',
+      answered.length ? 'תשובות שהמשתמש כבר נתן לשאלות שלך (השתמש בהן, ואל תשאל אותן שוב):\n' + answered.map(q => '- ' + q + ' → ' + ansMap[q]).join('\n') + '\n' : '',
+      'המשימה שלך עכשיו:', P.task[id] || ''].join('\n');
+    try {
+      const raw = await this.llm({ system: P.system, messages: [{ role: 'user', content: user }], max_tokens: 4000 });
+      const j = this.parseJSON(raw);
+      if (!j) throw new Error('לא הצלחתי לקרוא את התשובה של המודל. נסה שוב.');
+      this.setState(s => ({
+        busy: false,
+        ai: Object.assign({}, s.ai, { [id]: j }),
+        generated: Object.assign({}, s.generated, { [id]: true })
+      }));
+    } catch (e) {
+      this.setState({ busy: false, genErr: (e && e.message) || 'משהו השתבש' });
+    }
+  };
+
+  regenerate = () => {
+    const id = this.station.id;
+    this.setState(s => {
+      const ai = Object.assign({}, s.ai); delete ai[id];
+      const gen = Object.assign({}, s.generated); delete gen[id];
+      return { ai, generated: gen };
+    });
+  };
+
+  download = () => {
+    const txt = this.state.files.map(f => '=== ' + f.name + ' ===\n\n' + f.body).join('\n\n\n');
+    const b = new Blob([txt], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(b);
+    a.download = 'project-docs.md';
+    a.click();
+  };
+
+  copyAll = () => {
+    const txt = this.state.files.map(f => '=== ' + f.name + ' ===\n\n' + f.body).join('\n\n\n');
+    if (navigator.clipboard) navigator.clipboard.writeText(txt);
+    this.setState({ copied: true });
+    setTimeout(() => this.setState({ copied: false }), 1600);
+  };
+
+  mkItem(i, extraMoves, idx) {
+    const status = this.itemStatus(i.id);
+    const evK = this.evOf(i);
+    const ev = evK ? this.evMeta(evK) : null;
+    const vsrc = (this.state.items[i.id] || {}).vsrc;
+    const editing = this.state.editing === i.id;
+    const lines = [];
+    if (i.cause) lines.push({ label: 'הסיבה:', val: i.cause });
+    if (i.link) lines.push({ label: 'אצלנו:', val: i.link });
+    if (i.src) lines.push({ label: 'מקור:', val: vsrc || i.src, isLink: !!i.url && !vsrc, url: i.url || '#', urlLabel: i.urlLabel || i.url });
+    if (i.serves) lines.push({ label: 'משרת:', val: i.serves });
+    (i.meta || []).forEach(m => lines.push({ label: m.label, val: m.val }));
+    return {
+      id: i.id, title: i.title,
+      anim: status === 'ok' ? 'itemOk .34s ease' : (status === 'out' ? 'itemOut .32s ease' : ('pbup .4s ease both ' + (Math.min(idx || 0, 8) * 55) + 'ms')),
+      tickAnim: status === 'ok' ? 'tickPop .3s ease' : 'none',
+      text: this.itemText(i.id, i.text || i.finding || ''),
+      lines,
+      hasEv: !!ev, evLabel: ev ? ev.label : '', evFg: ev ? ev.fg : '', evBg: ev ? ev.bg : '', evBd: ev ? ev.bd : '',
+      hasTag: !!(i.cat || i.pri || i.tagx), tag: i.cat || i.pri || i.tagx || '',
+      editing, showBody: !editing, editText: this.state.editText,
+      op: status === 'out' ? .45 : 1,
+      bd: status === 'ok' ? 'rgba(147,224,177,.4)' : 'var(--bd)',
+      okBg: status === 'ok' ? 'var(--master)' : 'var(--panel2)',
+      okFg: status === 'ok' ? 'var(--onmaster)' : 'var(--tx3)',
+      okBd: status === 'ok' ? 'var(--master)' : 'var(--bd2)',
+      outBg: status === 'out' ? '#e6928f' : 'var(--panel2)',
+      outFg: status === 'out' ? '#20160a' : 'var(--tx3)',
+      outBd: status === 'out' ? '#e6928f' : 'var(--bd2)',
+      showMove: !!(extraMoves && extraMoves.length), moves: extraMoves || [],
+      onEv: () => this.setState({ ev: { k: this.evOf(i), src: (this.state.items[i.id] || {}).vsrc || i.src || 'לא צוין מקור', id: i.id }, evInput: '' }),
+      onOk: () => this.setItem(i.id, { status: status === 'ok' ? 'pending' : 'ok' }),
+      onOut: () => this.setItem(i.id, { status: status === 'out' ? 'pending' : 'out' }),
+      onEdit: () => this.setState({ editing: i.id, editText: this.itemText(i.id, i.text || i.finding || '') }),
+      onEditInput: (e) => this.setState({ editText: e.target.value }),
+      onSave: () => { this.setItem(i.id, { text: this.state.editText, status: 'ok' }); this.setState({ editing: null }); },
+      onCancel: () => this.setState({ editing: null })
+    };
+  }
+
+  renderVals() {
+    const s = this.state, D = this.D, st = this.content;
+    const narrow = s.w < 1080;
+    const gen = !!s.generated[st.id];
+    const sideMove = (i, side) => this.setState(x => ({ items: Object.assign({}, x.items, { [i.id]: Object.assign({}, x.items[i.id], { side }) }) }));
+    const sideOf = (i) => (s.items[i.id] && s.items[i.id].side) || i.side;
+
+    // phases
+    const PH = [
+      { name: 'להבין', sub: 'מה באמת קורה כאן', from: 1, to: 4 },
+      { name: 'להחליט', sub: 'מה בונים ולמי', from: 5, to: 8 },
+      { name: 'לבנות', sub: 'איך זה נראה בפועל', from: 9, to: 12 }
+    ];
+    const curNum = (D.stations[s.si] || {}).num || 1;
+    const phIdx = s.phaseView != null ? s.phaseView : Math.max(0, PH.findIndex(p => curNum >= p.from && curNum <= p.to));
+    const phases = PH.map((p, i) => {
+      const mine = D.stations.filter(x => x.num >= p.from && x.num <= p.to);
+      const done = mine.filter(x => s.approved[x.id]).length;
+      const isCur = i === phIdx;
+      const allDone = done === mine.length && mine.length > 0;
+      return {
+        name: p.name, sub: p.sub, count: done + '/' + mine.length,
+        onClick: () => this.setState({ phaseView: i }),
+        bg: isCur ? 'var(--panel2)' : 'transparent',
+        bd: isCur ? 'var(--accent)' : 'var(--bd)',
+        fg: isCur ? 'var(--tx)' : 'var(--tx3)',
+        dotBg: allDone ? 'var(--master)' : (isCur ? 'var(--accent)' : 'var(--bd2)')
+      };
+    });
+    const visible = D.stations.filter(x => x.num >= PH[phIdx].from && x.num <= PH[phIdx].to);
+
+    // rail
+    const rail = visible.map((x) => {
+      const i = D.stations.indexOf(x);
+      const done = !!s.approved[x.id], cur = i === s.si, lock = i > s.unlocked;
+      return {
+        short: x.short, mark: done ? '✓' : String(x.num),
+        onClick: () => this.goto(i),
+        cursor: lock ? 'default' : 'pointer', op: lock ? .4 : 1,
+        dotBg: done ? 'var(--master)' : (cur ? 'var(--accent)' : 'var(--panel2)'),
+        dotFg: done ? 'var(--onmaster)' : (cur ? 'var(--onaccent)' : 'var(--tx3)'),
+        dotBd: done ? 'var(--master)' : (cur ? 'var(--accent)' : 'var(--bd2)'),
+        fg: cur ? 'var(--tx)' : 'var(--tx3)', fw: cur ? '800' : '600',
+        lineBg: done ? 'var(--master)' : 'var(--bd)',
+        lineDisp: x === visible[visible.length - 1] ? 'none' : 'block'
+      };
+    });
+
+    // groups
+    let groups = [];
+    if (gen) {
+      if (st.layout === 'list' || st.layout === 'cases' || st.layout === 'reqs') {
+        groups = [{ hasTitle: false, items: (st.items || []).map((i, n) => this.mkItem(i, null, n)) }];
+      } else if (st.layout === 'fishbone') {
+        const mk = (k) => (st.items || []).filter(i => (k === 'v' ? i.ev === 'verified' : i.ev !== 'verified')).map((i, n) => this.mkItem(i, null, n));
+        groups = [
+          { hasTitle: true, title: 'מה שראינו במקור', sub: 'מותר להחליט על סמך זה', color: 'var(--master)', items: mk('v') },
+          { hasTitle: true, title: 'מה שניחשנו', sub: 'הולך לרשימת הבדיקה, לא להחלטה', color: 'var(--review)', items: mk('x') }
+        ];
+      } else if (st.layout === 'twocol') {
+        const defs = [
+          { key: 'need', title: 'משתמשי צורך', sub: 'בלי זה משהו נשבר אצלם', color: 'var(--master)' },
+          { key: 'want', title: 'משתמשי רצון', sub: 'בלי זה פשוט פחות נעים', color: 'var(--newc)' },
+          { key: 'stake', title: 'בעלי עניין שאינם משתמשים', sub: 'לא נוגעים במערכת, אכפת להם מהתוצאה', color: 'var(--review)' }
+        ];
+        groups = defs.map(d => ({
+          hasTitle: true, title: d.title, sub: d.sub, color: d.color,
+          items: (st.items || []).filter(i => sideOf(i) === d.key).map((i, n) => this.mkItem(i,
+            defs.filter(o => o.key !== d.key).map(o => ({ label: 'העבר ל' + o.title, onClick: () => sideMove(i, o.key) })), n
+          ))
+        }));
+      }
+    }
+
+    // vectors
+    const vectors = (gen && st.vectors ? st.vectors : []).map(v => ({
+      title: v.title, color: 'var(--' + v.color + ')', root: v.root, intervention: v.intervention,
+      steps: v.steps.map((t, n) => ({
+        n: n + 1, text: t, lineH: n === v.steps.length - 1 ? '0px' : '10px',
+        status: n === 0 ? 'נקודת פתיחה מאומתת' : 'השערה — צריך לבדוק מול אנשים',
+        dotBg: n === 0 ? 'var(--master)' : 'var(--panel2)',
+        dotFg: n === 0 ? 'var(--onmaster)' : 'var(--tx3)',
+        dotBd: n === 0 ? 'var(--master)' : 'var(--bd2)'
+      }))
+    }));
+
+    // prd
+    const prdRows = D.prdSections.map(x => {
+      const done = !!s.approved[(D.stations[x.st - 1] || {}).id];
+      return {
+        n: x.n, t: x.t, label: done ? 'הוכרע' : 'טרם נקבע',
+        bg: done ? 'rgba(147,224,177,.13)' : 'var(--panel2)',
+        fg: done ? '#93e0b1' : 'var(--tx3)',
+        bd: done ? 'rgba(147,224,177,.32)' : 'var(--bd)'
+      };
+    });
+    const prdDone = prdRows.filter(r => r.label === 'הוכרע').length;
+
+    // gate
+    const openChecks = (st.items || []).filter(i => this.itemStatus(i.id) !== 'out' && this.evOf(i) && this.evOf(i) !== 'verified').length;
+    const totalDecidable = (st.items || []).length + (gen && st.ask ? 1 : 0);
+    const decided = (st.items || []).filter(i => this.itemStatus(i.id) !== 'pending').length + ((gen && st.ask && s.answers[st.id]) ? 1 : 0);
+    const okCount = (st.items || []).filter(i => this.itemStatus(i.id) === 'ok').length;
+    const outCount = (st.items || []).filter(i => this.itemStatus(i.id) === 'out').length;
+    const gateEffects = []
+      .concat((st.gate && st.gate.creates ? st.gate.creates : []).map(f => ({ icon: '+', text: 'נוצר הקובץ ' + f + ' — תוכל לערוך אותו בכל רגע', bg: 'rgba(152,177,255,.15)', fg: 'var(--accent)' })))
+      .concat((st.gate && st.gate.prd ? st.gate.prd : []).map(p => ({ icon: '✓', text: 'סעיף ״' + p + '״ ב־PRD מתמלא', bg: 'rgba(147,224,177,.15)', fg: '#93e0b1' })))
+      .concat(s.si < D.stations.length - 1 ? [{ icon: '→', text: 'נפתחת תחנה ' + (st.num + 1) + ': ' + (D.stations[s.si + 1] || {}).short, bg: 'var(--raise)', fg: 'var(--tx2)' }] : []);
+
+    const aiOut = s.ai[st.id] || {};
+    const outIdeas = s.ideaOut[st.id] || {};
+    const addedT = (s.added[st.id] || []).map(x => x.title);
+    const ideaList = (gen && Array.isArray(aiOut.ideas)) ? aiOut.ideas.filter(x => x && x.title && !outIdeas[x.title] && addedT.indexOf(x.title) < 0) : [];
+    // a question with no ready assumption can't be a one-tap confirm — show it as an open field
+    const gaps = (gen && Array.isArray(aiOut.gaps)) ? aiOut.gaps.filter(g => g && g.q).slice(0, 1) : [];
+    const gapMap = s.gapAns[st.id] || {};
+    const gapsAnswered = gaps.filter(g => (gapMap[g.q] || '').trim()).length + ' מתוך ' + gaps.length;
+
+    const term = s.term ? (D.glossary[s.term] || {}) : {};
+    const evp = s.ev ? this.evMeta(s.ev.k) : {};
+
+    return {
+      themeVars: this.themeCSS(),
+      embedded: !!this.props.embedded,
+      showHeader: !this.props.embedded,
+      rootStyle: this.themeCSS() + (this.props.embedded
+        ? 'background:transparent;color:var(--tx);display:flex;flex-direction:column'
+        : 'min-height:100vh;background:var(--bg);color:var(--tx);display:flex;flex-direction:column'),
+      headStyle: 'display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;max-width:1080px;width:100%;margin:0 auto;padding:30px 26px 18px',
+      railStyle: this.props.embedded
+        ? 'max-width:1080px;width:100%;margin:0 auto;padding:0 26px 18px;overflow-x:auto'
+        : 'background:var(--panel);border-bottom:1px solid var(--bd);padding:14px 20px 16px;overflow-x:auto',
+      pageStyle: this.props.embedded
+        ? 'flex:1;display:flex;gap:22px;align-items:flex-start;max-width:1080px;width:100%;margin:0 auto;padding:4px 26px 48px'
+        : 'flex:1;display:flex;gap:22px;align-items:flex-start;max-width:1240px;width:100%;margin:0 auto;padding:24px 20px 60px',
+      themeIcon: this.isLight() ? '☾' : '☀',
+      onToggleTheme: () => this.setState(x => ({ theme: x.theme === 'light' ? 'dark' : 'light' })),
+      projectName: s.phase === 'start' ? 'פרויקט חדש' : (s.isDemo ? (D.project.name + ' · ' + D.project.domain) : (s.f1 || 'הפרויקט שלי').slice(0, 60)),
+      showStart: s.phase === 'start',
+      showRun: s.phase === 'run',
+      f1: s.f1, f2: s.f2, f3: s.f3,
+      onF1: (e) => this.setState({ f1: e.target.value }),
+      onF2: (e) => this.setState({ f2: e.target.value }),
+      onF3: (e) => this.setState({ f3: e.target.value }),
+      hasTerms: (st.terms || []).length > 0,
+      hasMethod: !!st.method,
+      methodName: (st.method || {}).name,
+      methodNote: (st.method || {}).note,
+      isDemo: s.isDemo,
+      onFillAll: this.fillAll,
+      fillLabel: prdDone === prdRows.length && prdRows.length ? 'הכול מאושר ✓' : 'אשר את כל התחנות ומלא את ה־PRD',
+      onReset: () => {
+        try { localStorage.removeItem(this.SAVE_KEY); } catch (e) {}
+        this.setState({ phase: 'start', si: 0, unlocked: 0, generated: {}, approved: {}, items: {}, answers: {},
+          ai: {}, files: [], introSeen: {}, isDemo: false, f1: '', f2: '', f3: '', genErr: '', filesOpen: false, prdOpen: false });
+      },
+      onStart: () => this.begin(false),
+      onDemo: () => this.begin(true),
+      startHint: (s.f1.trim() || s.f2.trim()) ? 'אפשר להשלים פרטים בהמשך' : 'אפשר גם להתחיל ריק ולמלא תוך כדי',
+      phases,
+      journeyPct: Math.round(((Object.keys(s.approved).length) / D.stations.length) * 100 + (gen ? ((decided / Math.max(1, totalDecidable)) * (100 / D.stations.length)) : 0)),
+      journeyLabel: Object.keys(s.approved).length + '/' + D.stations.length + ' תחנות',
+      stationBarPct: totalDecidable ? Math.round(decided / totalDecidable * 100) : 0,
+      stationBarLabel: decided + ' מתוך ' + totalDecidable + ' טופלו',
+      stationAllDone: totalDecidable > 0 && decided >= totalDecidable,
+      stationBarBg: (totalDecidable > 0 && decided >= totalDecidable) ? 'var(--master)' : 'var(--accent)',
+      stationBarFg: (totalDecidable > 0 && decided >= totalDecidable) ? 'var(--master)' : 'var(--tx2)',
+      stationBarPulse: (totalDecidable > 0 && decided >= totalDecidable) ? 'barPulse .7s ease 2' : 'none',
+      isNarrow: narrow,
+      showChrome: s.w >= 620,
+      compact: s.w < 620,
+      rail,
+
+      st: {
+        kicker: st.kicker, title: st.title,
+        introWhat: (st.intro || {}).what, introWhy: (st.intro || {}).why, introGet: (st.intro || {}).get,
+        why: st.why || [], genLabel: st.genLabel,
+        head: st.head, root: st.root, mlp: st.mlp, meeting: st.meeting,
+        rootSrc: st.rootSrc, mlpSrc: st.mlpSrc, meetingSrc: st.meetingSrc,
+        isFishbone: gen && st.layout === 'fishbone',
+        isVectors: gen && st.layout === 'vectors',
+        isTwocol: gen && st.layout === 'twocol',
+        isStory: gen && st.layout === 'story',
+        isPrd: gen && st.layout === 'prd',
+        termChips: (st.terms || []).map(t => ({ name: t, onClick: () => this.setState({ term: t }) })),
+        gateTitle: (st.gate || {}).title, gateNote: (st.gate || {}).note
+      },
+
+      showGenerate: !gen && !s.busy,
+      busyLine: 'עובד על ' + (st.title || '') + '…',
+      busySub: s.si === 0 ? 'קורא את מה שסיפרת לי' : 'קורא את מה שכבר החלטנו יחד',
+      busy: s.busy,
+      hasContent: gen && !s.busy,
+      onGenerate: this.generate,
+      groups, vectors,
+      vecCols: narrow ? '1fr' : '1fr 1fr',
+      storyTitle: (st.story || {}).title,
+      storySrc: (st.story || {}).src,
+      storyParts: (st.story || {}).parts || [],
+      prdRows, prdDone, prdTotal: prdRows.length,
+      prdPct: prdRows.length ? Math.round(prdDone / prdRows.length * 100) : 0,
+
+      hasAsk: gen && !!st.ask,
+      askQ: (st.ask || {}).q,
+      askOpts: ((st.ask || {}).opts || []).map(o => {
+        const on = s.answers[st.id] === o;
+        return {
+          label: o, onClick: () => this.setState(x => ({ answers: Object.assign({}, x.answers, { [st.id]: o }) })),
+          bg: on ? 'rgba(152,177,255,.14)' : 'var(--panel)',
+          bd: on ? 'var(--accent)' : 'var(--bd)',
+          fg: on ? 'var(--accent)' : 'var(--tx2)'
+        };
+      }),
+
+      gateBtnLabel: s.si === D.stations.length - 1 ? 'סגור גרסה של המסמך' : 'נראה טוב, ממשיכים',
+      decisionSummary: okCount + ' אושרו · ' + outCount + ' הוצאו' + (s.answers[st.id] ? ' · ההכרעה שלך נרשמה' : ''),
+      onOpenGate: () => this.setState({ gateOpen: true }),
+      onCloseGate: () => this.setState({ gateOpen: false }),
+      gateOpen: s.gateOpen, gateEffects,
+      hasOpenChecks: openChecks > 0,
+      openChecksLabel: openChecks + ' פריטים עדיין לא מאומתים — הם ייצאו איתך כרשימת בדיקה, ולא ישמשו בסיס להחלטה',
+      approveLabel: s.si === D.stations.length - 1 ? 'אשר וסגור גרסה' : 'אשר והמשך לתחנה הבאה',
+      onApprove: this.approve,
+
+      introOpen: s.introOpen,
+      onShowIntro: () => this.setState({ introOpen: true }),
+      onSkipIntro: () => this.setState(x => ({ introOpen: false, introSeen: Object.assign({}, x.introSeen, { [st.id]: true }) })),
+      onSkipAllIntros: () => this.setState({ introOpen: false, noIntros: true }),
+
+      showWhyPanel: !narrow || s.whyOpen,
+      whyStyle: narrow
+        ? 'position:fixed;inset-inline:16px;bottom:16px;z-index:60;max-height:60vh;overflow-y:auto'
+        : 'width:308px;flex:none;position:sticky;top:96px',
+      onToggleWhy: () => this.setState(x => ({ whyOpen: !x.whyOpen })),
+
+      termOpen: !!s.term, termName: s.term, termEn: term.en, termEli5: term.eli5,
+      onCloseTerm: () => this.setState({ term: null }),
+
+      evOpen: !!s.ev, evPopLabel: evp.label, evPopFg: evp.fg, evPopBg: evp.bg, evPopBd: evp.bd,
+      evPopExplain: evp.ex, evPopSrc: s.ev ? s.ev.src : '',
+      evCanVerify: !!(s.ev && s.ev.k !== 'verified'),
+      evVerifyVal: s.evInput || '',
+      onEvVerifyInput: (e) => this.setState({ evInput: e.target.value }),
+      onEvVerify: () => {
+        const t = (s.evInput || '').trim();
+        if (!t || !s.ev) return;
+        const id = s.ev.id;
+        this.setState(v => ({
+          items: Object.assign({}, v.items, { [id]: Object.assign({}, v.items[id], { ev: 'verified', vsrc: 'אימות שלך: ' + t, status: 'ok' }) }),
+          ev: null, evInput: ''
+        }));
+      },
+      onCloseEv: () => this.setState({ ev: null, evInput: '' }),
+
+      filesOpen: s.filesOpen, noFiles: s.files.length === 0, filesCount: s.files.length,
+      onOpenFiles: () => this.setState({ filesOpen: true }),
+      onCloseFiles: () => this.setState({ filesOpen: false }),
+      files: s.files.map((f, i) => ({
+        name: f.name, title: f.title, body: f.body,
+        open: s.openFile === i, btn: s.openFile === i ? 'סגור' : 'ערוך',
+        onToggle: () => this.setState(x => ({ openFile: x.openFile === i ? null : i })),
+        onInput: (e) => { const v = e.target.value; this.setState(x => { const fs = x.files.slice(); fs[i] = Object.assign({}, fs[i], { body: v }); return { files: fs }; }); }
+      })),
+      onDownloadAll: this.download, onCopyAll: this.copyAll,
+      onDownloadPrd: this.downloadPRD, onCopyPrd: this.copyPRD,
+      needKey: !this.hasLLM(),
+      keyInput: s.keyInput, keyErr: s.keyErr, hasKeyErr: !!s.keyErr,
+      onKeyInput: (e) => this.setState({ keyInput: e.target.value, keyErr: '' }),
+      onSaveKey: () => this.saveKey(),
+      hasGenErr: !!s.genErr, genErr: s.genErr,
+
+      pushOpts: [
+        { k: 'soft', label: 'רך', sub: 'כמעט לא שואל, זורם איתי' },
+        { k: 'balanced', label: 'מאוזן', sub: 'שואל כשבאמת חסר' },
+        { k: 'strict', label: 'קפדני', sub: 'לא מוותר, דורש מספרים ודוגמאות' }
+      ].map(o => ({
+        label: o.label, sub: o.sub,
+        onClick: () => this.setState({ push: o.k }),
+        bg: s.push === o.k ? 'rgba(152,177,255,.14)' : 'var(--panel)',
+        bd: s.push === o.k ? 'var(--accent)' : 'var(--bd2)',
+        fg: s.push === o.k ? 'var(--accent)' : 'var(--tx2)'
+      })),
+      doneOpen: !!s.doneCard,
+      doneTitle: s.doneCard ? (s.doneCard.last ? 'המסמך שלך מוכן' : (s.doneCard.phase ? 'סיימת את שלב ״' + s.doneCard.phase + '״' : 'תחנה ' + s.doneCard.num + ' סגורה')) : '',
+      doneSub: s.doneCard ? (s.doneCard.last ? 'אפשר לייצא אותו ולהתחיל לבנות' : (s.doneCard.prd.length ? 'נוספו למסמך: ' + s.doneCard.prd.join(' · ') : 'ממשיכים הלאה')) : '',
+      doneHasInsight: !!(s.doneCard && s.doneCard.insight),
+      doneInsight: s.doneCard ? s.doneCard.insight : '',
+      doneBtn: s.doneCard ? (s.doneCard.last ? 'קחו אותי למסמך' : 'לתחנה הבאה: ' + ((D.stations[s.si + 1] || {}).short || '')) : '',
+      doneRingBg: s.doneCard && s.doneCard.phase ? 'var(--accent)' : 'rgba(147,224,177,.16)',
+      doneRingFg: s.doneCard && s.doneCard.phase ? 'var(--onaccent)' : 'var(--master)',
+      onNextStation: () => { if (s.doneCard && s.doneCard.last) { this.setState({ doneCard: null, filesOpen: true }); } else this.nextStation(); },
+      projectsOpen: s.projectsOpen,
+      settingsOpen: s.settingsOpen,
+      onOpenProjects: () => this.setState({ projectsOpen: true }),
+      onCloseProjects: () => this.setState({ projectsOpen: false }),
+      onOpenSettings: () => this.setState({ settingsOpen: true }),
+      onCloseSettings: () => this.setState({ settingsOpen: false }),
+      onNewProject: this.newProject,
+      projectsCount: s.projects.length,
+      noProjects: s.projects.length === 0,
+      activeName: s.isDemo ? 'דוגמה' : ((s.f1 || 'הפרויקט שלי').slice(0, 40)),
+      projects: s.projects.map(p => ({
+        name: p.name || 'ללא שם',
+        sub: p.done + ' מתוך ' + D.stations.length + ' תחנות אושרו',
+        bg: p.id === s.projectId ? 'rgba(152,177,255,.12)' : 'var(--panel2)',
+        bd: p.id === s.projectId ? 'var(--accent)' : 'var(--bd)',
+        onOpen: () => this.switchTo(p.id),
+        onDelete: () => this.deleteProject(p.id)
+      })),
+      themeLabel: this.isLight() ? 'עבור למצב כהה' : 'עבור למצב בהיר',
+      keyStatus: this.hasLLM() ? 'מפתח פעיל' : 'אין מפתח — התוכן יהיה לדוגמה בלבד',
+      whyBotherOpen: s.whyBother,
+      whyBotherIcon: s.whyBother ? '▲' : '▼',
+      onToggleWhyBother: () => this.setState(x => ({ whyBother: !x.whyBother })),
+      pushLabel: s.push === 'soft' ? 'רך' : (s.push === 'strict' ? 'קפדני' : 'מאוזן'),
+
+      hasAsks: (ideaList.length + gaps.length + (gen && st.ask ? 1 : 0)) > 0,
+      asksSummary: [gaps.length ? gaps.length + ' שאלות' : '', ideaList.length ? ideaList.length + ' רעיונות' : '', (gen && st.ask) ? 'הכרעה אחת' : ''].filter(Boolean).join(' · '),
+      hasIdeas: ideaList.length > 0,
+      ideaListOpen: !!s.ideaOpen,
+      ideaHeadline: ideaList.length + ' רעיונות שעלו לי תוך כדי',
+      ideaToggle: s.ideaOpen ? 'סגור' : 'הצג',
+      onToggleIdeaList: () => this.setState(v => ({ ideaOpen: !v.ideaOpen })),
+      ideaList: ideaList.map(x => ({
+        title: x.title, text: x.text || '', why: x.why || '',
+        onAdd: () => this.setState(v => ({
+          added: Object.assign({}, v.added, { [st.id]: (v.added[st.id] || []).concat([{
+            id: st.id + '_add_' + (v.added[st.id] || []).length,
+            title: x.title, text: x.text || '', ev: 'plausible', tagx: 'רעיון',
+            src: 'הצעה של ה־AI שאישרת — טרם אומתה מול משתמשים'
+          }]) })
+        })),
+        onSkip: () => this.setState(v => ({ ideaOut: Object.assign({}, v.ideaOut, { [st.id]: Object.assign({}, v.ideaOut[st.id], { [x.title]: true }) }) }))
+      })),
+      ideasOn: s.ideas,
+      onToggleIdeas: () => this.setState(v => ({ ideas: !v.ideas })),
+      ideasLabel: s.ideas ? 'פעיל' : 'כבוי',
+      ideasBtn: s.ideas ? 'כבה רעיונות' : 'הפעל רעיונות',
+
+      hasGaps: gaps.length > 0,
+      gaps: gaps.map(g => {
+        const ans = (s.gapAns[st.id] || {})[g.q] || '';
+        const confirmed = ans === '__yes__';
+        const tappable = !!(g.assumption && String(g.assumption).trim());
+        return {
+          q: tappable ? g.q : ('אני צריך את זה ממך: ' + g.q), why: g.why || '',
+          tappable, openOnly: !tappable,
+          val: confirmed ? '' : ans,
+          fixing: tappable ? (s.gapFix === g.q) : true,
+          yesLabel: confirmed ? 'אושר ✓' : 'כן, נכון',
+          yesBg: confirmed ? 'var(--master)' : 'var(--accent)',
+          yesFg: confirmed ? 'var(--onmaster)' : 'var(--onaccent)',
+          yesBd: confirmed ? 'var(--master)' : 'var(--accent)',
+          onYes: () => this.setState(x => ({
+            gapFix: null,
+            gapAns: Object.assign({}, x.gapAns, { [st.id]: Object.assign({}, x.gapAns[st.id], { [g.q]: '__yes__' }) }),
+            added: Object.assign({}, x.added, { [st.id]: (x.added[st.id] || []).concat([{
+              id: st.id + '_asm_' + (x.added[st.id] || []).length,
+              title: 'הנחה שאישרת', text: g.assumption || g.q,
+              ev: 'plausible', tagx: 'הנחה',
+              src: 'אישור של בעל הפרויקט — טרם אומת מול משתמשים'
+            }]) })
+          })),
+          onFix: () => this.setState(x => ({ gapFix: x.gapFix === g.q ? null : g.q })),
+          onInput: (e) => { const v = e.target.value; this.setState(x => ({ gapAns: Object.assign({}, x.gapAns, { [st.id]: Object.assign({}, x.gapAns[st.id], { [g.q]: v }) }) })); }
+        };
+      }),
+      gapsAnswered: gapsAnswered,
+      onApplyGaps: () => { this.regenerate(); setTimeout(() => this.generate(), 60); },
+      draftBadge: (s.isDemo || !s.ai[st.id]) ? 'טיוטה לדוגמה' : 'טיוטה של ה־AI',
+      canRegen: !s.isDemo && !!s.ai[st.id],
+      onRegen: this.regenerate,
+      copyLabel: s.copied ? 'הועתק ✓' : 'העתק',
+
+      prdOpen: s.prdOpen,
+      onOpenPrd: () => this.setState({ prdOpen: true }),
+      onClosePrd: () => this.setState({ prdOpen: false }),
+
+      stopEvt: (e) => e.stopPropagation()
+    };
+  }
+}
+
+</script>
+</body>
+</html>
