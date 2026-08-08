@@ -325,7 +325,12 @@
             </sc-if>
             <div style="display:flex;flex-direction:column;gap:10px">
               <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
-                <div style="background:var(--panel);border:1px solid {{ it.bd }};border-radius:15px;padding:14px 16px;opacity:{{ it.op }};animation:{{ it.anim }};transition:border-color .3s ease,opacity .3s ease">
+                <div style="position:relative;border-radius:15px;overflow:hidden">
+                <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:{{ it.hintBg }};border-radius:15px">
+                  <span style="font-size:26px;font-weight:800;color:#e6928f;opacity:{{ it.hintOutOp }}">✕</span>
+                  <span style="font-size:26px;font-weight:800;color:var(--master);opacity:{{ it.hintOkOp }}">✓</span>
+                </div>
+                <div onTouchStart="{{ it.onTouchStart }}" onTouchMove="{{ it.onTouchMove }}" onTouchEnd="{{ it.onTouchEnd }}" style="position:relative;background:var(--panel);border:1px solid {{ it.bd }};border-radius:15px;padding:14px 16px;opacity:{{ it.op }};animation:{{ it.anim }};transform:{{ it.swipeX }};transition:{{ it.swipeTrans }};touch-action:pan-y">
                   <div style="display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap">
                     <div style="flex:1;min-width:180px">
                       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px">
@@ -361,11 +366,16 @@
                         </div>
                       </sc-if>
                     </div>
+                    <sc-if value="{{ showButtons }}" hint-placeholder-val="{{ true }}">
                     <div style="display:flex;gap:6px;flex:none">
                       <button onClick="{{ it.onOk }}" title="אשר" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid {{ it.okBd }};background:{{ it.okBg }};color:{{ it.okFg }};display:flex;align-items:center;justify-content:center;transition:background .25s ease,border-color .25s ease"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" width="15" height="15" style="animation:{{ it.tickAnim }}"><path d="M20 6 9 17l-5-5"></path></svg></button>
                       <button onClick="{{ it.onEdit }}" title="ערוך" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid var(--bd2);background:var(--panel2);color:var(--tx2);display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button>
                       <button onClick="{{ it.onOut }}" title="הוצא" style="cursor:pointer;width:32px;height:32px;border-radius:9px;border:1px solid {{ it.outBd }};background:{{ it.outBg }};color:{{ it.outFg }};display:flex;align-items:center;justify-content:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button>
                     </div>
+                    </sc-if>
+                    <sc-if value="{{ it.showBadge }}" hint-placeholder-val="{{ false }}">
+                      <div style="flex:none;width:32px;height:32px;border-radius:9px;background:{{ it.badgeBg }};color:{{ it.badgeFg }};display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;animation:tickPop .3s ease">{{ it.badgeIcon }}</div>
+                    </sc-if>
                   </div>
                   <sc-if value="{{ it.showMove }}" hint-placeholder-val="{{ false }}">
                     <div style="display:flex;gap:7px;margin-top:10px;flex-wrap:wrap">
@@ -374,6 +384,12 @@
                       </sc-for>
                     </div>
                   </sc-if>
+                  <sc-if value="{{ swipeMode }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:10px;font-size:11.5px;color:var(--tx3);display:flex;gap:10px;align-items:center">
+                      <span>← החלק שמאלה להסרה</span><span style="opacity:.5">·</span><span>לאישור החלק ימינה →</span>
+                    </div>
+                  </sc-if>
+                </div>
                 </div>
               </sc-for>
             </div>
@@ -1433,6 +1449,28 @@ class Component extends DCLogic {
     (i.meta || []).forEach(m => lines.push({ label: m.label, val: m.val }));
     return {
       id: i.id, title: i.title,
+      swipeX: (this.state.swipeId === i.id && this.state.swipeDx) ? ('translateX(' + this.state.swipeDx + 'px)') : 'none',
+      swipeTrans: this.state.swipeId === i.id ? 'border-color .3s ease,opacity .3s ease' : 'transform .25s ease,border-color .3s ease,opacity .3s ease',
+      hintBg: (this.state.swipeId === i.id && this.state.swipeDx > 0) ? 'rgba(147,224,177,.12)' : ((this.state.swipeId === i.id && this.state.swipeDx < 0) ? 'rgba(230,146,143,.12)' : 'transparent'),
+      hintOkOp: (this.state.swipeId === i.id && this.state.swipeDx > 20) ? Math.min(1, this.state.swipeDx / 70) : 0,
+      hintOutOp: (this.state.swipeId === i.id && this.state.swipeDx < -20) ? Math.min(1, -this.state.swipeDx / 70) : 0,
+      onTouchStart: (e) => { if (!this._touch) this._touch = {}; this._touch.x = e.touches[0].clientX; this._touch.id = i.id; this.setState({ swipeId: i.id, swipeDx: 0 }); },
+      onTouchMove: (e) => {
+        if (!this._touch || this._touch.id !== i.id) return;
+        const dx = e.touches[0].clientX - this._touch.x;
+        if (Math.abs(dx) > 4) this.setState({ swipeDx: Math.max(-140, Math.min(140, dx)) });
+      },
+      onTouchEnd: () => {
+        const dx = this.state.swipeDx || 0;
+        this._touch = null;
+        this.setState({ swipeId: null, swipeDx: 0 });
+        if (dx > 70) this.setItem(i.id, { status: 'ok' });
+        else if (dx < -70) this.setItem(i.id, { status: 'out' });
+      },
+      showBadge: status !== 'pending' && this.state.w < 1080,
+      badgeIcon: status === 'ok' ? '✓' : '✕',
+      badgeBg: status === 'ok' ? 'var(--master)' : '#e6928f',
+      badgeFg: status === 'ok' ? 'var(--onmaster)' : '#20160a',
       anim: status === 'ok' ? 'itemOk .34s ease' : (status === 'out' ? 'itemOut .32s ease' : ('pbup .4s ease both ' + (Math.min(idx || 0, 8) * 55) + 'ms')),
       tickAnim: status === 'ok' ? 'tickPop .3s ease' : 'none',
       text: this.itemText(i.id, i.text || i.finding || ''),
@@ -1569,7 +1607,7 @@ class Component extends DCLogic {
       .concat((st.gate && st.gate.prd ? st.gate.prd : []).map(p => ({ icon: '✓', text: 'סעיף ״' + p + '״ ב־PRD מתמלא', bg: 'rgba(147,224,177,.15)', fg: '#93e0b1' })))
       .concat(s.si < D.stations.length - 1 ? [{ icon: '→', text: 'נפתחת תחנה ' + (st.num + 1) + ': ' + (D.stations[s.si + 1] || {}).short, bg: 'var(--raise)', fg: 'var(--tx2)' }] : []);
 
-    const aiOut = s.ai[st.id] || {};
+    const aiOut = s.ai[st.id] || (s.isDemo ? { ideas: st.demoIdeas || [], gaps: st.demoGap ? [st.demoGap] : [] } : {});
     const outIdeas = s.ideaOut[st.id] || {};
     const addedT = (s.added[st.id] || []).map(x => x.title);
     const ideaList = (gen && Array.isArray(aiOut.ideas)) ? aiOut.ideas.filter(x => x && x.title && !outIdeas[x.title] && addedT.indexOf(x.title) < 0) : [];
@@ -1605,6 +1643,8 @@ class Component extends DCLogic {
       onF1: (e) => this.setState({ f1: e.target.value }),
       onF2: (e) => this.setState({ f2: e.target.value }),
       onF3: (e) => this.setState({ f3: e.target.value }),
+      swipeMode: narrow,
+      showButtons: !narrow,
       hasTerms: (st.terms || []).length > 0,
       hasMethod: !!st.method,
       methodName: (st.method || {}).name,
