@@ -124,6 +124,10 @@
             שם תצוגה
             <input value="{{ displayName }}" onInput="{{ onDisplayName }}" placeholder="איך שיופיע בכיתה" style="width:100%;background:#1f2733;border:1px solid #3f4956;border-radius:11px;padding:11px 13px;color:#f6f8fc;font-size:15px;outline:none" />
           </label>
+          <label style="display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600;color:#ccd4e1">
+            קוד קורס <span style="font-weight:400;color:#8791a1">(אם קיבלת/ה מהמרצה — כניסה מיידית בלי לחכות לאישור)</span>
+            <input value="{{ courseCode }}" onInput="{{ onCourseCode }}" placeholder="למשל 7KQ2MA" dir="ltr" maxLength="8" style="width:100%;background:#1f2733;border:1px solid #3f4956;border-radius:11px;padding:11px 13px;color:#f6f8fc;font-size:15px;outline:none;text-align:right;letter-spacing:.12em;text-transform:uppercase" />
+          </label>
           <div style="display:flex;flex-direction:column;gap:8px">
             <div style="font-size:13px;font-weight:600;color:#ccd4e1">בחר/י צבע לפרופיל</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -238,6 +242,7 @@ class Component extends DCLogic {
     booting: true,
     mode: 'login',          // 'login' | 'register'
     displayName: '',
+    courseCode: '',
     username: '',
     password: '',
     avatar: 'indigo',
@@ -262,14 +267,22 @@ class Component extends DCLogic {
     await API.boot();
     // Already logged in with a valid session? Go straight to the app.
     if (API.isOnline() && API.isLoggedIn()) {
-      location.href = 'Course Brain.dc.html';
+      location.href = 'Course Brain Platform.dc.html';
       return;
     }
     this.setState({ booting: false, offline: !API.isOnline() });
     // Google is the only student path — no env-dependent toggling here.
     // Returned from the Google sign-in redirect? (URL carries ?code=… or ?error=…)
     const q = new URLSearchParams(location.search || '');
-    if (q.get('code') || q.get('error')) {
+    if (q.get('code') && /^[A-Z0-9]{6}$/i.test(q.get('code'))) {
+      // join link: ?code=XXXXXX → pre-fill the course code and open the create form after Google
+      this.setState({ courseCode: q.get('code').toUpperCase() });
+      try { sessionStorage.setItem('cb_join_code', q.get('code').toUpperCase()); } catch (e) {}
+      try { history.replaceState(null, '', location.pathname); } catch (e) {}
+    } else {
+      try { const c = sessionStorage.getItem('cb_join_code'); if (c) this.setState({ courseCode: c }); } catch (e) {}
+    }
+    if (q.get('code') && !/^[A-Z0-9]{6}$/i.test(q.get('code')) || q.get('error')) {
       const code = q.get('code');
       const err = q.get('error');
       try { history.replaceState(null, '', location.pathname); } catch (e) {}
@@ -314,7 +327,7 @@ class Component extends DCLogic {
         this.setState({ busy: false, error: 'התחברות Google תעבוד בגרסה החיה של האתר לאחר הפריסה.' });
         return;
       }
-      if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
+      if (r && r.token) { location.href = 'Course Brain Platform.dc.html'; return; }
       if (r && r.status === 'unlinked') {
         this.setState({ busy: false, googleView: 'choice', gLinkToken: r.linkToken || '',
           gEmail: r.email || '', gName: r.name || '', displayName: r.name || '',
@@ -336,7 +349,7 @@ class Component extends DCLogic {
     this.setState({ busy: true, error: '' });
     try {
       const r = await window.CourseAPI.googleClaim({ linkToken: gLinkToken, username: username.trim(), password });
-      if (r && r.token) { location.href = 'Course Brain.dc.html'; return; }
+      if (r && r.token) { location.href = 'Course Brain Platform.dc.html'; return; }
       this.setState({ busy: false });
     } catch (e) {
       this.setState({ busy: false, error: e.message || 'החיבור נכשל, נסה/י שוב' });
@@ -345,11 +358,12 @@ class Component extends DCLogic {
 
   async goCreate() {
     if (this.state.busy) return;
-    const { displayName, avatar, gLinkToken } = this.state;
+    const { displayName, avatar, gLinkToken, courseCode } = this.state;
     if (!displayName.trim()) { this.setState({ error: 'נא להזין שם תצוגה' }); return; }
     this.setState({ busy: true, error: '' });
     try {
-      await window.CourseAPI.googleCreate({ linkToken: gLinkToken, displayName: displayName.trim(), avatar });
+      const r = await window.CourseAPI.googleCreate({ linkToken: gLinkToken, displayName: displayName.trim(), avatar, code: (courseCode || '').trim().toUpperCase() });
+      if (r && r.token) { location.href = 'Course Brain Platform.dc.html'; return; }
       this.setState({ busy: false, googleView: null, done: true,
         doneTitle: 'הבקשה נשלחה!',
         doneMsg: 'החשבון שלך נוצר וממתין לאישור המנהל/ת. תקבל/י גישה מיד לאחר האישור.' });
@@ -374,7 +388,7 @@ class Component extends DCLogic {
         if (r && r.offline) {
           // preview mode — treat as immediate login
           await API.login({ username: u, password });
-          location.href = 'Course Brain.dc.html';
+          location.href = 'Course Brain Platform.dc.html';
           return;
         }
         this.setState({
@@ -384,7 +398,7 @@ class Component extends DCLogic {
         });
       } else {
         await API.login({ username: u, password });
-        location.href = 'Course Brain.dc.html';
+        location.href = 'Course Brain Platform.dc.html';
       }
     } catch (e) {
       this.setState({ busy: false, error: e.message || 'אירעה שגיאה, נסה/י שוב' });
@@ -470,6 +484,8 @@ class Component extends DCLogic {
       username: st.username,
       password: st.password,
       onDisplayName: this.setField('displayName'),
+      courseCode: st.courseCode,
+      onCourseCode: this.setField('courseCode'),
       onUsername: this.setField('username'),
       onPassword: this.setField('password'),
       onKeyDown: (e) => { if (e.key === 'Enter') this.submit(); },

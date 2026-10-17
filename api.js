@@ -97,6 +97,7 @@
         API.chatServer = payload.chat === true;
         API.googleClientId = payload.googleClientId || null;
         API.googleOnly = payload.googleOnly === true;
+        API.defaultCourseId = payload.defaultCourseId || null;
       } else {
         API.mode = "offline";
       }
@@ -109,6 +110,8 @@
       if (API.token) {
         try {
           API.user = await req("GET", "/api/me");
+          var mc = (API.user && API.user.courses) || [];
+          API.courseId = mc.length ? mc[0].id : API.defaultCourseId;
         } catch (e) {
           setToken(null);
           API.user = null;
@@ -246,7 +249,90 @@
   // Offline (preview): return null so the caller falls back to window.claude.
   API.chat = async function (payload) {
     if (API.mode !== "online") return null;
+    if (!payload.courseId && API.courseId) payload = Object.assign({}, payload, { courseId: API.courseId });
     return req("POST", "/api/chat", payload);
+  };
+
+  // ---- courses / enrolment / content / costs -------------------------------
+  // API.courseId = the course the current session works in (first membership, or the
+  // deployment default). Set in boot() once /api/me returns memberships.
+  API.courseId = null;
+  API.defaultCourseId = null;
+  API.myCourses = function () { return (API.user && API.user.courses) || []; };
+  API.isTeacher = function (cid) {
+    if (API.isAdmin()) return true;
+    return API.myCourses().some(function (c) { return c.role === "teacher" && (!cid || c.id === cid); });
+  };
+  API.courses = function () {
+    if (API.mode === "offline") return Promise.resolve({ courses: [{ id: "ai-arch", name: "AI Solutions Architect", teacherName: "רילי", accent: "#98b1ff", joinCode: "DEMO42", budgetUsd: 40, spentUsd: 6.4, students: 24, teachers: 1, published: 16, role: "admin", active: true }], defaultCourseId: "ai-arch" });
+    return req("GET", "/api/courses");
+  };
+  API.createCourse = function (payload) { return req("POST", "/api/courses", payload); };
+  API.updateCourse = function (id, payload) { return req("PUT", "/api/courses/" + encodeURIComponent(id), payload); };
+  API.deleteCourse = function (id) { return req("DELETE", "/api/courses/" + encodeURIComponent(id)); };
+  API.rotateCode = function (id) { return req("POST", "/api/courses/" + encodeURIComponent(id) + "/code/rotate"); };
+  API.join = function (code) {
+    if (API.mode === "offline") return Promise.resolve({ ok: true, offline: true });
+    return req("POST", "/api/join", { code: code });
+  };
+  API.members = function (id) { return req("GET", "/api/courses/" + encodeURIComponent(id) + "/members"); };
+  API.setMember = function (id, userId, role) { return req("POST", "/api/courses/" + encodeURIComponent(id) + "/members", { userId: userId, role: role }); };
+  API.removeMember = function (id, userId) { return req("DELETE", "/api/courses/" + encodeURIComponent(id) + "/members/" + userId); };
+  // Published lesson content (server is the source of truth once seeded).
+  API.published = function (id) {
+    if (API.mode === "offline") return Promise.resolve(null);
+    return req("GET", "/api/courses/" + encodeURIComponent(id || API.courseId || API.defaultCourseId) + "/published");
+  };
+  // One-time seed of the DB from the static course-data.js (admin).
+  API.importCourse = function (id, payload) { return req("POST", "/api/courses/" + encodeURIComponent(id) + "/import", payload); };
+  API.costs = function (id, month) {
+    if (API.mode === "offline") return Promise.resolve({ courseId: id, month: "2026-09", budgetUsd: 40, totalUsd: 6.4, calls: 212, tokensIn: 1420000, tokensOut: 96000, pct: 16, perModel: [{ model: "claude-sonnet-4-5", usd: 6.1, calls: 190 }, { model: "claude-haiku-4-5", usd: 0.3, calls: 22 }], perKind: [{ kind: "chat", usd: 6.4, calls: 212 }], perUser: [{ displayName: "מאיה כהן", avatar: "leaf", usd: 2.1, calls: 70 }, { displayName: "דני לוי", avatar: "wave", usd: 1.3, calls: 44 }], daily: [] });
+    return req("GET", "/api/courses/" + encodeURIComponent(id) + "/costs" + (month ? "?month=" + month : ""));
+  };
+  API.adminCosts = function (month) { return req("GET", "/api/admin/costs" + (month ? "?month=" + month : "")); };
+  API.backups = function () {
+    if (API.mode === "offline") return Promise.resolve({ count: 3, files: [] });
+    return req("GET", "/api/admin/backups");
+  };
+  API.backupNow = function () { return req("POST", "/api/admin/backups"); };
+
+  // ---- pilot: student feedback + active time --------------------------------
+  API.sendFeedback = function (p) { if (API.mode !== "online") return Promise.resolve({ ok: true, offline: true }); return req("POST", "/api/feedback", p); };
+  API.usagePing = function (p) { if (API.mode !== "online") return Promise.resolve({ ok: true, offline: true }); return req("POST", "/api/usage/ping", p); };
+  API.pilot = function (courseId, cohortId, start) { return req("GET", "/api/pilot?courseId=" + encodeURIComponent(courseId) + "&cohortId=" + encodeURIComponent(cohortId || "") + "&start=" + encodeURIComponent(start || "")); };
+
+  // ---- platform (Course Brain Platform live mode) --------------------------
+  API.platform = function (month) { return req("GET", "/api/platform" + (month ? "?month=" + month : "")); };
+  API.createCohort = function (cid, payload) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/cohorts", payload); };
+  API.updateCohort = function (cid, coid, payload) { return req("PUT", "/api/courses/" + encodeURIComponent(cid) + "/cohorts/" + encodeURIComponent(coid), payload); };
+  API.deleteCohort = function (cid, coid) { return req("DELETE", "/api/courses/" + encodeURIComponent(cid) + "/cohorts/" + encodeURIComponent(coid)); };
+  API.rotateCohortCode = function (cid, coid) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/cohorts/" + encodeURIComponent(coid) + "/code/rotate"); };
+  API.setRole = function (cid, uid, role, cohortId) { return req("PUT", "/api/courses/" + encodeURIComponent(cid) + "/members/" + uid + "/role", { role: role, cohortId: cohortId || null }); };
+  API.moveCohort = function (cid, uid, cohortId) { return req("PUT", "/api/courses/" + encodeURIComponent(cid) + "/members/" + uid + "/cohort", { role: "student", cohortId: cohortId }); };
+  API.userApprove = function (uid) { return req("POST", "/api/users/" + uid + "/approve"); };
+  API.userReject = function (uid) { return req("POST", "/api/users/" + uid + "/reject"); };
+  API.userDisable = function (uid) { return req("POST", "/api/users/" + uid + "/disable"); };
+  API.userEnable = function (uid) { return req("POST", "/api/users/" + uid + "/enable"); };
+  API.userTempPassword = function (uid) { return req("POST", "/api/users/" + uid + "/temp-password"); };
+  API.addMaterial = function (cid, payload) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/materials", payload); };
+  API.deleteMaterial = function (cid, mid) { return req("DELETE", "/api/courses/" + encodeURIComponent(cid) + "/materials/" + mid); };
+  API.settings = function () { return req("GET", "/api/settings"); };
+  API.saveSettings = function (patch) { return req("PUT", "/api/settings", { patch: patch }); };
+  // pipeline (teacher)
+  API.lesson = function (cid, num) { return req("GET", "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num); };
+  API.approveLesson = function (cid, num) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num + "/approve"); };
+  API.reworkLesson = function (cid, num, reason, note) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num + "/rework", { reason: reason, note: note || "" }); };
+  API.editLesson = function (cid, num, edited) { return req("PUT", "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num + "/edit", { edited: edited }); };
+  API.runLesson = function (cid, num, fromStage) { return req("POST", "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num + "/run?from_stage=" + (fromStage || "transcript")); };
+  API.uploadSources = async function (cid, num, files) {
+    var fd = new FormData();
+    if (files.srt) fd.append("srt", files.srt);
+    if (files.pdf) fd.append("pdf", files.pdf);
+    fd.append("date", files.date || ""); fd.append("teacher_notes", files.notes || "");
+    var res = await fetch(BASE + "/api/courses/" + encodeURIComponent(cid) + "/lessons/" + num + "/sources", { method: "POST", headers: { Authorization: "Bearer " + getToken() }, body: fd });
+    var data = null; try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((data && data.detail) || ("שגיאה " + res.status));
+    return data;
   };
 
   // ---- admin --------------------------------------------------------------
