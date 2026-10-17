@@ -35,6 +35,8 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import sys as _sys
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # ---------------------------------------------------------------------------
 # Config
