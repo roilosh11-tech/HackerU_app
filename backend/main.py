@@ -25,6 +25,8 @@ import datetime as dt
 import urllib.request
 import urllib.error
 import urllib.parse
+import traceback
+from contextlib import asynccontextmanager
 from typing import Optional
 
 import jwt
@@ -102,6 +104,15 @@ CHAT_MONTHLY_LIMIT = int(os.environ.get("CHAT_MONTHLY_LIMIT", "250"))
 # required for the authorization-code flow (server-side code→token exchange).
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+
+try:
+    from . import courses_api as _courses_api
+    from . import platform_api as _platform_api
+    from . import pilot_api as _pilot_api
+except ImportError:  # run as a plain script (uvicorn main:app from inside backend/)
+    import courses_api as _courses_api
+    import platform_api as _platform_api
+    import pilot_api as _pilot_api
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +194,11 @@ def init_db():
     conn.commit()
     conn.close()
     seed_admin()
+    conn = db()
+    _courses_api.ensure_default_course(conn)
+    for r in conn.execute("SELECT id FROM courses").fetchall():
+        _platform_api.ensure_default_cohort(conn, r["id"])
+    conn.close()
 
 
 def seed_admin():
@@ -370,13 +386,31 @@ def user_public(row: sqlite3.Row) -> dict:
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
-app = FastAPI(title="מוח הקורס API")
+@asynccontextmanager
+async def lifespan(_app):
+    init_db()
+    _courses_api.start_backup_thread(DB_PATH)
+    yield
+
+
+app = FastAPI(title="מוח הקורס API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Unhandled server errors return their message as `detail` so the app can display it
+# (these are admin/debug paths behind auth — a silent 500 hid a real bug for a while).
+@app.exception_handler(Exception)
+async def unhandled_error(request: Request, exc: Exception):
+    traceback.print_exc()
+    return JSONResponse(
+        status_code=500,
+        content={"detail": type(exc).__name__ + ": " + str(exc)},
+    )
 
 
 # Force revalidation of the app shell (HTML/JS/manifest) so a new deploy is picked
@@ -391,9 +425,21 @@ async def no_cache_app_shell(request: Request, call_next):
     return resp
 
 
-@app.on_event("startup")
-def _startup():
-    init_db()
+def current_user_any(request: Request) -> sqlite3.Row:
+    """Logged-in user regardless of approval status (used by /api/join)."""
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        raise HTTPException(401, "missing token")
+    try:
+        payload = jwt.decode(auth[7:], JWT_SECRET, algorithms=[JWT_ALG])
+    except Exception:
+        raise HTTPException(401, "invalid token")
+    conn = db()
+    row = conn.execute("SELECT * FROM users WHERE id=?", (payload["sub"],)).fetchone()
+    conn.close()
+    if row is None:
+        raise HTTPException(401, "user not found")
+    return row
 
 
 def current_user(request: Request) -> sqlite3.Row:
@@ -410,6 +456,8 @@ def current_user(request: Request) -> sqlite3.Row:
     conn.close()
     if row is None:
         raise HTTPException(401, "user not found")
+    if row["status"] == "disabled":
+        raise HTTPException(403, "החשבון הושבת. פנה/י למרצה או לאדמין")
     if row["status"] != "approved":
         raise HTTPException(403, "account not approved")
     return row
@@ -430,6 +478,7 @@ class RegisterIn(BaseModel):
     displayName: str
     password: str
     avatar: Optional[str] = ""
+    code: Optional[str] = ""   # course join code → auto-approve + enrol
 
 
 class LoginIn(BaseModel):
@@ -458,6 +507,7 @@ class GoogleCreateIn(BaseModel):
     linkToken: Optional[str] = None
     displayName: str
     avatar: Optional[str] = ""
+    code: Optional[str] = ""
 
 
 class ProfileIn(BaseModel):
@@ -488,6 +538,7 @@ class ChatIn(BaseModel):
     system: Optional[str] = ""
     max_tokens: Optional[int] = 2000
     model: Optional[str] = None
+    courseId: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -514,6 +565,18 @@ def register(body: RegisterIn):
         (uname, body.displayName.strip(), hash_pw(body.password), body.avatar or "", now, now, now),
     )
     conn.commit()
+    if (body.code or "").strip():
+        row = conn.execute("SELECT * FROM users WHERE username=?", (uname,)).fetchone()
+        try:
+            course = _courses_api.join_by_code(conn, row["id"], body.code)
+        except HTTPException:
+            conn.close()
+            raise HTTPException(404, "קוד הקורס לא נמצא — בדוק/י את הקוד או השאר/י ריק והמתן/י לאישור")
+        conn.execute("UPDATE users SET status='approved' WHERE id=?", (row["id"],))
+        conn.commit()
+        row = conn.execute("SELECT * FROM users WHERE id=?", (row["id"],)).fetchone()
+        conn.close()
+        return {"token": make_token(row["id"]), "user": user_public(row), "course": course}
     conn.close()
     # No token — must be approved first.
     return {"ok": True, "status": "pending",
@@ -537,6 +600,9 @@ def login(body: LoginIn):
     if row["status"] == "rejected":
         conn.close()
         raise HTTPException(403, "החשבון נדחה. פנה/י למנהל/ת")
+    if row["status"] == "disabled":
+        conn.close()
+        raise HTTPException(403, "החשבון הושבת. פנה/י למרצה או לאדמין")
     conn.execute("UPDATE users SET last_active=? WHERE id=?", (time.time(), row["id"]))
     conn.commit()
     conn.close()
@@ -544,6 +610,8 @@ def login(body: LoginIn):
 
 
 def _google_status_gate(row):
+    if row["status"] == "disabled":
+        raise HTTPException(403, "החשבון הושבת. פנה/י למרצה או לאדמין")
     if row["status"] == "pending":
         raise HTTPException(403, "החשבון עדיין ממתין לאישור המנהל/ת")
     if row["status"] == "rejected":
@@ -663,10 +731,22 @@ def google_create(body: GoogleCreateIn):
          "approved" if is_admin_email(email) else "pending", now, now, now),
     )
     conn.commit()
+    row = conn.execute("SELECT * FROM users WHERE google_sub=?", (sub,)).fetchone()
     if is_admin_email(email):
-        row = conn.execute("SELECT * FROM users WHERE google_sub=?", (sub,)).fetchone()
         conn.close()
         return {"token": make_token(row["id"]), "user": user_public(row)}
+    # A valid course code is the approval: enrol + approve + log in immediately.
+    if (body.code or "").strip():
+        try:
+            course = _courses_api.join_by_code(conn, row["id"], body.code)
+        except HTTPException:
+            conn.close()
+            raise HTTPException(404, "קוד הקורס לא נמצא — בדוק/י את הקוד או השאר/י ריק והמתן/י לאישור")
+        conn.execute("UPDATE users SET status='approved' WHERE id=?", (row["id"],))
+        conn.commit()
+        row = conn.execute("SELECT * FROM users WHERE id=?", (row["id"],)).fetchone()
+        conn.close()
+        return {"token": make_token(row["id"]), "user": user_public(row), "course": course}
     conn.close()
     return {"ok": True, "status": "pending", "message": "החשבון נוצר וממתין לאישור המנהל/ת."}
 
@@ -676,6 +756,10 @@ def me(request: Request):
     user = current_user(request)
     out = user_public(user)
     out["data"] = json.loads(user["data_json"] or "{}")
+    conn = db()
+    out["courses"] = _courses_api.user_courses(conn, user["id"])
+    conn.close()
+    out["email"] = user["email"] or ""
     return out
 
 
@@ -953,14 +1037,28 @@ def admin_users(request: Request):
         u = user_public(r)
         u["createdAt"] = r["created_at"]
         u["lastActive"] = r["last_active"]
-        data = json.loads(r["data_json"] or "{}")
-        u["notes"] = data.get("notes", {})
-        u.update(learning_metrics(data))
-        ct, cm, _ = chat_usage_counts(conn, r["id"])
-        u["chatToday"] = ct
-        u["chatMonth"] = cm
-        u["reviewsLifetime"] = data.get("reviewsTotal") or u["reviewsLogged"]
-        u["lessonStatus"] = {k: v for k, v in (data.get("statusOverride") or {}).items() if v}
+        # Per-row extras are best-effort: one corrupt data_json must never 500 the
+        # whole roster (that used to lock the admin out of the page entirely).
+        try:
+            data = json.loads(r["data_json"] or "{}")
+            if not isinstance(data, dict):
+                data = {}
+        except Exception:
+            data = {}
+        try:
+            u["notes"] = data.get("notes", {})
+            u.update(learning_metrics(data))
+            u["reviewsLifetime"] = data.get("reviewsTotal") or u.get("reviewsLogged") or 0
+            u["lessonStatus"] = {k: v for k, v in (data.get("statusOverride") or {}).items() if v}
+        except Exception as e:
+            u["metricsError"] = str(e)
+        try:
+            ct, cm, _ = chat_usage_counts(conn, r["id"])
+            u["chatToday"] = ct
+            u["chatMonth"] = cm
+        except Exception:
+            u["chatToday"] = 0
+            u["chatMonth"] = 0
         out.append(u)
     conn.close()
     return {"users": out}
@@ -1023,7 +1121,8 @@ def google_start(request: Request):
 def health():
     return {"ok": True, "signupOpen": ALLOW_SIGNUP, "chat": bool(ANTHROPIC_API_KEY),
             "googleClientId": GOOGLE_CLIENT_ID or None, "googleOnly": GOOGLE_ONLY,
-            "chatDailyLimit": CHAT_DAILY_LIMIT, "chatMonthlyLimit": CHAT_MONTHLY_LIMIT}
+            "chatDailyLimit": CHAT_DAILY_LIMIT, "chatMonthlyLimit": CHAT_MONTHLY_LIMIT,
+            "defaultCourseId": _courses_api.DEFAULT_COURSE_ID}
 
 
 # ---------------------------------------------------------------------------
@@ -1058,9 +1157,16 @@ def chat(body: ChatIn, request: Request):
     if not ANTHROPIC_API_KEY:
         raise HTTPException(503, "chat not configured")
 
-    # Per-user usage caps (admins exempt) so one student can't run up the bill.
+    # Per-user usage caps (admins exempt) so one student can't run up the bill,
+    # plus a per-course monthly budget in USD (see courses_api).
     conn = db()
     used_today, used_month, today = chat_usage_counts(conn, user["id"])
+    course_id = body.courseId
+    if not course_id:
+        mine = _courses_api.user_courses(conn, user["id"])
+        course_id = mine[0]["id"] if mine else _courses_api.DEFAULT_COURSE_ID
+    if user["role"] != "admin":
+        _courses_api.check_budget(conn, course_id)
     conn.close()
     if user["role"] != "admin":
         if CHAT_DAILY_LIMIT and used_today >= CHAT_DAILY_LIMIT:
@@ -1120,9 +1226,10 @@ def chat(body: ChatIn, request: Request):
     text = "".join(
         b.get("text", "") for b in data.get("content", []) if b.get("type") == "text"
     )
-    # Count this successful request against the user's quota.
+    # Count this successful request against the user's quota + the course's budget.
     conn = db()
     chat_usage_bump(conn, user["id"], today)
+    _courses_api.record_usage(conn, user["id"], course_id, payload["model"], data.get("usage") or {}, "chat")
     conn.close()
     return {
         "text": text,
@@ -1134,13 +1241,35 @@ def chat(body: ChatIn, request: Request):
 
 
 # ---------------------------------------------------------------------------
+# Lesson pipeline (extraction agent) — see lessons_api.py / extract.py
+# ---------------------------------------------------------------------------
+try:
+    from . import lessons_api as _lessons_api
+except ImportError:  # run as a plain script (uvicorn main:app from inside backend/)
+    import lessons_api as _lessons_api
+_courses_api_fns = _courses_api.register(app, db, current_user, current_user_any, require_admin, DB_PATH)
+_platform_api.register(app, db, current_user, current_user_any, require_admin, _courses_api, learning_metrics)
+_pilot_api.register(app, db, current_user, require_admin)
+
+
+def _pipeline_usage(course_id, model, usage):
+    conn = db()
+    _courses_api.record_usage(conn, None, course_id, model, usage, "pipeline")
+    conn.close()
+
+
+_lessons_api.register(app, db, current_user, require_admin, _courses_api_fns["require_teacher"], _courses_api_fns["require_member"], _pipeline_usage)
+
+
+# ---------------------------------------------------------------------------
 # Static front-end
 # ---------------------------------------------------------------------------
 # Entry point is the login page. Everything else (the .dc.html app, support.js,
 # course-data.js, api.js, assets/) is served as-is from STATIC_DIR.
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(STATIC_DIR, "Login.dc.html"))
+    # redirect (not serve) so the page path — and the Google OAuth redirect URI built from it — stays stable
+    return RedirectResponse("/Course%20Brain%20Platform.dc.html", status_code=302)
 
 
 app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")
